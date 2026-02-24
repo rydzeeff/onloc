@@ -1,0 +1,175 @@
+/* styles/cards.pc.module.css */
+.cardsContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  animation: fadeInSection 0.5s ease-in-out;
+}
+
+@keyframes fadeInSection {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cardsContainer h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.addButton {
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: block;
+  margin: 0 auto 20px;
+}
+
+.addButton:hover {
+  background: #2563eb;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardNumber {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: 2px;
+}
+
+.cardExpiry {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.primaryToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.primaryToggle input {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryToggle input:checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.primaryToggle input:checked::before {
+  content: '✓';
+  color: #ffffff;
+  font-size: 14px;
+  position: absolute;
+  left: 2px;
+  top: -2px;
+}
+
+.removeButton {
+  padding: 8px 16px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+  background: #dc2626;
+}
+
+.removeButton:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.expiredBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ef4444;
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 1000;
+  font-size: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

@@ -1,0 +1,189 @@
+.fade-in { animation: fadeIn .5s ease-in-out; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+/* --- SEARCH BAR --- */
+.searchBar{
+  position: sticky; top: 0; z-index: 5;
+  background: #fff; padding: 10px 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+.searchWrap{ position: relative; }
+.searchIcon{
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 12px; height: 12px;
+  border-right: 2px solid #94a3b8; border-bottom: 2px solid #94a3b8;
+  opacity: .9;
+}
+.searchInput{
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;             /* ← округлённые углы */
+  font-size: 15px; color: #334155;
+  background: #f8fafc;
+  transition: all .2s ease;
+}
+.searchInputWithIcon{ padding-left: 36px; }
+.searchInput::placeholder{ color:#94a3b8; }
+.searchInput:focus{ border-color:#3b82f6; outline:none; box-shadow:0 0 0 4px rgba(59,130,246,.12); background:#fff; }
+
+/* карточка */
+.chatItem{
+  display:flex;
+  flex-direction:column;
+  padding:0;                /* ✅ убрали нижний зазор */
+  border-radius:12px;
+  cursor:default;
+  transition:all .2s ease;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  border:1px solid #e2e8f0;
+}
+.chatItem:hover{ box-shadow:0 4px 6px -1px rgba(0,0,0,.08); transform: translateY(-1px); }
+.chatItemOpen{ border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom:none; }
+.activeChat{ background:#fff; color:inherit; border:2px solid #3b82f6; box-shadow:0 2px 5px rgba(0,0,0,.06); }
+.unreadChat{ font-weight:600; position:relative; }
+
+/* ✅ перенесли отступ сюда */
+.chatItemContent{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  cursor:pointer;
+  padding:12px;             /* было в .chatItem */
+}
+.chatImage{ width:56px; height:56px; border-radius:10px; object-fit:cover; border:1px solid #e2e8f0; }
+.chatAvatar{ width:60px; height:60px; border-radius:10px; object-fit:cover; border:1px solid #e2e8f0; }
+.chatInfo{ flex:1; display:flex; flex-direction:column; gap:4px; }
+.chatTitleWrapper{ display:flex; align-items:center; gap:8px; }
+.chatTitle{ font-size:16px; font-weight:600; color:#0f172a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px; }
+.chatUserInfo{ font-size:14px; color:#64748b; }
+.unreadBadge{ background:#ef4444; color:#fff; border-radius:12px; padding:2px 8px; font-size:12px; font-weight:500; }
+
+/* --- нижняя полоса-кнопка --- */
+.footerToggle{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding: 2px 0 4px;       /* ✅ низ ~4px (поджато) */
+  border-top:1px solid #eef2f7;
+  cursor:pointer;
+  user-select:none;
+  background:transparent;
+}
+.toggleLabel{ font-size:14px; color:#334155; font-weight:500; line-height:1; }
+.footerToggle:hover .toggleLabel{ color:#2563eb; }
+.chevron{ width:10px; height:10px; border-right:2px solid #334155; border-bottom:2px solid #334155; transform:rotate(45deg); transition:transform .18s ease, border-color .18s ease; margin-top:-1px; }
+.footerToggle:hover .chevron{ border-color:#2563eb; }
+.up{ transform: rotate(-135deg); }
+.down{ transform: rotate(45deg); }
+
+/* индикатор "внутри есть непрочитанные ЛС" (без числа) */
+.footerToggleUnread .toggleLabel::after{
+  content: ""; display:inline-block; width:8px; height:8px; margin-left:8px;
+  background:#ef4444; border-radius:50%; vertical-align:middle; box-shadow:0 0 0 2px #fff;
+}
+
+/* header справа */
+.chatHeader{ padding:15px 20px; background:#fff; border-bottom:1px solid #e2e8f0; font-size:18px; font-weight:600; color:#0f172a; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+
+/* сообщения */
+.chatMessages{ flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; background:#f8fafc; }
+.dateDivider{ text-align:center; font-size:12px; color:#64748b; margin:16px 0; background:#fff; padding:6px 12px; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.05); align-self:center; }
+.message{ margin-bottom:.5rem; display:flex; animation: fadeInMessage .3s ease-in-out; }
+@keyframes fadeInMessage{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+.messageSent{ justify-content:flex-end; } .messageReceived{ justify-content:flex-start; }
+.messageBubble{ max-width:320px; padding:.75rem; border-radius:12px; word-wrap:break-word; }
+.messageSent .messageBubble{ background:#3b82f6; color:#fff; border-radius:12px 12px 0 12px; }
+.messageReceived .messageBubble{ background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:12px 12px 12px 0; }
+.messageSenderName{ font-size:12px; opacity:.9; margin-bottom:4px; color:#0f172a; }
+.messageContent{ margin-bottom:.25rem; font-size:14px; }
+.messageFooter{ display:flex; justify-content:space-between; align-items:center; }
+.messageTime{ font-size:12px; color:rgba(255,255,255,.8); } .messageReceived .messageTime{ color:#64748b; }
+.messageStatus{ font-size:.75rem; }
+
+/* инпуты */
+.chatInput{ flex:1; padding:12px 16px; border:1px solid #e2e8f0; border-radius:8px; font-size:16px; color:#334155; background:#f8fafc; transition:all .2s ease; }
+.chatInput:focus{ border-color:#3b82f6; outline:none; box-shadow:0 0 8px rgba(59,130,246,.2); background:#fff; }
+.sendButton{ padding:10px 20px; background:#3b82f6; color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:500; cursor:pointer; transition:all .2s ease; }
+.sendButton:hover{ background:#2563eb; box-shadow:0 2px 5px rgba(0,0,0,.1); }
+
+.noChatSelected,.loading{ flex:1; display:flex; justify-content:center; align-items:center; color:#64748b; font-size:16px; font-style:italic; }
+
+/* состав */
+.participantsCollapse{ max-height:0; overflow:hidden; transition:max-height .28s ease; }
+.participantsCollapse.open{ max-height:320px; }
+.participantsInner{ background:#fff; border:1px solid #e2e8f0; border-top:none; border-bottom-left-radius:12px; border-bottom-right-radius:12px; padding:8px; margin-top:-1px; overflow:hidden; }
+.participantRow{ display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px dashed #eef2f7; box-sizing: border-box; }
+.participantRow:last-child{ border-bottom:none; }
+.participantAvatar{ width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0; }
+.participantMain{ display:flex; flex-direction:column; }
+.participantName{ font-size:14px; color:#0f172a; }
+.roleBadge{ margin-top:2px; font-size:12px; width:fit-content; padding:2px 6px; border-radius:8px; }
+.roleOrganizer{ background:#fff7ed; color:#9a3412; border:1px solid #f59e0b; }
+.roleMember{ background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; }
+
+/* подсветка выбранного для ЛС — строго внутри */
+.highlightedParticipant{ background:#e0f2fe; border:1px solid #38bdf8 !important; border-radius:10px; margin:4px 2px; }
+
+/* кнопка ЛС + бейдж */
+.pmButton{ margin-left:auto; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; cursor:pointer; background:#fff; font-size:12px; display:flex; align-items:center; gap:8px; }
+.pmButton:hover{ background:#f8fafc; }
+.pmUnreadBadge{ background:#ef4444; color:#fff; border-radius:999px; padding:2px 6px; font-size:12px; line-height:1; }
+.pmIconButton {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px;
+  border: 1px solid #e2e8f0; background: #fff; color: #3b82f6;
+  transition: .18s ease;
+}
+.pmIconButton:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+.pmIconButton:disabled { opacity:.5; cursor: default; }
+.pmIconButton img, .pmIconButton svg { display:block; pointer-events:none; }
+/* === attachments (inline фото/видео и ссылки на документы) === */
+.attachmentsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  max-width: 100%;
+}
+
+.attachment {
+  max-width: 320px;      /* ширина карточки медиа */
+  max-height: 240px;     /* высота карточки медиа */
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.attachmentImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* аккуратно вписывает картинку в рамку */
+}
+
+.attachmentVideo {
+  display: block;
+  width: 100%;
+  height: auto;           /* сохраняет пропорции видео */
+  max-height: 240px;
+  outline: none;
+}
+
+.attachmentFile {
+  display: inline-block;
+  font-size: 14px;
+  color: #2563eb;         /* синие ссылки */
+  text-decoration: underline;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+

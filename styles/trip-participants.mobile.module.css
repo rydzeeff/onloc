@@ -1,0 +1,943 @@
+/* styles/trip-participants.mobile.module.css */
+.sectionContent {
+  padding: 15px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.backButtonContainer {
+  margin-bottom: 10px;
+}
+
+.backButton {
+  padding: 8px 16px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.backButton:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #3b82f6;
+}
+
+.errorMessage {
+  color: red;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.participantsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.participantCard {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.participantAvatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.participantInfo h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 5px;
+}
+
+.participantInfo p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 2px 0;
+}
+
+.participantActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.actionButton {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.actionButton:hover {
+  background: #2563eb;
+}
+
+.cancelButton {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background: #dc2626;
+}
+
+.payButton {
+  background: #34c759;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.payButton:hover {
+  background: #2ea44f;
+}
+
+.footerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.noParticipants {
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 300px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.messageInput {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #334155;
+  background-color: #f8fafc;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.acceptButton {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+
+  border: none;
+  background: #34c759; /* зелёная */
+  color: #ffffff;
+  cursor: pointer;
+}
+.acceptButton:hover {
+  background: #2ea44f;
+}
+
+.rejectButton {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+
+  border: none;
+  background: #ff3b30; /* красная */
+  color: #ffffff;
+  cursor: pointer;
+}
+.rejectButton:hover {
+  background: #dc2626;
+}
+.closeButton {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background: #dc2626;
+}
+
+.reviewModalContent {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 300px;
+  text-align: center;
+}
+
+.reviewModalTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.reviewModalSubtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 10px;
+}
+
+.reviewTextArea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #334155;
+  background-color: #f8fafc;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 10px 0;
+  font-size: 20px;
+}
+
+.filledStar {
+  color: #ffcc00;
+  cursor: pointer;
+}
+
+.emptyStar {
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.reviewModalButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.toast {
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  z-index: 1000;
+  font-size: 14px;
+}
+
+.fileInput {
+  width: 100%;
+  padding: 6px;
+  margin: 5px 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #334155;
+  background-color: #f8fafc;
+}
+
+.inputGroup {
+  margin-bottom: 20px;
+}
+
+.cardSelect {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.disabledButton {
+  background: #d1d5db;
+  color: #6b7280;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: not-allowed;
+}
+
+.disabledCard {
+  color: #888;
+  background-color: #f5f5f5;
+}
+.cancelProgress {
+  color: #ff9800;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+.cardStatus {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+}
+
+.cardStatus p {
+  margin: 0 0 10px 0;
+}
+
+
+/* ===== Mobile-friendly table (ParticipantsTable) ===== */
+.participantsTable {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.tableHeader {
+  display: none; /* on mobile we use cards */
+}
+
+/* Card-like row */
+.tableRow {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px;
+  margin: 10px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Each cell becomes a labeled line */
+.tableRow > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  flex-wrap: wrap;
+}
+
+.tableRow > span::before {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Labels by position (keep in sync with ParticipantsTable columns) */
+.tableRow > span:nth-child(1)::before { content: ""; }            /* avatar */
+.tableRow > span:nth-child(2)::before { content: "ФИО"; }
+.tableRow > span:nth-child(3)::before { content: "Возраст"; }
+.tableRow > span:nth-child(4)::before { content: "Пол"; }
+.tableRow > span:nth-child(5)::before { content: "Рейтинг"; }
+.tableRow > span:nth-child(6)::before { content: "Статус"; }
+.tableRow > span:nth-child(7)::before { content: "Присутствие"; }
+.tableRow > span:nth-child(8)::before { content: "Одобрено"; }
+.tableRow > span:nth-child(9)::before { content: "Дата"; }
+.tableRow > span:nth-child(10)::before { content: ""; }           /* actions */
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
+
+/* Action area inside a row */
+.actionButtons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch !important;
+}
+
+.actionButtons button {
+  width: 100%;
+  min-height: 40px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+
+/* Dropdown menu for accept/reject – show as bottom sheet-ish */
+.dropdownMenu {
+  position: fixed !important;
+  left: 50% !important;
+  top: auto !important;
+  bottom: 14px !important;
+  transform: translateX(-50%) !important;
+  z-index: 2000;
+  width: min(92vw, 380px);
+  background: rgba(255,255,255,0.98);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dropdownWrapper {
+  width: 100%;
+}
+
+.mutedHint {
+  color: #64748b;
+}
+
+/* Loader */
+.loaderWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 10px;
+  gap: 10px;
+  opacity: 0.9;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.loaderText {
+  font-size: 13px;
+  color: #64748b;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Page header buttons ===== */
+.backButtonContainer {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.backButtonContainer button {
+  flex: 1;
+}
+
+/* ===== Footer buttons (sticky) ===== */
+.tableFooter {
+  position: sticky;
+  bottom: 0;
+  margin-top: 14px;
+  padding: 10px;
+  border-top: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tableFooter button {
+  width: 100%;
+  min-height: 44px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+/* ===== Compact bottom dock (single button) ===== */
+.footerDock {
+  position: sticky;
+  bottom: 0;
+  margin-top: 14px;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  border-top: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.footerDockButton {
+  width: 100%;
+  min-height: 44px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+/* ===== Bottom action sheet (menu) ===== */
+.actionSheetBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 2600;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+}
+
+.actionSheet {
+  width: min(94vw, 460px);
+  margin: 0 10px calc(12px + env(safe-area-inset-bottom) + 64px);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.sheetTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 2px 0 10px;
+}
+
+.sheetNote {
+  font-size: 12px;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.sheetItem {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 10px 12px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.sheetItemPrimary {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+
+  border: none;
+  background: #34c759; /* зелёная */
+  color: #ffffff;
+  cursor: pointer;
+}
+.sheetItemPrimary:hover {
+  background: #2ea44f;
+}
+
+.sheetCancel {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sheetCancel {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+/* ===== Modals extra helpers (used by ParticipantsModals) ===== */
+.policyWrapper {
+  max-height: 40vh;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.cardsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cardItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.cardItem input {
+  width: 18px;
+  height: 18px;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #334155;
+}
+
+/* ===== Overlay blocking ===== */
+.blockAll {
+  pointer-events: none;
+}
+
+.dimmed {
+  opacity: 0.85;
+}
+
+.pageOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+}
+
+.pageOverlayVisible {
+  display: flex;
+}
+
+.pageOverlaySpinner {
+  width: 30px;
+  height: 30px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+
+
+/* ===== Верхняя панель + сворачиваемые действия (mobile) ===== */
+.headerBar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.headerDivider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 10px 0;
+  border-radius: 1px;
+}
+
+/* Верхний блок действий: вертикальные кнопки на всю ширину */
+.actionsWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actionsHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.actionsTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.actionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Общие размеры кнопок в блоке действий */
+.topActionBtn {
+  width: 100%;
+  min-height: 44px;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.actionsHint {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #dc2626;
+  opacity: 0.92;
+}
+
+.actionsToggle {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.actionsToggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.actionsBarCollapsed {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actionsToggleFull {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actionsToggleFull:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Unified modal sheet helpers (ParticipantsModals) ===== */
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sheetClose {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.sheetBody {
+  max-height: 70vh;
+  overflow: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sheetButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Rating inside sheet */
+.ratingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.ratingLabel {
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.ratingButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ratingBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ratingBtnActive {
+  border: none;
+  background: #34c759;
+  color: #ffffff;
+}
+
+/* Красная (опасная) кнопка */
+.sheetItemDanger {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+
+  border: none;
+  background: #ff3b30;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+/* Синяя кнопка (например, "Отклонить" в approve-and-payout) */
+.sheetItemBlue {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+
+  border: none;
+  background: #3b82f6;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.sheetItemBlue:hover {
+  background: #2563eb;
+}
+
+
+.errorPopup {
+  position: fixed;
+  z-index: 2000;
+
+  /* позицию даёт errorPopupPosition (top/left/transform),
+     но на всякий случай зададим базу */
+  left: 50%;
+
+  background: #ffffff;
+  border: 1px solid #ff3b30;
+  border-radius: 14px;
+  padding: 12px 14px;
+
+  /* чтобы НЕ тянулось и красиво выглядело */
+  height: auto;
+  max-width: calc(100vw - 32px);
+  width: min(360px, calc(100vw - 32px));
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.errorPopupText {
+  margin: 0;
+  color: #ff3b30;
+  font-weight: 600;
+  line-height: 1.35;
+}

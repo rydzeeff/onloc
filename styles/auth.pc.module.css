@@ -1,0 +1,408 @@
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 20px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.header {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.formContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  max-width: 340px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: stretch;
+}
+
+.label {
+  width: 100%;
+  text-align: center;    /* центр */
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: none;
+  letter-spacing: 0.2px;
+  font-family: inherit;
+}
+
+
+
+.phoneInputWrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  overflow: hidden;
+  max-width: 340px;
+  width: 100%;
+}
+
+.phoneInputWrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+}
+
+.phonePrefix {
+  font-size: 16px;
+  color: #64748b;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+}
+
+.phoneInput {
+  flex-grow: 1;
+  padding: 14px 16px;
+  border: none;
+  font-size: 16px;
+  color: #1e293b;
+  background: transparent;
+  outline: none;
+}
+
+.input {
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1e293b;
+  background: #f8fafc;
+  max-width: 340px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.phoneInput:focus,
+.input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 340px;
+}
+
+.actionButton {
+  padding: 16px 32px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.05s ease;
+  max-width: 340px;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.actionButton:hover {
+  background: #2563eb;
+}
+
+.actionButton:active {
+  transform: translateY(1px);
+}
+
+.actionButton:disabled {
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  padding: 12px 24px;
+  background: #ffffff;
+  color: #3b82f6;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  max-width: 340px;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.secondaryButton:hover {
+  background: #f1f5f9;
+}
+
+.secondaryButton:disabled {
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 14px;
+  text-align: center;
+  padding: 12px 16px;
+  background: #fff1f2;
+  border-radius: 8px;
+  border: 1px solid #ef4444;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.linkWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 340px;
+  margin: 28px auto 0;
+  align-items: center;
+  width: 100%;
+}
+
+.linkTextWrapper {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;          /* добавили */
+  width: 100%;
+  text-align: center; /* добавили */
+}
+
+.linkText {
+  /* оставляем твой стиль */
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  padding: 6px 12px;
+  background: #f1f5f9;
+  border-radius: 8px;
+
+  min-width: 0;       /* было 120px */
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  font-family: inherit; /* чтобы точно совпадал */
+}
+
+.linkText:hover {
+  color: #2563eb;
+  background: #e2e8f0;
+}
+
+.qrText {
+  font-size: 15px;
+  color: #64748b;
+  margin: 16px 0;
+}
+
+.qrImage {
+  max-width: 200px;
+  margin: 16px auto;
+  border-radius: 8px;
+}
+
+.verificationOptions {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.verificationHeader {
+  font-size: 16px;
+  font-weight: 600;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.optionCards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionCard {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  width: 100%;
+  max-width: 340px;
+}
+
+.optionCard:hover {
+  border-color: #3b82f6;
+}
+
+/* было .optionCard.selected — но в JSX используется отдельный класс pcStyles.selected */
+.selected {
+  border-color: #3b82f6;
+  background: #f1f5f9;
+}
+
+.optionCard input[type="radio"] {
+  margin-right: 12px;
+  accent-color: #3b82f6;
+}
+
+.optionContent {
+  text-align: left;
+  flex-grow: 1;
+}
+
+.optionTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1e293b;
+  display: block;
+}
+
+.optionDescription {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.callSection {
+  text-align: center;
+}
+
+.callText {
+  font-size: 16px;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.callNumber {
+  font-size: 20px;
+  font-weight: 500;
+  color: #3b82f6;
+}
+
+@media (max-width: 520px) {
+  .card {
+    padding: 28px 18px;
+  }
+  .header {
+    font-size: 26px;
+  }
+}
+.callLabel{
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.callNumber{
+  font-size: 40px;     /* сделай крупнее: 36–44px по вкусу */
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+
+.qrWrap{
+  text-align: center;
+}
+
+.qrImageSmall{
+  width: 140px;        /* QR поменьше */
+  max-width: 140px;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+.callBlock{
+text-align:center;
+}
+
+
+.fadeIn{
+opacity: 0;
+transform: translateY(6px);
+animation: fadeInUp 250ms ease forwards;
+}
+
+
+.fadeOut{
+opacity: 1;
+transform: translateY(0);
+transition: opacity 250ms ease, transform 250ms ease;
+opacity: 0;
+transform: translateY(-6px);
+}
+
+
+@keyframes fadeInUp{
+to{
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.formContent,
+.inputGroup,
+.phoneInputWrapper,
+.input,
+.buttonWrapper,
+.verificationOptions,
+.optionCard {
+  width: 100%;
+}

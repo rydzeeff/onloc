@@ -1,0 +1,441 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f8fafc;
+  color: #1e293b;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.authButtons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.messagesWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.messageIcon {
+  font-size: 20px;
+  cursor: pointer;
+  color: #64748b;
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.messageIcon:hover {
+  color: #3b82f6;
+  background: #f1f5f9;
+}
+
+.unreadCount {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #ef4444;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  border: 2px solid #ffffff;
+}
+
+.infoWrapper {
+  position: relative;
+}
+
+.button {
+  padding: 8px 16px;
+  background: #ffffff;
+  color: #334155;
+  text-decoration: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover {
+  border-color: #cbd5e1;
+  color: #3b82f6;
+  background: #f8fafc;
+}
+
+.infoDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 0;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-top: 8px;
+  min-width: 180px;
+}
+
+.infoOption {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  color: #334155;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.infoOption:hover {
+  background-color: #f1f5f9;
+  color: #3b82f6;
+}
+
+.companyCard {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  z-index: 15;
+  width: 400px;
+  max-height: 500px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-top: 8px;
+}
+
+.companyCard h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.documentsCard {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 0;
+  z-index: 15;
+  width: 200px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-top: 8px;
+}
+
+.documentsCard h3 {
+  margin: 0 0 12px 0;
+  padding: 0 16px;
+  font-size: 16px;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.documentLink {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  color: #334155;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.documentLink:hover {
+  background-color: #f1f5f9;
+  color: #3b82f6;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.mapContainer {
+  width: 70%;
+  height: 100%;
+  position: relative;
+  background-color: #ffffff;
+}
+
+.tripsList {
+  width: 30%;
+  overflow-y: auto;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: min-content;
+  gap: 16px;
+  background-color: #ffffff;
+  height: 100%;
+  border-left: 1px solid #e2e8f0;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  align-content: flex-start;
+}
+
+.tripsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tripsList::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.tripsList::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
+}
+
+.tripsList::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+.tripCard {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  height: auto;
+  min-height: 280px;
+}
+
+.tripCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+.selectedTrip {
+  border-color: #25D366;                 /* WhatsApp green */
+  background-color: #f0fff4;             /* лёгкий зелёный фон */
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.45); /* “рамка” толще */
+}
+
+.imageContainer {
+  width: 100%;
+  height: 160px;
+  position: relative;
+  background-color: #f1f5f9;
+  overflow: hidden;
+}
+
+.tripImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.tripImage:hover {
+  transform: scale(1.05);
+}
+
+.tripInfo {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 120px;
+}
+
+.tripInfo h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tripInfo p {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.tripDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tripDate {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tripDate:before {
+  content: "🗓";
+  font-size: 12px;
+}
+
+.tripPrice {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e293b;
+  margin-top: 4px;
+}
+
+.noTrips {
+  padding: 16px;
+  color: #64748b;
+  font-size: 16px;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  animation: fadeIn 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.contextMenu {
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 15;
+  width: 240px;
+  color: #1e293b;
+}
+
+.contextMenu p {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.contextButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.contextButton {
+  padding: 8px 16px;
+  background-color: transparent;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.contextButton:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.contextButton:first-child {
+  background-color: #25D366; /* WhatsApp green */
+  color: #ffffff;
+  border-color: #25D366;
+}
+
+.contextButton:first-child:hover {
+  background-color: #1DA851; /* немного темнее при наведении */
+  border-color: #1DA851;
+}

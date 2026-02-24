@@ -1,0 +1,444 @@
+/* Общие стили */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f8fafc;
+  color: #1e293b;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+/* Хедер */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  height: 50px;
+  flex-shrink: 0;
+}
+
+.logo {
+  height: 30px;
+  width: auto;
+}
+
+.authButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.button {
+  padding: 6px 12px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: #cbd5e1;
+  color: #3b82f6;
+}
+
+.mapButton {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+}
+
+.mapButton:hover {
+  background: #2563eb;
+}
+
+/* Основной контейнер */
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Сайдбар (нижнее меню) */
+.sidebar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  padding: 10px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: nowrap;
+  z-index: 10;
+}
+
+.menuItem, .activeMenuItem {
+  padding: 8px;
+  background: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #334155;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.menuItem:hover {
+  background: #f1f5f9;
+  color: #3b82f6;
+}
+
+.activeMenuItem {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.unreadMenuItem {
+  position: relative;
+}
+
+.unreadIndicator {
+  position: absolute;
+  top: 0;
+  right: 5px;
+  background-color: #ef4444;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.icon {
+  font-size: 18px;
+}
+
+/* Контент */
+.content {
+  flex: 1;
+  padding: 0;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+/* Полная страница без подложек */
+.fullPage {
+  width: 100%;
+  padding: 10px;
+  background: #ffffff;
+}
+
+/* Табы */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.tab, .activeTab {
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  flex: 1;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: #f1f5f9;
+  color: #3b82f6;
+}
+
+.activeTab {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+}
+
+.tabContent {
+  animation: fadeInTab 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeInTab {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Поездки */
+.tripGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tripCard {
+  background: #f8fafc;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+}
+
+.tripCard:hover {
+  background: #f1f5f9;
+}
+
+.tripImageContainer {
+  position: relative;
+  width: 100%;
+  padding-top: 60%;
+  overflow: hidden;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tripImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tripRole {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.tripInfo {
+  padding: 10px;
+}
+
+.tripInfo h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.tripInfo p {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Настройки */
+.settingsForm {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.inputGroup:last-child {
+  border-bottom: none;
+}
+
+.inputGroup label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.inputGroup input,
+.inputGroup textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #334155;
+  background: #f8fafc;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.inputGroup.dateGroup input[type="date"] {
+  padding-right: 30px;
+}
+
+.inputGroup.dateGroup::after {
+  content: '📅';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #3b82f6;
+  pointer-events: none;
+}
+
+.inputGroup textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.actionButton {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.actionButton:hover {
+  background: #2563eb;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+}
+
+.suggestions li {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #334155;
+}
+
+.suggestions li:hover {
+  background-color: #f1f5f9;
+}
+
+/* Отзывы */
+.averageRating {
+  margin: 10px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  padding: 8px 0;
+  text-align: center;
+}
+
+.ratingValue {
+  color: #3b82f6;
+}
+
+.reviewsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reviewCard {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.reviewerName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.ratingStars {
+  font-size: 16px;
+}
+
+.reviewTrip {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 6px 0;
+}
+
+.reviewText {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.4;
+  margin: 0 0 6px 0;
+}
+
+.reviewDate {
+  font-size: 10px;
+  color: #94a3b8;
+  text-align: right;
+}
+
+/* Тост */
+.toast {
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  z-index: 1000;
+  font-size: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

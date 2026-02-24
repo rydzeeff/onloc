@@ -1,0 +1,64 @@
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #1e293b; /* Цвет текста из dashboard.module.css */
+  background: #f8fafc; /* Фон из dashboard.module.css */
+}
+
+.header {
+  font-size: 24px; /* Размер шрифта из dashboard.module.css для заголовков */
+  font-weight: 600;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.reviewsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.reviewCard {
+  background-color: #ffffff; /* Белый фон из dashboard.module.css */
+  width: 300px;
+  border-radius: 12px; /* Закругления из dashboard.module.css */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Тень из dashboard.module.css */
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  border: 1px solid #e2e8f0; /* Граница из dashboard.module.css */
+  transition: all 0.3s ease; /* Переход из dashboard.module.css */
+}
+
+.reviewCard:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Тень при наведении из dashboard.module.css */
+}
+
+.tripTitle {
+  font-size: 16px; /* Размер шрифта из dashboard.module.css */
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1e293b; /* Цвет текста из dashboard.module.css */
+}
+
+.author {
+  font-size: 14px;
+  color: #64748b; /* Цвет текста из dashboard.module.css */
+  margin-bottom: 4px;
+}
+
+.rating {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #3b82f6; /* Акцентный цвет из dashboard.module.css */
+}
+
+.reviewText {
+  font-size: 14px;
+  color: #334155; /* Цвет текста из dashboard.module.css */
+  margin-top: auto;
+}

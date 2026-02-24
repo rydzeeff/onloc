@@ -1,0 +1,375 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 16px;
+  overflow-x: hidden;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  margin: 48px auto 16px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 6px;
+  letter-spacing: -0.2px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0 12px;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.tabButton:hover {
+  background: #f1f5f9;
+}
+
+.activeTab {
+  border-color: #3b82f6;
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.tabButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 14px;
+  text-align: center;
+  padding: 12px 16px;
+  background: #fff1f2;
+  border-radius: 10px;
+  border: 1px solid #ef4444;
+  margin: 12px 0 4px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.backButton {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.backButton:hover {
+  color: #2563eb;
+}
+
+.formContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: center;
+}
+
+.phoneWrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  overflow: hidden;
+  width: 100%;
+}
+
+.phoneWrap:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+}
+
+.phonePrefix {
+  font-size: 16px;
+  color: #64748b;
+  padding: 14px 14px;
+}
+
+.phoneInput {
+  flex: 1;
+  padding: 14px 14px;
+  border: none;
+  font-size: 16px;
+  color: #1e293b;
+  background: transparent;
+  outline: none;
+}
+
+.input {
+  padding: 14px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 16px;
+  color: #1e293b;
+  background: #f8fafc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.phoneInput:focus {
+  outline: none;
+}
+
+.input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+}
+
+.actionButton {
+  padding: 14px 16px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.05s ease;
+  width: 100%;
+  max-width: 360px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.actionButton:hover {
+  background: #2563eb;
+}
+
+.actionButton:active {
+  transform: translateY(1px);
+}
+
+.actionButton:disabled {
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  padding: 12px 14px;
+  background: #ffffff;
+  color: #3b82f6;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  width: 100%;
+  max-width: 360px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.secondaryButton:hover {
+  background: #f1f5f9;
+}
+
+.secondaryButton:disabled {
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.methodTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.methodOptions {
+  width: 100%;
+  max-width: 360px;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.optionCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.optionCard:hover {
+  border-color: #3b82f6;
+}
+
+.selected {
+  border-color: #3b82f6;
+  background: #f1f5f9;
+}
+
+.optionCard input[type="radio"] {
+  margin-top: 2px;
+  accent-color: #3b82f6;
+}
+
+.optionContent {
+  flex: 1;
+}
+
+.optionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.optionDescription {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.qrText {
+  font-size: 14px;
+  color: #64748b;
+  margin: 12px 0 8px;
+  text-align: center;
+}
+
+.qrImage {
+  display: block;
+  max-width: 180px;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+@media (max-width: 360px) {
+  .card {
+    margin-top: 28px;
+    padding: 16px;
+  }
+  .title {
+    font-size: 24px;
+  }
+}
+
+.callRow{
+display:flex;
+align-items:center; /* ключевое: выравнивание по центру */
+justify-content:center; /* чтобы вся строка была по центру */
+gap:12px;
+}
+
+
+.callLink{
+display:block; /* убирает baseline-особенности */
+font-size:32px;
+font-weight:800;
+line-height:44px; /* под высоту иконки */
+text-decoration:none;
+color:#3b82f6;
+}
+
+
+.callLink:hover{
+color:#2563eb;
+}
+
+
+.callIconButton{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:44px;
+height:44px;
+border-radius:999px;
+text-decoration:none;
+color:#3b82f6;
+flex:0 0 44px; /* фиксируем размер, не сжимается */
+}
+
+
+.callIconButton:hover{
+color:#2563eb;
+}
+
+
+.callIconButton svg{
+width:40px;
+height:40px;
+display:block;
+}
+

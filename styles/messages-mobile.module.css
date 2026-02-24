@@ -1,0 +1,358 @@
+/* messages-mobile.module.css */
+.container {
+  position: fixed;
+  top: 56px; /* Высота хедера */
+  bottom: 0; /* Полное пространство до низа экрана */
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* NEW: чтобы ellipsis 100% работал внутри flex */
+.chatTitleWrapper {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.chatListContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.chatViewContainer {
+  position: fixed;
+  top: 56px; /* Хедер */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 20;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+.chatViewContainer.active {
+  transform: translateX(0);
+}
+.chatViewContainer.active.sidebarHidden {
+  bottom: 0; /* Прижимается к низу экрана при скрытом сайдбаре */
+}
+
+.header {
+  padding: 12px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #3b82f6;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.backButton::before {
+  content: "←";
+  font-size: 20px;
+}
+
+.backButton:active {
+  color: #2563eb;
+}
+
+.chatTitleHeader {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3b82f6;
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchBar {
+  padding: 10px 16px;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: #3b82f6;
+  outline: none;
+  background: #ffffff;
+}
+
+.chatList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 16px 0;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chatItem {
+  padding: 10px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.chatItem:active {
+  background: #f1f5f9;
+  transform: scale(0.98);
+}
+
+.chatImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.chatInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* UPDATE */
+.chatTitle {
+  font-size: 14px;
+  font-weight: 600;
+
+  /* было: color: #3b82f6; */
+  color: #111827;            /* ✅ чёрный */
+
+  display: block;            /* ✅ важно для ellipsis */
+  flex: 1;                   /* ✅ занимает доступную ширину */
+  min-width: 0;              /* ✅ иначе ellipsis во flex часто не срабатывает */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatUserInfo {
+  font-size: 12px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unreadBadge {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chatMessages {
+  flex: 1;
+  padding: 10px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #f8fafc;
+}
+
+.dateDivider {
+  text-align: center;
+  font-size: 12px;
+  color: #64748b;
+  margin: 16px 0;
+  background: #ffffff;
+  padding: 6px 12px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  align-self: center;
+}
+
+.message {
+  margin-bottom: 0.5rem;
+  display: flex;
+}
+
+.messageSent {
+  justify-content: flex-end;
+}
+
+.messageReceived {
+  justify-content: flex-start;
+}
+
+.messageBubble {
+  max-width: 70%;
+  padding: 8px;
+  border-radius: 12px;
+  word-wrap: break-word;
+}
+
+.messageSent .messageBubble {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-radius: 12px 12px 0 12px;
+}
+
+.messageReceived .messageBubble {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px 12px 12px 0;
+}
+
+.messageContent {
+  font-size: 13px;
+}
+
+.messageTime {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.messageReceived .messageTime {
+  color: #64748b;
+}
+
+.messageStatus {
+  font-size: 0.75rem;
+}
+
+.chatInputRow {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 16px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  z-index: 10;
+
+  /* ✅ NEW: всё в одну линию */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.chatInputRow.sidebarHidden {
+  bottom: 0; /* Прижимается к низу экрана */
+}
+
+.chatInput {
+  flex: 1;
+  min-width: 0;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.chatInput:focus {
+  border-color: #3b82f6;
+  outline: none;
+  background: #ffffff;
+}
+
+.sendButton {
+  white-space: nowrap;
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  font-size: 14px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sendButton:active {
+  background: #2563eb;
+  transform: scale(0.98);
+}
+
+.noChatSelected,
+.loading {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #64748b;
+  font-size: 14px;
+  font-style: italic;
+}
+.leftPanel { min-width: 0; }
+.tabsRow, .tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  overflow: hidden;
+scrollbar-width: none;
+}
+
+.tabsRow::-webkit-scrollbar {
+  display: none;              /* Chrome/Safari */
+}
+
+.pmIconButton {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.pmIconButton:active {
+  transform: scale(0.98);
+}
+

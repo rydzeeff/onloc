@@ -1,0 +1,428 @@
+/* styles/settings.pc.module.css */
+.sectionContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  animation: fadeInSection 0.5s ease-in-out;
+}
+
+@keyframes fadeInSection {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tab {
+  padding: 10px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.tab:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #3b82f6;
+}
+
+.activeTab {
+  padding: 10px 18px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  min-width: 100px;
+  transition: all 0.2s ease;
+  font-size: 15px;
+}
+
+.tabContent {
+  animation: fadeInTab 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeInTab {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.settingsForm {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.inputGroup {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 15px;
+  align-items: center;
+  position: relative;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.inputGroup:last-child {
+  border-bottom: none;
+}
+
+.inputGroup label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.inputGroup input,
+.inputGroup textarea {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #334155;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+}
+
+.inputGroup textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.inputGroup span {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+}
+
+.suggestions li {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #334155;
+  transition: background-color 0.2s ease;
+}
+
+.suggestions li:hover {
+  background-color: #f1f5f9;
+}
+
+.actionButton {
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: #2563eb;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Старые классы списка карт — оставлены для совместимости */
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cardItem:last-child {
+  border-bottom: none;
+}
+
+.removeButton {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+  background: #dc2626;
+}
+
+.removeButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 1000;
+  font-size: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.loadingSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 16px;
+  color: #64748b;
+}
+
+/* --- Новые стили для "современных" карт --- */
+.cardsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cardsToolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.cardTile {
+  position: relative;
+  background: radial-gradient(120% 120% at 0% 0%, #f8fafc 0%, #ffffff 60%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.cardTile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.cardBrand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cardBrandDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3b82f6;
+  display: inline-block;
+}
+
+.cardBrandText {
+  opacity: 0.9;
+}
+
+.cardPan {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 1px;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #475569;
+  font-size: 13px;
+}
+
+.cardMetaItem {
+  opacity: 0.9;
+}
+
+.cardStatus {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cardStatus.ok {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.cardStatus.bad {
+  background: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* Скелетоны */
+.skeleton {
+  overflow: hidden;
+}
+
+.skeletonLine,
+.skeletonLineShort {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+.skeletonLineShort {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.emptyBlock {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.emptySub {
+  color: #64748b;
+  font-size: 14px;
+}
+.primaryRow {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.primaryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+  font-size: 13px;
+  user-select: none;
+}
+.primaryRadio {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.primaryLabel span {
+  cursor: default;
+}
+
+.helpIcon {
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+} 

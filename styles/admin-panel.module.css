@@ -1,0 +1,148 @@
+/* styles/admin-panel.module.css — обновлённая версия */
+
+/* Контейнер и заголовок */
+.container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* Табы панели */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tabBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: all .2s ease;
+  font-weight: 600;
+}
+.tabBtn:hover {
+  background: #f1f5f9;
+}
+.active {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* Бейджи непрочитанных */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Тело вкладки */
+.tabBody {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+/* Плейсхолдер для незаполненных вкладок */
+.placeholder {
+  text-align: center;
+  color: #64748b;
+  padding: 24px 8px;
+}
+.placeholder h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+/* Вспомогательные кнопки (на случай использования в админке) */
+.actionButton,
+.joinButton,
+.resolveButton,
+.uploadButton,
+.fileInput {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.joinButton,
+.resolveButton,
+.uploadButton {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+}
+.joinButton:hover,
+.resolveButton:hover,
+.uploadButton:hover {
+  background: #2563eb;
+}
+
+.fileInput {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+.fileInput:hover {
+  background: #f1f5f9;
+}
+
+/* Нотификации/ошибки */
+.error {
+  color: #ef4444;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 16px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  z-index: 1000;
+  font-size: 14px;
+}

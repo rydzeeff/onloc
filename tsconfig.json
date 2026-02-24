@@ -1,0 +1,61 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {
+      "components/*": [
+        "components/*"
+      ],
+      "lib/*": [
+        "lib/*"
+      ],
+      "pages/*": [
+        "pages/*"
+      ]
+    },
+    "types": [
+      "next",
+      "next/types/global"
+    ],
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": false,
+    "outDir": "./dist",
+    "removeComments": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "noEmit": true,
+    "incremental": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    ".next",
+    "supabase/functions/**/*" // Добавляем исключение для Supabase Functions
+  ],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}

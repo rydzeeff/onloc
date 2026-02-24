@@ -1,0 +1,222 @@
+.container {
+  max-width: 540px;
+  margin: 60px auto;
+  background: #ffffff; /* Белый фон из dashboard.module.css */
+  border-radius: 12px; /* Закругления из dashboard.module.css */
+  padding: 48px 40px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Тень из dashboard.module.css */
+  border: 1px solid #e2e8f0; /* Граница из dashboard.module.css */
+  text-align: center;
+  position: relative;
+}
+
+.header {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  color: #1e293b; /* Цвет текста из dashboard.module.css */
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: relative;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b; /* Цвет текста из dashboard.module.css */
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: left;
+}
+
+.input,
+.select {
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0; /* Граница из dashboard.module.css */
+  border-radius: 8px; /* Закругления из dashboard.module.css */
+  font-size: 16px;
+  color: #334155; /* Цвет текста из dashboard.module.css */
+  background: #f8fafc; /* Фон из dashboard.module.css */
+  transition: all 0.2s ease; /* Переход из dashboard.module.css */
+  max-width: 340px;
+  width: 100%;
+}
+
+.input:focus,
+.select:focus {
+  border-color: #3b82f6; /* Акцентный цвет из dashboard.module.css */
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0; /* Граница из dashboard.module.css */
+  border-radius: 8px; /* Закругления из dashboard.module.css */
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Тень из dashboard.module.css */
+  margin-top: 4px;
+  max-width: 340px;
+}
+
+.suggestionItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #334155; /* Цвет текста из dashboard.module.css */
+  transition: background-color 0.2s ease;
+}
+
+.suggestionItem:hover {
+  background-color: #f1f5f9; /* Цвет при hover из dashboard.module.css */
+}
+
+.actionButton {
+  padding: 16px 32px;
+  background: #3b82f6; /* Акцентный цвет из dashboard.module.css */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px; /* Закругления из dashboard.module.css */
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease; /* Переход из dashboard.module.css */
+  margin-top: 20px;
+  max-width: 340px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.actionButton:hover {
+  background: #2563eb; /* Чуть темнее при hover, как в dashboard.module.css */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton:disabled {
+  background: #e2e8f0; /* Цвет для disabled из dashboard.module.css */
+  color: #64748b;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.error {
+  color: #ef4444; /* Красный цвет из dashboard.module.css */
+  font-size: 14px;
+  margin-top: 12px;
+  text-align: center;
+  background: #fff1f2; /* Лёгкий красный фон из dashboard.module.css */
+  padding: 12px 16px;
+  border-radius: 8px; /* Закругления из dashboard.module.css */
+  font-weight: 500;
+  border: 1px solid #ef4444;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #3b82f6; /* Акцентный цвет из dashboard.module.css */
+  margin-top: 60px;
+}
+
+.fadeIn {
+  animation: fadeIn 0.5s ease-in-out; /* Анимация из dashboard.module.css */
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px; /* Закругления из dashboard.module.css */
+  pointer-events: all;
+  z-index: 10;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 420px;
+    padding: 36px 28px;
+    margin: 40px auto;
+  }
+
+  .header {
+    font-size: 26px;
+  }
+
+  .actionButton {
+    font-size: 15px;
+    padding: 14px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-width: 360px;
+    padding: 28px 20px;
+    margin: 30px auto;
+  }
+
+  .header {
+    font-size: 22px;
+  }
+
+  .actionButton {
+    font-size: 14px;
+    padding: 12px 24px;
+  }
+
+  .input,
+  .select {
+    font-size: 15px;
+    padding: 12px 14px;
+  }
+}

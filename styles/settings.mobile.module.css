@@ -1,0 +1,662 @@
+/* styles/settings.mobile.module.css */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  height: 100%;
+}
+
+.settingsTabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+
+.settingsTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  flex: 0 0 auto;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  background: #f1f5f9;
+}
+
+.tab:active {
+  background: #f1f5f9;
+}
+
+.activeTab {
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  flex: 0 0 auto;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.contentArea {
+  padding: 16px;
+  height: calc(100% - 52px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.section:active {
+  transform: scale(0.98);
+}
+
+.inputGroup {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.inputGroup label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.inputGroup input,
+.inputGroup textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+.inputGroup textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.disabledInput {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 4px;
+  animation: slideIn 0.2s ease-out;
+}
+
+.suggestions li {
+  padding: 12px 16px;
+  font-size: 16px;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.suggestions li:hover,
+.suggestions li:active {
+  background: #f1f5f9;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.saveButton {
+  padding: 16px;
+  background: #3b82f6;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.saveButton:hover {
+  background: #2563eb;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.saveButton:active {
+  transform: scale(0.95);
+}
+
+.snackbar {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 41, 59, 0.95);
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  z-index: 2000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  animation: fadeInUp 0.3s ease-out;
+  max-width: 90%;
+  backdrop-filter: blur(8px);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background: #f8fafc;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #3b82f6;
+  border-top: 4px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cardItem:last-child {
+  border-bottom: none;
+}
+
+.removeButton {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+  background: #dc2626;
+}
+
+.actionButton {
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: #2563eb;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 360px) {
+  .tab {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  .inputGroup input,
+  .inputGroup textarea {
+    font-size: 14px;
+  }
+  .saveButton {
+    font-size: 14px;
+    padding: 14px;
+  }
+}
+
+/* Поддержка touch */
+@supports (-webkit-tap-highlight-color: transparent) {
+  .tab,
+  .saveButton,
+  .suggestions li {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ---------------- Новые стили под вкладку «Мои карты» (mobile) ---------------- */
+
+.segmented {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.segBtn {
+  flex: 1 1 0%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segBtn:active {
+  transform: scale(0.98);
+}
+
+.segActive {
+  flex: 1 1 0%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #3b82f6;
+  background: #ffffff;
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cardsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardsToolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.smallButton {
+  padding: 10px 12px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.smallButton:hover {
+  background: #f8fafc;
+}
+
+.smallButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.cardTile {
+  position: relative;
+  background: radial-gradient(120% 120% at 0% 0%, #f8fafc 0%, #ffffff 60%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.cardTile:active {
+  transform: scale(0.99);
+}
+
+.cardBrand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.cardBrandDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3b82f6;
+  display: inline-block;
+}
+
+.cardBrandText {
+  opacity: 0.9;
+}
+
+.cardPan {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 1px;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #475569;
+  font-size: 13px;
+}
+
+.cardMetaItem {
+  opacity: 0.92;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.primaryRow {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.primaryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+  font-size: 13px;
+  user-select: none;
+}
+
+.primaryRadio {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.primaryLabel span {
+  cursor: default;
+}
+
+.helpIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.emptyBlock {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.emptySub {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* Скелетоны для карт */
+.skeleton {
+  overflow: hidden;
+}
+
+.skeleton .cardBrandText,
+.skeleton .cardPan,
+.skeleton .cardMetaItem {
+  color: transparent;
+}
+
+.skeleton .cardBrandText,
+.skeleton .cardPan,
+.skeleton .cardMetaItem {
+  position: relative;
+}
+
+.skeleton .cardBrandText::after,
+.skeleton .cardPan::after,
+.skeleton .cardMetaItem::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+
+/* ===== Settings menu (лист сверху вниз вместо вкладок) ===== */
+.settingsMenu{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.menuTitle{
+  font-size:20px;
+  font-weight:700;
+  margin: 4px 0 4px;
+  color:#0f172a;
+}
+
+.menuRow{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 14px;
+  border-radius:14px;
+  border:1px solid #e2e8f0;
+  background:#fff;
+  text-align:left;
+}
+
+.menuRow:active{
+  background:#f1f5f9;
+}
+
+.menuRowLeft{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.menuRowTitle{
+  font-size:16px;
+  font-weight:600;
+  color:#0f172a;
+}
+
+.menuRowHint{
+  font-size:12px;
+  color:#64748b;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.menuChevron{
+  font-size:22px;
+  line-height:1;
+  color:#94a3b8;
+  flex:0 0 auto;
+}
+
+.menuRowDanger{
+  border-color: rgba(239, 68, 68, 0.25);
+}
+.menuRowDanger .menuRowTitle{
+  color:#ef4444;
+}
+
+/* ===== Sub page header with back ===== */
+.subPage{
+  min-height: calc(100vh - 120px);
+}
+
+.subHeader{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding: 10px 2px 12px;
+  background: rgba(248,250,252,0.90);
+  backdrop-filter: blur(10px);
+}
+
+.backButton{
+  border: 1px solid #e2e8f0;
+  background:#fff;
+  color:#334155;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.backButton:active{
+  background:#f1f5f9;
+}
+
+.subTitle{
+  font-size: 16px;
+  font-weight: 700;
+  color:#0f172a;
+  text-align:center;
+  flex: 1 1 auto;
+}
+
+.subHeaderSpacer{
+  width: 64px; /* чтобы заголовок был по центру */
+  flex: 0 0 auto;
+}

@@ -1,0 +1,51 @@
+/* styles/payment-result.module.css */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.resultBox {
+  text-align: center;
+  padding: 40px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+
+.successTitle {
+  color: #28a745;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.errorTitle {
+  color: #dc3545;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.message {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
