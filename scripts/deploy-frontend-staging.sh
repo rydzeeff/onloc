@@ -23,9 +23,9 @@ command -v npm >/dev/null 2>&1 || { echo "ОШИБКА: npm не найден"; 
 command -v systemctl >/dev/null 2>&1 || { echo "ОШИБКА: systemctl не найден"; exit 1; }
 
 # Проверка: sudo без пароля для нужного сервиса (non-interactive)
-if ! sudo -n true 2>/dev/null; then
-  echo "ОШИБКА: sudo требует пароль (ожидался NOPASSWD)."
-  echo "Проверь sudoers для useradmin."
+if ! sudo -n systemctl status "$SERVICE_NAME" >/dev/null 2>&1; then
+  echo "ОШИБКА: нет NOPASSWD sudo для systemctl status $SERVICE_NAME"
+  echo "Проверь sudoers для useradmin (разрешение на systemctl status/restart этого сервиса)."
   exit 1
 fi
 
