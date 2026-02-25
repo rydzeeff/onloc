@@ -7,16 +7,16 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 16px;
+  padding: var(--space-4);
   z-index: 10060;
 }
 
 .sheet {
   width: 100%;
   max-width: 560px;
-  background: #ffffff;
+  background: var(--color-bg);
   border-radius: 18px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   overflow: hidden;
   transform: translateY(10px);
   animation: sheetIn 140ms ease-out forwards;
@@ -34,9 +34,9 @@
 }
 
 .title {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -44,15 +44,15 @@
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
 .close:hover {
   background: #f1f5f9;
-  color: #3b82f6;
+  color: var(--color-primary);
   border-color: #cbd5e1;
 }
 
@@ -70,11 +70,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px;
-  border: 1px solid #e2e8f0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--color-bg);
+  color: var(--color-text);
   text-decoration: none;
   cursor: pointer;
   user-select: none;
@@ -82,7 +82,7 @@
 }
 
 .item:hover {
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   border-color: #cbd5e1;
   color: #1d4ed8;
 }
@@ -105,7 +105,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #334155;
+  color: var(--color-text-secondary);
   flex: 0 0 auto;
 }
 
@@ -118,18 +118,18 @@
 .labelTitle {
   font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 .labelSub {
   font-size: 11px;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .footerHint {
   margin-top: 10px;
   font-size: 11px;
-  color: #64748b;
+  color: var(--color-muted);
   line-height: 1.35;
 }
 
@@ -138,8 +138,8 @@
   bottom: calc(16px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--color-text);
+  color: var(--color-bg);
   padding: 10px 14px;
   border-radius: 999px;
   z-index: 10070;
@@ -167,7 +167,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 8px;
+    gap: var(--space-2);
     padding: 14px 10px;
   }
 
