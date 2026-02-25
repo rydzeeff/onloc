@@ -92,17 +92,17 @@
 
 /* сообщения */
 .chatMessages{ flex:1; padding:var(--space-5); overflow-y:auto; display:flex; flex-direction:column; gap:var(--space-3); background:var(--color-bg-soft); }
-.dateDivider{ text-align:center; font-size:12px; color:var(--color-muted); margin:var(--space-4) 0; background:var(--color-bg); padding:6px var(--space-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); align-self:center; }
+.dateDivider{ text-align:center; font-size:var(--font-size-xs); color:var(--color-muted); margin:var(--space-4) 0; background:var(--color-bg); padding:6px var(--space-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); align-self:center; }
 .message{ margin-bottom:.5rem; display:flex; animation: fadeInMessage .3s ease-in-out; }
 @keyframes fadeInMessage{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 .messageSent{ justify-content:flex-end; } .messageReceived{ justify-content:flex-start; }
 .messageBubble{ max-width:320px; padding:var(--space-3); border-radius:var(--radius-lg); word-wrap:break-word; }
 .messageSent .messageBubble{ background:var(--color-primary); color:var(--color-bg); border-radius:12px 12px 0 12px; }
 .messageReceived .messageBubble{ background:var(--color-bg); color:var(--color-text-secondary); border:1px solid var(--color-border); border-radius:12px 12px 12px 0; }
-.messageSenderName{ font-size:12px; opacity:.9; margin-bottom:4px; color:var(--color-text); }
+.messageSenderName{ font-size:var(--font-size-xs); opacity:.9; margin-bottom:4px; color:var(--color-text); }
 .messageContent{ margin-bottom:.25rem; font-size:var(--font-size-sm); }
 .messageFooter{ display:flex; justify-content:space-between; align-items:center; }
-.messageTime{ font-size:12px; color:rgba(255,255,255,.8); } .messageReceived .messageTime{ color:var(--color-muted); }
+.messageTime{ font-size:var(--font-size-xs); color:rgba(255,255,255,.8); } .messageReceived .messageTime{ color:var(--color-muted); }
 .messageStatus{ font-size:.75rem; }
 
 /* инпуты */
@@ -122,7 +122,7 @@
 .participantAvatar{ width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--color-border); }
 .participantMain{ display:flex; flex-direction:column; }
 .participantName{ font-size:var(--font-size-sm); color:var(--color-text); }
-.roleBadge{ margin-top:2px; font-size:12px; width:fit-content; padding:2px 6px; border-radius:var(--radius-md); }
+.roleBadge{ margin-top:2px; font-size:var(--font-size-xs); width:fit-content; padding:2px 6px; border-radius:var(--radius-md); }
 .roleOrganizer{ background:#fff7ed; color:#9a3412; border:1px solid #f59e0b; }
 .roleMember{ background:#f1f5f9; color:var(--color-text-secondary); border:1px solid var(--color-border); }
 
@@ -130,9 +130,9 @@
 .highlightedParticipant{ background:#e0f2fe; border:1px solid #38bdf8 !important; border-radius:var(--radius-md); margin:4px 2px; }
 
 /* кнопка ЛС + бейдж */
-.pmButton{ margin-left:auto; border:var(--border-default); border-radius:var(--radius-md); padding:6px 10px; cursor:pointer; background:var(--color-bg); font-size:12px; display:flex; align-items:center; gap:var(--space-2); }
+.pmButton{ margin-left:auto; border:var(--border-default); border-radius:var(--radius-md); padding:var(--space-1) 10px; cursor:pointer; background:var(--color-bg); font-size:var(--font-size-xs); display:flex; align-items:center; gap:var(--space-2); }
 .pmButton:hover{ background:var(--color-bg-soft); }
-.pmUnreadBadge{ background:var(--color-error); color:var(--color-bg); border-radius:999px; padding:2px 6px; font-size:12px; line-height:1; }
+.pmUnreadBadge{ background:var(--color-error); color:var(--color-bg); border-radius:var(--radius-pill); padding:2px 6px; font-size:var(--font-size-xs); line-height:1; }
 .pmIconButton {
   display: inline-flex; align-items: center; justify-content: center;
   width: 36px; height: 36px; border-radius: var(--radius-md);

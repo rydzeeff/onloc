@@ -68,3 +68,53 @@
 ### Этап 3
 - Консолидация дублирующихся модулей и вариантов стилей.
 - Вынести повторяющиеся «композитные» паттерны (toolbar, filter-row, modal footer) в shared UI-слой.
+
+
+## 7) Anti-regression guardrails (phase 2 finalization)
+Чтобы стиль дальше не «расползался», при любых UI-изменениях используем такой порядок:
+
+1. **Сначала foundation tokens**, потом локальные значения.
+   - Цвета: `--color-*`.
+   - Отступы: `--space-*`.
+   - Радиусы: `--radius-*`.
+   - Тени: `--shadow-*`.
+   - Типографика: `--font-size-*`, `--font-weight-*`, `--line-height-*`.
+   - Границы и focus: `--border-default`, `--focus-ring`.
+2. **Сначала reusable patterns**, потом локальные стили:
+   - `.ui-button`, `.ui-input`, `.ui-card`, `.ui-section-title`, `.ui-focus-visible`.
+3. Локальные «магические» значения допустимы только если:
+   - нет релевантного токена,
+   - значение действительно уникально для конкретного UX-кейса,
+   - и это явно отмечено комментарием в CSS.
+
+## 8) Reusable UI patterns (current baseline)
+Минимальный baseline, который уже есть в проекте и должен переиспользоваться:
+
+- **Button pattern**: primary background + hover (`--color-primary-hover`) + `:focus-visible` с `--focus-ring` + `:disabled` через opacity/cursor.
+- **Input pattern**: `--border-default`, `--radius-lg`, `--color-bg-soft`, обязательный `:focus`/`:focus-visible`.
+- **Card/panel pattern**: `--color-bg`, `--border-default`, `--radius-lg`, `--shadow-sm`.
+- **Section title**: `--font-size-lg`, `--font-weight-semibold`, `--color-text`.
+- **Badge/chip pattern**: токены цвета + `--radius-pill` или `--radius-md` (без произвольных `999px`/`12px`, если есть готовый токен).
+
+## 9) Что не делать
+- Не добавлять новые raw `#hex`/`rgba`/`px`, если можно использовать существующий token.
+- Не дублировать hover/focus/disabled-стили между похожими кнопками/инпутами.
+- Не копировать целые CSS-блоки из других страниц без нормализации через foundation.
+- Не менять backend/auth/payments/webhooks в рамках UI-унификации.
+
+## 10) Как добавлять новую страницу/компонент в едином стиле
+1. Проверить, есть ли нужный паттерн в `styles/foundation.css`.
+2. Собрать компонент из существующих primitives (`ui-*` + tokens).
+3. Добавить интерактивные состояния: hover, focus-visible, disabled.
+4. Проверить мобильный и desktop breakpoints без изменения бизнес-логики.
+5. Если приходится вводить новый token — сделать его общим и переиспользуемым, а не локальным «точечным» значением.
+
+## 11) UI review checklist (pre-merge)
+Короткий checklist для ревьюера:
+
+- [ ] В diff нет изменений API-контрактов/endpoint-ов/бизнес-логики.
+- [ ] Основные значения (color/space/radius/shadow/typography/border) взяты из foundation tokens.
+- [ ] Для интерактивных элементов заданы hover + focus-visible + disabled (где применимо).
+- [ ] Нет явного дублирования одинаковых стилей в нескольких местах.
+- [ ] Новые raw-значения добавлены только с явным обоснованием.
+- [ ] Изменения локальны и безопасны (без большого редизайна и массового рефакторинга).
