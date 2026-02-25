@@ -3,7 +3,7 @@
   top: 15px;
   left: 15px;
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   z-index: 5;
   flex-wrap: wrap;
   max-width: 90%;
@@ -16,11 +16,11 @@
 .filterButton {
   padding: 6px 12px;
   background-color: transparent;
-  color: #334155;
+  color: var(--color-text-secondary);
   border: none;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   transition: all 0.2s ease;
   display: flex;
@@ -30,13 +30,13 @@
 }
 
 .filterButton:hover {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 .filterButton.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 .filterValue {
@@ -47,8 +47,8 @@
 
 .clearIcon {
   margin-left: 4px;
-  font-size: 16px;
-  color: #3b82f6;
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
   opacity: 0.7;
   transition: opacity 0.2s ease;
   cursor: pointer;
@@ -62,10 +62,10 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 12px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
   z-index: 15;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   margin-top: 8px;
@@ -93,7 +93,7 @@
   width: 100%;
   max-width: 100%;
   border: none;
-  font-size: 16px;
+  font-size: var(--font-size-md);
 }
 
 .filterOption {
@@ -103,7 +103,7 @@
   text-align: left;
   background: none;
   border: none;
-  color: #334155;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 4px;
@@ -114,14 +114,14 @@
 }
 
 .filterOption.selected {
-  background-color: #3b82f6;
+  background-color: var(--color-primary);
   color: white;
 }
 
 .rangeContainer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   padding: 8px 0;
 }
@@ -130,7 +130,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .rangeInputs {
@@ -156,7 +156,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--color-primary);
   cursor: pointer;
   pointer-events: auto;
   margin-top: -6px;
@@ -168,7 +168,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--color-primary);
   cursor: pointer;
   pointer-events: auto;
   position: relative;
@@ -179,7 +179,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: #334155;
+  color: var(--color-text-secondary);
   margin-top: 4px;
 }
 
@@ -188,7 +188,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: #e2e8f0;
+  background: var(--color-border);
   border-radius: 2px;
   margin: 10px 0;
 }
@@ -199,7 +199,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--color-primary);
   cursor: pointer;
 }
 
@@ -207,14 +207,14 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--color-primary);
   cursor: pointer;
 }
 
 .rangeValue {
   text-align: center;
-  font-size: 14px;
-  color: #334155;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   margin-top: 4px;
 }
 
@@ -223,7 +223,7 @@
   position: absolute;
   height: 4px;
   width: 100%;
-  background: #e2e8f0;
+  background: var(--color-border);
   border-radius: 2px;
 }
 
@@ -231,7 +231,7 @@
   content: '';
   position: absolute;
   height: 4px;
-  background: #3b82f6;
+  background: var(--color-primary);
   left: var(--range-min, 0%);
   right: calc(100% - var(--range-max, 100%));
   border-radius: 2px;
@@ -247,11 +247,11 @@
 
 .cancelButton {
   padding: 10px 20px;
-  background-color: #e2e8f0;
-  color: #334155;
+  background-color: var(--color-border);
+  color: var(--color-text-secondary);
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -262,35 +262,35 @@
 
 .applyButton {
   padding: 10px 20px;
-  background-color: #3b82f6;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-bg);
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .applyButton:hover {
-  background-color: #2563eb;
+  background-color: var(--color-primary-hover);
 }
 
 .react-datepicker {
   font-family: 'Inter', sans-serif;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
 }
 
 .react-datepicker__header {
-  background-color: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background-color: var(--color-bg-soft);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .react-datepicker__day--selected, 
 .react-datepicker__day--in-selecting-range, 
 .react-datepicker__day--in-range {
-  background-color: #3b82f6;
+  background-color: var(--color-primary);
   color: white;
 }
 
@@ -314,14 +314,14 @@
   }
 
   .react-datepicker__day {
-    font-size: 16px;
+    font-size: var(--font-size-md);
     width: 40px;
     height: 40px;
     line-height: 40px;
   }
 
   .react-datepicker__day-name {
-    font-size: 14px;
+    font-size: var(--font-size-sm);
     width: 40px;
     height: 40px;
     line-height: 40px;

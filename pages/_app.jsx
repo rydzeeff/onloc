@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { initializeRealtime, cleanupRealtime } from '../lib/realtime';
 import 'react-image-crop/dist/ReactCrop.css';
+import '../styles/foundation.css';
 import '../styles/globals.css';
 
 export const AuthContext = createContext();
