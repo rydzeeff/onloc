@@ -8,7 +8,7 @@
     "dev": "next dev -H 127.0.0.1 -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint \"**/*.{js,jsx,mjs,cjs}\" --no-inline-config",
     "test": "npx jest"
   },
   "keywords": [
