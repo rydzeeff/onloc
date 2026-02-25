@@ -61,22 +61,6 @@ function InfoIcon() {
   );
 }
 
-function HelpIcon() {
-  return (
-    <svg className={mobileStyles.topNavIcon} viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M9.7 9.4a2.4 2.4 0 0 1 4.6.8c0 1.7-1.6 2.1-2.3 2.6-.6.4-.7.7-.7 1.7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="17" r="1" fill="currentColor" />
-    </svg>
-  );
-}
-
 function UserIcon() {
   return (
     <svg className={mobileStyles.topNavIcon} viewBox="0 0 24 24" aria-hidden="true">
@@ -200,18 +184,8 @@ export default function TripsPageMobile({ user: propUser, geolocation: propGeolo
   const [mapLoaded, setMapLoaded] = useState(false);
   const [tripsLoaded, setTripsLoaded] = useState(false);
 
-// --- Long-press hint/indicator ---
 const LONGPRESS_HINT_KEY = "seen_longpress_create_trip_hint_v1";
-
 const [showLongPressHint, setShowLongPressHint] = useState(false);
-const [pressIndicator, setPressIndicator] = useState(null); // { x, y } в координатах контейнера
-
-const mapContainerRef = useRef(null);
-const filtersRootRef = useRef(null);
-
-const pressTimerRef = useRef(null);
-const isPressingRef = useRef(false);
-
 
   // marker highlight (оставляем как было)
   const [selectedTripId, setSelectedTripId] = useState(null);
@@ -229,13 +203,6 @@ const [activeInfoModal, setActiveInfoModal] = useState(null);
   const mapClickHandlerRef = useRef(null);
   const tripsDragRef = useRef(null);
 
-// --- Header Help (Apple-like) ---
-const HELP_HINT_KEY = "seen_header_help_hint_v3";
-
-const [helpOpen, setHelpOpen] = useState(false);
-const [helpPulse, setHelpPulse] = useState(false);
-const helpButtonRef = useRef(null);
-
 useEffect(() => {
   if (!isTripsSheetOpen || !selectedTripId) return;
 
@@ -248,43 +215,6 @@ useEffect(() => {
     el.scrollTo({ top: 0, behavior: "smooth" });
   });
 }, [isTripsSheetOpen, selectedTripId]);
-
-useEffect(() => {
-  if (typeof window === "undefined") return;
-
-  let seen = false;
-  try {
-    seen = localStorage.getItem(HELP_HINT_KEY) === "1";
-  } catch {}
-
-  if (seen) return;
-
-  // включаем "моргалку"
-  setHelpPulse(true);
-
-  // можно авто-выключить через N секунд, если не нажали
-  const t = setTimeout(() => setHelpPulse(false), 12000);
-  return () => clearTimeout(t);
-}, []);
-
-useEffect(() => {
-  const onDocPointerDown = (e) => {
-    if (!helpOpen) return;
-
-    const root = helpButtonRef.current;
-    if (!root) return;
-
-    const path = e.composedPath ? e.composedPath() : [];
-    const inside = root.contains(e.target) || (path && path.includes(root));
-    if (inside) return;
-
-    setHelpOpen(false);
-  };
-
-  document.addEventListener("pointerdown", onDocPointerDown, true);
-  return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
-}, [helpOpen]);
-
 
 useEffect(() => {
   const onDocPointerDown = (e) => {
@@ -789,74 +719,15 @@ useEffect(() => {
   if (typeof window === "undefined") return;
   if (!mapLoaded) return;
 
-  // если уже показывали — не показываем снова
   try {
     if (localStorage.getItem(LONGPRESS_HINT_KEY) === "1") return;
   } catch {}
 
-  // если открыт нижний лист — не мешаем
   if (isTripsSheetOpen) return;
 
   const t = setTimeout(() => setShowLongPressHint(true), 1200);
   return () => clearTimeout(t);
 }, [mapLoaded, isTripsSheetOpen]);
-
-useEffect(() => {
-  const el = mapContainerRef.current;
-  if (!el) return;
-
-  const alreadySeen = () => {
-    try {
-      return localStorage.getItem(LONGPRESS_HINT_KEY) === "1";
-    } catch {
-      return false;
-    }
-  };
-
-  const hide = () => {
-    isPressingRef.current = false;
-    if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
-    pressTimerRef.current = null;
-    setTimeout(() => setPressIndicator(null), 60);
-  };
-
-  const onTouchStart = (e) => {
-    if (alreadySeen()) return;
-    if (isTripsSheetOpen) return;
-
-    // НЕ показываем индикатор, если тапнули по фильтрам (они поверх карты)
-    if (filtersRootRef.current && filtersRootRef.current.contains(e.target)) return;
-
-    const t = e.touches?.[0];
-    if (!t) return;
-
-    isPressingRef.current = true;
-
-    const rect = el.getBoundingClientRect();
-    setPressIndicator({
-      x: t.clientX - rect.left,
-      y: t.clientY - rect.top,
-    });
-
-    if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
-    pressTimerRef.current = setTimeout(() => {
-      if (isPressingRef.current) setPressIndicator(null);
-    }, 1600);
-  };
-
-  el.addEventListener("touchstart", onTouchStart, { passive: true, capture: true });
-  el.addEventListener("touchend", hide, { passive: true, capture: true });
-  el.addEventListener("touchcancel", hide, { passive: true, capture: true });
-
-  return () => {
-    el.removeEventListener("touchstart", onTouchStart, true);
-    el.removeEventListener("touchend", hide, true);
-    el.removeEventListener("touchcancel", hide, true);
-    if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
-  };
-}, [isTripsSheetOpen]);
-
-
 
 
   async function fetchTrips(opts = {}) {
@@ -1016,9 +887,7 @@ const markLongPressHintSeen = () => {
     localStorage.setItem(LONGPRESS_HINT_KEY, "1");
   } catch {}
   setShowLongPressHint(false);
-  setPressIndicator(null);
 };
-
 
   const handleMapChange = (e) => {
     setMapBounds(e.get('newBounds'));
@@ -1051,7 +920,6 @@ const markLongPressHintSeen = () => {
   };
 
  const handleMapContextMenu = (e) => {
-  // ✅ long-press случился — считаем, что пользователь понял механику
   markLongPressHintSeen();
 
   const coords = e.get("coords");
@@ -1166,24 +1034,6 @@ const openInfoModal = (type) => {
   setActiveInfoModal(type);    // ✅ открываем модалку
 };
 
-const markHelpSeen = () => {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HELP_HINT_KEY, "1");
-  } catch {}
-  setHelpPulse(false);
-};
-
-const toggleHelp = () => {
-  // если открываем — помечаем как прочитанное
-  setHelpOpen((v) => {
-    const next = !v;
-    if (next) markHelpSeen();
-    return next;
-  });
-};
-
-
 const closeInfoModal = () => {
   setActiveInfoModal(null);
 };
@@ -1270,54 +1120,9 @@ const closeInfoModal = () => {
   return (
   <div className={mobileStyles.container}>
    <header className={mobileStyles.header}>
-  {/* LEFT: logo + help */}
+  {/* LEFT: logo */}
   <div className={mobileStyles.headerLeft}>
     <img src="/logo.png" alt="Onloc Logo" className={mobileStyles.logo} />
-
-    {/* Help / Подсказки */}
-    <div className={mobileStyles.helpWrapper} ref={helpButtonRef}>
-      <button
-        type="button"
-        onClick={() => {
-          if (isTripsSheetOpen) closeTripsSheet();
-          setInfoMenuOpen(false);
-          toggleHelp();
-        }}
-        className={`${mobileStyles.topIconButton} ${helpOpen ? mobileStyles.topIconActive : ""}`}
-        aria-label="Подсказки"
-        title="Подсказки"
-      >
-        <span className={`${mobileStyles.topIconWrap} ${helpPulse ? mobileStyles.helpBreath : ""}`}>
-          <HelpIcon />
-          {helpPulse && <span className={mobileStyles.helpPulse} aria-hidden="true" />}
-        </span>
-      </button>
-
-      {helpOpen && (
-        <div className={mobileStyles.helpPopover} role="dialog" aria-modal="false">
-          <div className={mobileStyles.helpTitle}>Как пользоваться картой</div>
-
-          <ul className={mobileStyles.helpList}>
-            <li>
-              <b>Создать поездку:</b> нажмите и удерживайте палец на карте <b>1–2 секунды</b>.
-              Появится подтверждение создания поездки в выбранной точке.
-            </li>
-            <li>
-              <b>Детальный просмотр:</b> нажмите на <b>маркер поездки</b> на карте — откроется список/выделение.
-            </li>
-            <li>
-              <b>Фильтры:</b> включайте фильтры, чтобы <b>убрать лишние поездки</b> с карты и оставить только подходящие.
-            </li>
-          </ul>
-
-          <div className={mobileStyles.helpActions}>
-            <button type="button" className={mobileStyles.helpOkBtn} onClick={() => setHelpOpen(false)}>
-              Понятно
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
   </div>
 
   {/* RIGHT: icons */}
@@ -1328,7 +1133,6 @@ const closeInfoModal = () => {
       onClick={() => {
         if (isTripsSheetOpen) closeTripsSheet();
         setInfoMenuOpen(false);
-        setHelpOpen(false);
         handleMessagesClick();
       }}
       className={`${mobileStyles.topIconButton} ${unreadMessages > 0 ? mobileStyles.topIconUnread : ""}`}
@@ -1346,7 +1150,6 @@ const closeInfoModal = () => {
         type="button"
         onClick={() => {
           if (isTripsSheetOpen) closeTripsSheet();
-          setHelpOpen(false);
           toggleInfoMenu();
         }}
         className={`${mobileStyles.topIconButton} ${infoMenuOpen ? mobileStyles.topIconActive : ""}`}
@@ -1397,7 +1200,6 @@ const closeInfoModal = () => {
         onClick={() => {
           if (isTripsSheetOpen) closeTripsSheet();
           setInfoMenuOpen(false);
-          setHelpOpen(false);
         }}
       >
         <span className={mobileStyles.topIconWrap}>
@@ -1413,7 +1215,6 @@ const closeInfoModal = () => {
         onClick={() => {
           if (isTripsSheetOpen) closeTripsSheet();
           setInfoMenuOpen(false);
-          setHelpOpen(false);
         }}
       >
         <span className={mobileStyles.topIconWrap}>
@@ -1427,8 +1228,7 @@ const closeInfoModal = () => {
 
 
       <div className={mobileStyles.main}>
-            <div className={mobileStyles.mapContainer} ref={mapContainerRef}>
-  {/* Текстовая подсказка (один раз) */}
+            <div className={mobileStyles.mapContainer}>
   {showLongPressHint && (
     <div className={mobileStyles.coachmark}>
       <div className={mobileStyles.coachmarkCard} role="status" aria-live="polite">
@@ -1445,21 +1245,6 @@ const closeInfoModal = () => {
           </button>
         </div>
       </div>
-    </div>
-  )}
-
-  {/* Индикатор удержания в точке касания */}
-  {pressIndicator && (
-    <div
-      className={mobileStyles.pressIndicator}
-      style={{ left: pressIndicator.x, top: pressIndicator.y }}
-      aria-hidden="true"
-    >
-      <svg className={mobileStyles.pressRing} viewBox="0 0 40 40">
-        <circle className={mobileStyles.ringBg} cx="20" cy="20" r="16" pathLength="100" />
-        <circle className={mobileStyles.ringFg} cx="20" cy="20" r="16" pathLength="100" />
-      </svg>
-      <div className={mobileStyles.pressLabel}>Удерживайте 1–2 сек</div>
     </div>
   )}
 
@@ -1533,7 +1318,7 @@ const closeInfoModal = () => {
                 </Map>
               </YMaps>
 
-              <div ref={filtersRootRef}>
+              <div>
   <FiltersMobile
     filters={filters}
     setFilters={setFilters}
