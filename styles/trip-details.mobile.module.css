@@ -3,8 +3,8 @@
   display: flex;
   flex-direction: column;
   height: 100dvh; /* Динамическая высота, учитывает интерфейс браузера */
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -17,8 +17,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 15px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -44,9 +44,9 @@
 .messageIcon {
   font-size: 18px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--color-muted);
   padding: 6px;
-  background: #ffffff;
+  background: var(--color-bg);
   border-radius: 6px;
   width: 30px;
   height: 30px;
@@ -56,7 +56,7 @@
 }
 
 .messageIcon:hover {
-  color: #3b82f6;
+  color: var(--color-primary);
   background: #f1f5f9;
 }
 
@@ -64,8 +64,8 @@
   position: absolute;
   top: -2px;
   right: -2px;
-  background-color: #ef4444;
-  color: #ffffff;
+  background-color: var(--color-error);
+  color: var(--color-bg);
   border-radius: 50%;
   width: 16px;
   height: 16px;
@@ -74,7 +74,7 @@
   justify-content: center;
   font-size: 9px;
   font-weight: bold;
-  border: 1px solid #ffffff;
+  border: 1px solid var(--color-bg);
 }
 
 .infoWrapper {
@@ -83,10 +83,10 @@
 
 .button {
   padding: 6px 12px;
-  background: #ffffff;
-  color: #334155;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
   text-decoration: none;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
@@ -98,16 +98,16 @@
 
 .button:hover {
   border-color: #cbd5e1;
-  color: #3b82f6;
-  background: #f8fafc;
+  color: var(--color-primary);
+  background: var(--color-bg-soft);
 }
 
 .infoDropdown {
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 6px 0;
   z-index: 15;
@@ -122,7 +122,7 @@
   background: none;
   border: none;
   padding: 6px 12px;
-  color: #334155;
+  color: var(--color-text-secondary);
   text-align: left;
   font-size: 12px;
   cursor: pointer;
@@ -130,7 +130,7 @@
 
 .infoOption:hover {
   background-color: #f1f5f9;
-  color: #3b82f6;
+  color: var(--color-primary);
 }
 
 .companyCard,
@@ -138,8 +138,8 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 12px;
   z-index: 15;
@@ -152,8 +152,8 @@
 .companyCard h3,
 .documentsCard h3 {
   margin: 0 0 10px 0;
-  font-size: 16px;
-  color: #1e293b;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
   font-weight: 600;
 }
 
@@ -161,13 +161,13 @@
 .documentsCard p {
   margin: 4px 0;
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-muted);
   line-height: 1.4;
 }
 
 .companyCard p strong,
 .documentsCard p strong {
-  color: #1e293b;
+  color: var(--color-text);
   font-weight: 500;
 }
 
@@ -175,7 +175,7 @@
   background: none;
   border: none;
   padding: 6px 12px;
-  color: #334155;
+  color: var(--color-text-secondary);
   text-align: left;
   font-size: 12px;
   cursor: pointer;
@@ -185,7 +185,7 @@
 
 .documentLink:hover {
   background-color: #f1f5f9;
-  color: #3b82f6;
+  color: var(--color-primary);
 }
 
 .mainContent {
@@ -208,8 +208,8 @@
   width: 100%;
   height: 200px;
   overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
   background: #f1f5f9;
 }
 
@@ -239,12 +239,12 @@
   height: 100%;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   cursor: pointer;
 }
 
 .thumbnail:hover {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
 }
 
 .infoSection {
@@ -256,28 +256,28 @@
 .tripTitle {
   font-size: 20px;
   margin-bottom: 10px;
-  color: #1e293b;
+  color: var(--color-text);
   font-weight: 600;
   text-align: center;
 }
 
 .infoCard {
   padding: 12px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }
 
 .price,
 .date,
 .description {
   margin: 5px 0;
-  font-size: 14px;
-  color: #64748b;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
 }
 
 .highlight {
-  color: #3b82f6;
+  color: var(--color-primary);
   font-weight: 500;
 }
 
@@ -295,9 +295,9 @@
 .actionButton {
 min-height: 53px;
   padding: 8px 15px;
-  background: #ffffff;
-  color: #334155;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
@@ -308,7 +308,7 @@ min-height: 53px;
 
 .actionButton:hover {
   background: #f1f5f9;
-  color: #3b82f6;
+  color: var(--color-primary);
   border-color: #cbd5e1;
 }
 
@@ -317,11 +317,11 @@ min-height: 53px;
   justify-content: space-between;
   margin: 10px 0;
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-muted);
   padding: 8px;
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .legendItem {
@@ -339,7 +339,7 @@ min-height: 53px;
 .mapContainer {
   width: 100%;
   height: 250px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin: 10px 0;
   overflow: hidden;
 }
@@ -361,10 +361,10 @@ min-height: 53px;
 
 .infoTile {
   flex: 1;
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   text-align: center;
   min-width: 0;
 }
@@ -372,14 +372,14 @@ min-height: 53px;
 .infoTile p {
   margin: 0;
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .loading {
   text-align: center;
   padding: 15px;
-  color: #64748b;
-  font-size: 14px;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
 }
 
 .toast {
@@ -387,8 +387,8 @@ min-height: 53px;
   bottom: calc(15px + env(safe-area-inset-bottom)); /* Учитываем нижнюю панель */
   left: 50%;
   transform: translateX(-50%);
-  background-color: #1e293b;
-  color: #ffffff;
+  background-color: var(--color-text);
+  color: var(--color-bg);
   padding: 10px 20px;
   border-radius: 6px;
   z-index: 1000;
@@ -411,18 +411,18 @@ min-height: 53px;
 }
 
 .modalContent {
-  background: #ffffff;
+  background: var(--color-bg);
   padding: 15px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   max-width: 90%;
   max-height: 80%;
   overflow-y: auto;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .modalTitle {
   font-size: 18px;
-  color: #1e293b;
+  color: var(--color-text);
   margin-bottom: 15px;
   text-align: center;
   font-weight: 600;
@@ -430,8 +430,8 @@ min-height: 53px;
 
 .closeButton {
   padding: 6px 12px;
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--color-error);
+  color: var(--color-bg);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -449,16 +449,16 @@ min-height: 53px;
   width: 100%;
   padding: 8px;
   margin: 8px 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #f8fafc;
-  color: #334155;
-  font-size: 14px;
+  background: var(--color-bg-soft);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
   resize: vertical;
 }
 
 .messageInput:focus {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   outline: none;
 }
 
@@ -470,11 +470,11 @@ min-height: 53px;
 }
 
 .organizerCard {
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   padding: 15px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 15px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .organizerHeader {
@@ -489,7 +489,7 @@ min-height: 53px;
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-border);
 }
 
 .avatarHover:hover {
@@ -501,34 +501,34 @@ min-height: 53px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: #e2e8f0;
+  background-color: var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .status {
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-muted);
   margin-top: 5px;
 }
 
 .organizerDetails p {
   margin: 6px 0;
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .organizerDetails p strong {
-  color: #1e293b;
+  color: var(--color-text);
   font-weight: 500;
 }
 
 .reviewsTitle {
-  font-size: 16px;
-  color: #1e293b;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
   margin-bottom: 10px;
   text-align: center;
   font-weight: 600;
@@ -541,11 +541,11 @@ min-height: 53px;
 }
 
 .reviewCard {
-  background: #ffffff;
+  background: var(--color-bg);
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .reviewHeader {
@@ -557,12 +557,12 @@ min-height: 53px;
 .reviewHeader p {
   margin: 0;
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .reviewText {
   font-size: 13px;
-  color: #334155;
+  color: var(--color-text-secondary);
   margin-bottom: 8px;
 }
 
@@ -574,7 +574,7 @@ min-height: 53px;
 
 .noReviews {
   text-align: center;
-  color: #64748b;
+  color: var(--color-muted);
   font-size: 13px;
   margin-top: 15px;
 }
@@ -603,24 +603,24 @@ min-height: 53px;
   align-items: center;
   gap: 10px;
   padding: 10px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }
 
 .participantInfo p {
   margin: 3px 0;
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .participantInfo p strong {
-  color: #1e293b;
+  color: var(--color-text);
 }
 
 .noParticipants {
   text-align: center;
-  color: #64748b;
+  color: var(--color-muted);
   font-size: 13px;
   padding: 10px;
 }
@@ -782,23 +782,23 @@ min-height: 53px;
   gap: 10px;
 
   padding-bottom: 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .descModalX {
   width: 36px;
   height: 36px;
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
   font-size: 18px;
   cursor: pointer;
 }
 
 .descModalX:hover {
   background: #f1f5f9;
-  color: #3b82f6;
+  color: var(--color-primary);
   border-color: #cbd5e1;
 }
 
@@ -815,34 +815,34 @@ min-height: 53px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.55;
-  font-size: 14px;
-  color: #334155;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
 .descModalFooter {
   padding-top: 10px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-border);
 
   /* чтобы кнопка была всегда "внутри" и видна */
   position: sticky;
   bottom: 0;
-  background: #ffffff;
+  background: var(--color-bg);
 }
 
 .descModalClose {
   width: 100%;
   min-height: 44px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
   font-weight: 600;
   cursor: pointer;
 }
 
 .descModalClose:hover {
   background: #f1f5f9;
-  color: #3b82f6;
+  color: var(--color-primary);
   border-color: #cbd5e1;
 }
 
@@ -881,7 +881,7 @@ min-height: 53px;
 
 .topIconButton:hover .topIconWrap {
   background: #f1f5f9;
-  color: #3b82f6;
+  color: var(--color-primary);
 }
 
 .topIconButton:active .topIconWrap {
@@ -891,17 +891,17 @@ min-height: 53px;
 
 .topIconActive .topIconWrap {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--color-primary);
 }
 
 /* непрочитанные */
 .topIconUnread {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .topIconUnread:hover .topIconWrap {
   background: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 /* ===== Info modal (как в trips) ===== */
@@ -936,17 +936,17 @@ min-height: 53px;
   border: none;
   border-radius: 999px;
   background: #f1f5f9;
-  color: #0f172a;
+  color: var(--color-text);
   font-size: 22px;
   line-height: 34px;
   cursor: pointer;
 }
 
 .infoModalTitle {
-  font-size: 16px;
+  font-size: var(--font-size-md);
   font-weight: 700;
   margin: 4px 42px 12px 0;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 /* Внутри модалки карточки должны быть "обычными", а не absolute */
@@ -960,7 +960,7 @@ min-height: 53px;
   overflow: visible;
   margin-top: 0;
   z-index: auto;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 /* в модалке инфо убираем внутренние ограничения старых карточек */
@@ -969,7 +969,7 @@ min-height: 53px;
   max-height: none;
   overflow: visible;
   padding: 12px;         /* чтобы не было слишком плоско */
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   background: #fff;
 }
 

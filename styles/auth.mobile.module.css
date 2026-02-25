@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   padding: 16px;
   overflow-x: hidden;
 }
@@ -12,29 +12,29 @@
   max-width: 420px;
   margin: 48px auto 16px;
   padding: 20px;
-  background: #ffffff;
-  border-radius: 12px;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 .header {
   text-align: center;
   margin-bottom: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .title {
   font-size: 26px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text);
   margin: 0 0 6px;
   letter-spacing: -0.2px;
 }
 
 .subtitle {
-  font-size: 14px;
-  color: #64748b;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -49,14 +49,14 @@
   flex: 1;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #334155;
-  font-size: 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .tabButton:hover {
@@ -64,9 +64,9 @@
 }
 
 .activeTab {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   background: #f1f5f9;
-  color: #1e293b;
+  color: var(--color-text);
 }
 
 .tabButton:disabled {
@@ -75,13 +75,13 @@
 }
 
 .error {
-  color: #ef4444;
-  font-size: 14px;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
   text-align: center;
   padding: 12px 16px;
   background: #fff1f2;
   border-radius: 10px;
-  border: 1px solid #ef4444;
+  border: 1px solid var(--color-error);
   margin: 12px 0 4px;
 }
 
@@ -95,15 +95,15 @@
   align-self: flex-start;
   border: none;
   background: transparent;
-  color: #3b82f6;
+  color: var(--color-primary);
   font-weight: 600;
   cursor: pointer;
   padding: 6px 0;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .backButton:hover {
-  color: #2563eb;
+  color: var(--color-primary-hover);
 }
 
 .formContent {
@@ -124,7 +124,7 @@
 .label {
   font-size: 12px;
   font-weight: 700;
-  color: #334155;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   text-align: center;
@@ -133,21 +133,21 @@
 .phoneWrap {
   display: flex;
   align-items: center;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   overflow: hidden;
   width: 100%;
 }
 
 .phoneWrap:focus-within {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
 }
 
 .phonePrefix {
-  font-size: 16px;
-  color: #64748b;
+  font-size: var(--font-size-md);
+  color: var(--color-muted);
   padding: 14px 14px;
 }
 
@@ -155,19 +155,19 @@
   flex: 1;
   padding: 14px 14px;
   border: none;
-  font-size: 16px;
-  color: #1e293b;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
   background: transparent;
   outline: none;
 }
 
 .input {
   padding: 14px 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 10px;
-  font-size: 16px;
-  color: #1e293b;
-  background: #f8fafc;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  background: var(--color-bg-soft);
   width: 100%;
   box-sizing: border-box;
 }
@@ -178,27 +178,27 @@
 }
 
 .input:focus {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
 }
 
 .actionButton {
   padding: 14px 16px;
-  background: #3b82f6;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-bg);
   border: none;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: var(--font-size-md);
   font-weight: 700;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.05s ease;
   width: 100%;
   max-width: 360px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .actionButton:hover {
-  background: #2563eb;
+  background: var(--color-primary-hover);
 }
 
 .actionButton:active {
@@ -206,24 +206,24 @@
 }
 
 .actionButton:disabled {
-  background: #e2e8f0;
-  color: #64748b;
+  background: var(--color-border);
+  color: var(--color-muted);
   cursor: not-allowed;
 }
 
 .secondaryButton {
   padding: 12px 14px;
-  background: #ffffff;
-  color: #3b82f6;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
   width: 100%;
   max-width: 360px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .secondaryButton:hover {
@@ -231,14 +231,14 @@
 }
 
 .secondaryButton:disabled {
-  color: #64748b;
+  color: var(--color-muted);
   cursor: not-allowed;
 }
 
 .methodTitle {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
-  color: #334155;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   text-align: center;
@@ -261,25 +261,25 @@
   align-items: flex-start;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .optionCard:hover {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
 }
 
 .selected {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   background: #f1f5f9;
 }
 
 .optionCard input[type="radio"] {
   margin-top: 2px;
-  accent-color: #3b82f6;
+  accent-color: var(--color-primary);
 }
 
 .optionContent {
@@ -289,20 +289,20 @@
 .optionTitle {
   font-size: 15px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text);
   display: block;
   margin-bottom: 4px;
 }
 
 .optionDescription {
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-muted);
   line-height: 1.4;
 }
 
 .qrText {
-  font-size: 14px;
-  color: #64748b;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
   margin: 12px 0 8px;
   text-align: center;
 }
@@ -313,7 +313,7 @@
   width: 100%;
   margin: 0 auto;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
 }
 
 @media (max-width: 360px) {
@@ -340,12 +340,12 @@ font-size:32px;
 font-weight:800;
 line-height:44px; /* под высоту иконки */
 text-decoration:none;
-color:#3b82f6;
+color:var(--color-primary);
 }
 
 
 .callLink:hover{
-color:#2563eb;
+color:var(--color-primary-hover);
 }
 
 
@@ -357,13 +357,13 @@ width:44px;
 height:44px;
 border-radius:999px;
 text-decoration:none;
-color:#3b82f6;
+color:var(--color-primary);
 flex:0 0 44px; /* фиксируем размер, не сжимается */
 }
 
 
 .callIconButton:hover{
-color:#2563eb;
+color:var(--color-primary-hover);
 }
 
 
