@@ -3,49 +3,49 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: var(--space-6);
+  background-color: var(--color-bg-soft);
 }
 
 .resultBox {
   text-align: center;
-  padding: 40px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: calc(var(--space-6) + var(--space-4));
+  background-color: var(--color-bg);
+  border: var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   max-width: 500px;
   width: 100%;
 }
 
 .successTitle {
-  color: #28a745;
+  color: var(--color-success);
   font-size: 28px;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
+  line-height: var(--line-height-tight);
 }
 
 .errorTitle {
-  color: #dc3545;
+  color: var(--color-error);
   font-size: 28px;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
+  line-height: var(--line-height-tight);
 }
 
 .message {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 30px;
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  margin-bottom: calc(var(--space-6) + var(--space-2));
+  line-height: var(--line-height-normal);
 }
 
 .button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
 }
 
 .button:hover {
-  background-color: #0056b3;
+  box-shadow: var(--shadow-sm);
 }

@@ -100,7 +100,7 @@ export default function CardResult() {
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <div className={styles.card} role="status" aria-live="polite">
+      <div className={`ui-card ${styles.card}`} role="status" aria-live="polite">
         <StatusIcon variant={isLoading ? "loading" : isSuccess ? "success" : "error"} />
 
         <h1 className={styles.title}>{title}</h1>
@@ -121,7 +121,7 @@ export default function CardResult() {
 
         <div className={styles.actions}>
           <button
-            className={styles.primaryButton}
+            className={`ui-button ${styles.primaryButton}`}
             onClick={() => router.push("/dashboard?section=settings")}
           >
             Вернуться к настройкам
