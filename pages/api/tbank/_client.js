@@ -2,9 +2,11 @@
 import axios from 'axios';
 import https from 'https';
 import fs from 'fs';
+import { getTbankConfig } from './_config';
 
-const BASE = process.env.TBANK_BASE_URL || 'https://acqapi-test.tinkoff.ru';
-const OAUTH = (process.env.TBANK_OAUTH_URL || BASE) + '/oauth/token';
+const tbankConfig = getTbankConfig();
+const BASE = tbankConfig.partnerApiBase;
+const OAUTH = `${(process.env.TBANK_OAUTH_URL || BASE).replace(/\/+$/, '')}/oauth/token`;
 const BASIC = process.env.TBANK_OAUTH_BASIC || 'cGFydG5lcjpwYXJ0bmVy'; // 'partner:partner'
 const LOGIN = process.env.TBANK_OAUTH_LOGIN;
 const PASSWORD = process.env.TBANK_OAUTH_PASSWORD;

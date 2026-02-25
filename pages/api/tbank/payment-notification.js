@@ -1,6 +1,7 @@
 // /api/tbank/payment-notification.js
 import { supabase } from '../../../lib/supabaseClient';
 import crypto from 'crypto';
+import { getTbankConfig } from './_config';
 
 /**
  * Генерация токена по правилу A2C/E2C:
@@ -13,7 +14,7 @@ import crypto from 'crypto';
  */
 const generateToken = (params, label, passwordAtEnd = false) => {
   try {
-    if (!process.env.TBANK_SECRET) {
+    if (!tbankConfig.terminalSecret) {
       throw new Error('TBANK_SECRET не задан');
     }
     let sortedParams = Object.keys(params)
@@ -25,12 +26,12 @@ const generateToken = (params, label, passwordAtEnd = false) => {
       }, {});
 
     if (passwordAtEnd) {
-      sortedParams['Password'] = process.env.TBANK_SECRET;
+      sortedParams['Password'] = tbankConfig.terminalSecret;
     } else {
 
       sortedParams = {
         ...sortedParams,
-        Password: process.env.TBANK_SECRET,
+        Password: tbankConfig.terminalSecret,
       };
 
       sortedParams = Object.keys(sortedParams)
@@ -47,7 +48,7 @@ const generateToken = (params, label, passwordAtEnd = false) => {
     console.log(`Параметры для генерации токена (${label}):`, {
       sortedParams,
       concatenatedPreview: concatenated.slice(0, 32) + '…' + concatenated.slice(-32),
-      tbankSecret: process.env.TBANK_SECRET ? '**** (скрыт)' : 'не задан',
+      tbankSecret: tbankConfig.terminalSecret ? '**** (скрыт)' : 'не задан',
     });
 
     return { token, concatenated, sortedParams };
@@ -56,6 +57,8 @@ const generateToken = (params, label, passwordAtEnd = false) => {
     throw error;
   }
 };
+
+const tbankConfig = getTbankConfig();
 
 export default async function handler(req, res) {
   console.log('Получен запрос на /api/tbank/payment-notification (полное тело):', {

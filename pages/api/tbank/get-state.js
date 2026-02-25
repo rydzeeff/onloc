@@ -1,5 +1,6 @@
 // pages/api/tbank/get-state.js
 import crypto from "crypto";
+import { getTbankConfig } from "./_config";
 
 const genReqId = () =>
   `${Date.now().toString(36)}-${crypto.randomBytes(3).toString("hex")}`;
@@ -15,12 +16,13 @@ const maskKey = (k) => (k ? mask(k, 4, 4) : k);
 
 const log = (id, ...a) => console.log(`[tbank-getstate][${id}]`, ...a);
 const logErr = (id, ...a) => console.error(`[tbank-getstate][${id}]`, ...a);
+const tbankConfig = getTbankConfig();
 
 /**
  * Генерация токена для EACQ v2.
  */
 const generateToken = (params, reqId) => {
-  const pwd = process.env.TBANK_SECRET || "";
+  const pwd = tbankConfig.terminalSecret || "";
   const base = { ...params, Password: pwd };
 
   const excluded = [
@@ -94,7 +96,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Не указан PaymentId" });
     }
 
-    const terminalKey = process.env.TBANK_TERMINAL_KEY || "";
+    const terminalKey = tbankConfig.terminalKeyEacq || tbankConfig.terminalKeyBase || "";
     if (!terminalKey) {
       return res.status(500).json({
         error: "Отсутствует TBANK_TERMINAL_KEY в переменных окружения",
@@ -119,7 +121,7 @@ export default async function handler(req, res) {
     };
 
     // ✅ ТЕСТОВЫЙ URL
-    const url = "https://rest-api-test.tinkoff.ru/v2/GetState";
+    const url = `${tbankConfig.eacqBaseV2}/GetState`;
 
     // === ЛОГИ ЗАПРОСА ===
     log(reqId, "=== OUTGOING REQUEST ===");

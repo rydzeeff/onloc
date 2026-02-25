@@ -2,14 +2,15 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { platformSettings } from '../../../lib/platformSettings';
+import { getTbankConfig } from './_config';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-// База URL E2C
-const TBANK_E2C_BASE = process.env.TBANK_E2C_BASE || 'https://rest-api-test.tinkoff.ru/e2c/v2';
+const tbankConfig = getTbankConfig();
+const TBANK_E2C_BASE = tbankConfig.a2cBaseV2;
 
 // ---------- utils ----------
 const genReqId = () => `${Date.now().toString(36)}-${crypto.randomBytes(3).toString('hex')}`;
@@ -74,7 +75,7 @@ function computeNetFromGrossUsingTripPercents(gross, trip) {
 const sha256Hex = (s) => crypto.createHash('sha256').update(s).digest('hex');
 
 function buildTokenWithPassword(params) {
-  const pwd = process.env.TBANK_SECRET || '';
+  const pwd = tbankConfig.terminalSecret || '';
   const pairs = Object.entries({ ...params, Password: pwd })
     .filter(([k]) => !['Token', 'DigestValue', 'SignatureValue', 'X509SerialNumber'].includes(k))
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
@@ -192,7 +193,7 @@ async function tbankInitAndPayment({
   orderId, // связываем с бронью из prepare_payout_atomic
 paymentRecipientId,   // ← добавили
 }) {
-  const terminalKey = `${process.env.TBANK_TERMINAL_KEY || ''}E2C`;
+  const terminalKey = tbankConfig.terminalKeyA2c || `${tbankConfig.terminalKeyBase || ''}E2C`;
 
   // Безопасный OrderId ≤ 50 символов
   let safeOrderId = orderId && String(orderId).trim();
@@ -284,7 +285,7 @@ function ensureE2CTerminal(key) {
 }
 
 function generateGetStateToken(params, reqId) {
-  const pwd = process.env.TBANK_SECRET || '';
+  const pwd = tbankConfig.terminalSecret || '';
   const excluded = ['Token', 'DigestValue', 'SignatureValue', 'X509SerialNumber'];
 
   const base = { ...params, Password: pwd };
@@ -303,7 +304,7 @@ function generateGetStateToken(params, reqId) {
 }
 
 async function tbankGetState({ reqId, paymentId, ip }) {
-  const terminalKey = ensureE2CTerminal(process.env.TBANK_TERMINAL_KEY || '');
+  const terminalKey = tbankConfig.terminalKeyA2c || ensureE2CTerminal(tbankConfig.terminalKeyBase || '');
   if (!terminalKey) throw new Error('TBANK_TERMINAL_KEY is empty');
 
   // ⚠️ БЕЗ OrderId

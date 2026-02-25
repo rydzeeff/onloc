@@ -4,14 +4,15 @@
 
 import { createClient } from '@supabase/supabase-js';
 import crypto, { randomUUID } from 'crypto';
+import { getTbankConfig } from './_config';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const RAW_BASE = process.env.TBANK_API_BASE || 'https://rest-api-test.tinkoff.ru';
-const TBANK_BASE = RAW_BASE.replace(/\/+$/, '');
+const tbankConfig = getTbankConfig();
+const TBANK_BASE = tbankConfig.restBase;
 const DEBUG_VERBOSE = process.env.TBANK_DEBUG_VERBOSE === '1';
 
 const HIDDEN = '[hidden]';
@@ -50,7 +51,7 @@ const logE = (cid, msg, extra = {}) => console.error(`[TBANK][add-customer][${ci
 const ensureE2C = (tk) => (tk ? (/(E2C)$/i.test(tk) ? tk : `${tk}E2C`) : tk);
 
 const tokenMaterials = (params) => {
-  const withPwd = { ...params, Password: process.env.TBANK_SECRET ?? '' };
+  const withPwd = { ...params, Password: tbankConfig.terminalSecret ?? '' };
   const orderedKeys = Object.keys(withPwd)
     .filter((k) => !['Token', 'DigestValue', 'SignatureValue', 'X509SerialNumber'].includes(k))
     .sort();
@@ -130,7 +131,7 @@ export default async function handler(req, res) {
     const userId = userRes.user.id;
 
     // A2C: ключ С СУФФИКСОМ E2C
-    const TerminalKey = ensureE2C(process.env.TBANK_TERMINAL_KEY || '');
+    const TerminalKey = tbankConfig.terminalKeyA2c || ensureE2C(tbankConfig.terminalKeyBase || '');
     if (!TerminalKey) return res.status(500).json({ error: 'Server misconfigured (TerminalKey)' });
 
     // 1) Проверяем, есть ли customer на A2C

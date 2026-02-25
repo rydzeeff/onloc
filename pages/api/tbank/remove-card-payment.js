@@ -9,15 +9,17 @@
 // Сохранённая совместимость и тон логов по образцу remove-card.js. :contentReference[oaicite:0]{index=0}
 
 import crypto from 'crypto';
+import { getTbankConfig } from './_config';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
-const TBANK_BASE = (process.env.TBANK_API_BASE || 'https://rest-api-test.tinkoff.ru').replace(/\/+$/,'');
-const PASSWORD   = process.env.TBANK_PASSWORD || process.env.TBANK_SECRET || '';
+const tbankConfig = getTbankConfig();
+const TBANK_BASE = tbankConfig.restBase;
+const PASSWORD   = tbankConfig.terminalSecret || '';
 
 // EACQ (оплаты): ключ БЕЗ E2C
 const stripE2C = (tk) => (!tk ? tk : tk.replace(/E2C$/i, ''));
-const TERMINAL_KEY = stripE2C(process.env.TBANK_TERMINAL_KEY || '');
+const TERMINAL_KEY = tbankConfig.terminalKeyEacq || stripE2C(tbankConfig.terminalKeyBase || '');
 
 const LOGNS  = 'TBANK';
 const METHOD = 'remove-card-payment';

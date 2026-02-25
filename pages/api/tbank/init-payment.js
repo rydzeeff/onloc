@@ -1,15 +1,14 @@
 // /pages/api/tbank/init-payment.js
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { getTbankConfig } from './_config';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const TBANK_BASE = (
-  process.env.TBANK_API_BASE ||
-  (process.env.TBANK_ENV === 'production' ? 'https://securepay.tinkoff.ru' : 'https://rest-api-test.tinkoff.ru')
-).replace(/\/+$/, '');
+const tbankConfig = getTbankConfig();
+const TBANK_BASE = tbankConfig.restBase;
 
 const log  = (...a) => console.log('[init-payment]', ...a);
 const logE = (...a) => console.error('[init-payment]', ...a);
@@ -28,11 +27,11 @@ function absoluteBaseUrl(req) {
 
 /** Подпись (без DATA) */
 function generateToken(params) {
-  if (!process.env.TBANK_SECRET) throw new Error('TBANK_SECRET не задан');
+  if (!tbankConfig.terminalSecret) throw new Error('TBANK_SECRET не задан');
   const keys = Object.keys(params)
     .filter(k => !['Token','DigestValue','SignatureValue','X509SerialNumber','DATA'].includes(k))
     .sort();
-  const concatenated = keys.map(k => String(params[k])).join('') + process.env.TBANK_SECRET;
+  const concatenated = keys.map(k => String(params[k])).join('') + tbankConfig.terminalSecret;
   return crypto.createHash('sha256').update(concatenated).digest('hex');
 }
 
@@ -50,7 +49,7 @@ function makeTokenDebugForInit(params) {
 
   return {
     orderedKeys: filteredKeys,
-    concatenatedLen: concatWithoutSecret.length + (process.env.TBANK_SECRET ? String(process.env.TBANK_SECRET).length : 0),
+    concatenatedLen: concatWithoutSecret.length + (tbankConfig.terminalSecret ? String(tbankConfig.terminalSecret).length : 0),
     concatenatedPreview: concatPreview + ' + <SECRET>',
     tokenPreview,
   };
@@ -102,7 +101,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    if (!process.env.TBANK_TERMINAL_KEY || !process.env.TBANK_SECRET) {
+    if (!tbankConfig.terminalKeyBase || !tbankConfig.terminalSecret) {
       return res.status(500).json({ error: 'Ошибка конфигурации сервера' });
     }
 
@@ -292,7 +291,7 @@ payment = upd;
     }
 
     // Оплатный терминал БЕЗ E2C
-    const initTerminalKey = stripE2C(process.env.TBANK_TERMINAL_KEY || '');
+    const initTerminalKey = tbankConfig.terminalKeyEacq || stripE2C(tbankConfig.terminalKeyBase || '');
 
     // ─────────────────────────────────────────────────────────────
     // Итоговая стратегия передачи CustomerKey/DATA:
