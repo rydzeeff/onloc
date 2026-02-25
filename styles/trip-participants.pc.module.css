@@ -2,63 +2,63 @@
 .sectionContent {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
   max-width: 1200px;
   margin: 0 auto;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  border: var(--border-default);
 }
 
 .backButtonContainer {
-  margin-bottom: 10px;
+  margin-bottom: var(--space-2);
   display: flex;            /* NEW */
-  gap: 12px;                /* NEW — расстояние между "Назад" и "Просмотр" */
+  gap: var(--space-3);                /* NEW — расстояние между "Назад" и "Просмотр" */
   align-items: center;      /* NEW */
 }
 
 .backButton {
-  padding: 8px 16px;
-  background: #ffffff;
-  color: #334155;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .backButton:hover {
   background: #f1f5f9;
   border-color: #cbd5e1;
-  color: #3b82f6;
+  color: var(--color-primary);
 }
 
 .participantsTable {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-  background: #ffffff;
-  border-radius: 12px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm);
+  border: var(--border-default);
 }
 /* === ЛОАДЕР ДЛЯ ТАБЛИЦЫ УЧАСТНИКОВ === */
 .loaderWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 160px;
   width: 100%;
-  padding: 20px;
-  background: #fff;
+  padding: var(--space-5);
+  background: var(--color-bg);
 }
 
 .spinner {
@@ -71,8 +71,8 @@
 }
 
 .loaderText {
-  color: #64748b;
-  font-size: 14px;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
 }
 
 @keyframes spin {
@@ -82,23 +82,23 @@
 .tableRow {
   display: grid;
   grid-template-columns: 80px 2fr 1fr 1fr 1fr 1fr 1fr 1fr 150px 2fr;
-  gap: 10px;
-  padding: 15px;
+  gap: var(--space-2);
+  padding: var(--space-4);
 }
 
 .tableHeader {
-  background: #f8fafc;
-  font-weight: 600;
-  font-size: 14px;
-  color: #1e293b;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--color-bg-soft);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tableRow {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 14px;
-  color: #334155;
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   transition: background-color 0.2s ease;
 }
 
@@ -131,40 +131,40 @@
 
 .tableFooter {
   display: flex;
-  gap: 12px;
-  padding: 15px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   justify-content: center;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  background: var(--color-bg-soft);
+  border-top: 1px solid var(--color-border);
 }
 
 .actionButton {
-  background: #3b82f6;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-bg);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .actionButton:hover {
-  background: #2563eb;
+  background: var(--color-primary-hover);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .cancelButton {
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--color-error);
+  color: var(--color-bg);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .cancelButton:hover {
@@ -174,14 +174,14 @@
 
 .payButton {
   background: #34c759;
-  color: #ffffff;
+  color: var(--color-bg);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .payButton:hover {
@@ -193,10 +193,10 @@
   background: #d1d5db;
   color: #6b7280;
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: not-allowed;
 }
 
@@ -209,8 +209,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: #ffffff;
-  border-radius: 8px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
   padding: 8px;
   min-width: 120px;
   z-index: 10000;
@@ -219,13 +219,13 @@
 
 .acceptButton {
   background: #34c759;
-  color: #ffffff;
+  color: var(--color-bg);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .acceptButton:hover {
@@ -233,14 +233,14 @@
 }
 
 .rejectButton {
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--color-error);
+  color: var(--color-bg);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .rejectButton:hover {
@@ -261,30 +261,30 @@
 }
 
 .modalContent {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
+  background: var(--color-bg);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
   width: 400px;
   max-width: 90%;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
+  border: var(--border-default);
   text-align: center;
 }
 
 .messageInput {
   width: 100%;
   min-height: 100px;
-  padding: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
-  color: #334155;
-  background-color: #f8fafc;
+  padding: var(--space-3);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-soft);
 }
 
 .modalButtons {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   margin-top: 16px;
   justify-content: center;
 }
@@ -296,9 +296,9 @@
   height: 36px;
   border-radius: 10px;
 
-  background: #ffffff;      /* ✅ кнопка белая */
-  color: #0f172a;           /* ✅ крестик тёмный (можно #111 или #334155) */
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg);      /* ✅ кнопка белая */
+  color: var(--color-text);           /* ✅ крестик тёмный (можно #111 или var(--color-text-secondary)) */
+  border: var(--border-default);
 
   display: flex;
   align-items: center;
@@ -308,24 +308,24 @@
   font-size: 18px;
   line-height: 1;
 
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .sheetClose:hover {
-  background: #f8fafc;
+  background: var(--color-bg-soft);
   border-color: #cbd5e1;
 }
 
 
 .closeButton {
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--color-error);
+  color: var(--color-bg);
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .closeButton:hover {
@@ -336,7 +336,7 @@
 .modalButtons,
 .reviewModalButtons {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   margin-top: 16px;
   justify-content: center;
   align-items: stretch;
@@ -351,9 +351,9 @@
 
 
 .reviewModalContent {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
+  background: var(--color-bg);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
   width: 400px;
   max-width: 90%;
   text-align: center;
@@ -361,26 +361,26 @@
 
 .reviewModalTitle {
   font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
 }
 
 .reviewModalSubtitle {
-  font-size: 14px;
-  color: #64748b;
-  margin-bottom: 10px;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
 }
 
 .reviewTextArea {
   width: 100%;
   min-height: 100px;
-  padding: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
-  color: #334155;
-  background-color: #f8fafc;
+  padding: var(--space-3);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-soft);
 }
 
 .rating {
@@ -398,13 +398,13 @@
 }
 
 .emptyStar {
-  color: #e2e8f0;
+  color: var(--color-border);
   cursor: pointer;
 }
 
 .reviewModalButtons {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   margin-top: 16px;
   justify-content: center;
 }
@@ -414,12 +414,12 @@
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1e293b;
-  color: #ffffff;
+  background: var(--color-text);
+  color: var(--color-bg);
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   z-index: 1000;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
@@ -427,23 +427,23 @@
   width: 100%;
   padding: 6px;
   margin: 5px 0;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #334155;
-  background-color: #f8fafc;
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-soft);
 }
 
 .inputGroup {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
 .cardSelect {
   width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  font-size: 14px;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: var(--border-default);
+  font-size: var(--font-size-sm);
 }
 
 .disabledCard {
@@ -453,10 +453,10 @@
 
 .cardStatus {
   margin-top: 10px;
-  padding: 10px;
+  padding: var(--space-3);
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: #721c24;
 }
 
@@ -472,8 +472,8 @@
 }
 
 .errorMessage {
-  color: red;
-  font-size: 14px;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
   margin: 10px 0;
 }
 
@@ -527,16 +527,33 @@
 .sheetItemDanger {
   width: 100%;
   min-height: 44px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 
   border: none;
   background: #ff3b30;
-  color: #ffffff;
+  color: var(--color-bg);
 
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   padding: 10px 12px;
   cursor: pointer;
 }
 
 
+
+
+.actionButton:focus-visible,
+.cancelButton:focus-visible,
+.payButton:focus-visible,
+.acceptButton:focus-visible,
+.rejectButton:focus-visible,
+.closeButton:focus-visible,
+.backButton:focus-visible,
+.sheetClose:focus-visible,
+.messageInput:focus-visible,
+.reviewTextArea:focus-visible,
+.cardSelect:focus-visible,
+.fileInput:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

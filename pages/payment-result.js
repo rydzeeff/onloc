@@ -16,7 +16,7 @@ export default function PaymentResult() {
             <h1 className={styles.successTitle}>Оплата прошла успешно!</h1>
             <p className={styles.message}>Ваш платеж успешно обработан. Теперь вы можете вернуться к поездке.</p>
             <button
-              className={styles.button}
+              className={`ui-button ${styles.button}`}
               onClick={() => router.push('/dashboard?section=myTrips')}
             >
               Вернуться к поездкам
@@ -29,7 +29,7 @@ export default function PaymentResult() {
               К сожалению, произошла ошибка при обработке платежа. Пожалуйста, попробуйте снова или обратитесь в поддержку.
             </p>
             <button
-              className={styles.button}
+              className={`ui-button ${styles.button}`}
               onClick={() => router.push('/dashboard?section=myTrips')}
             >
               Вернуться к поездкам

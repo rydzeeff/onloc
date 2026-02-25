@@ -2,11 +2,11 @@
 .sectionContent {
   max-width: 1200px;
   margin: 0 auto;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   animation: fadeInSection 0.5s ease-in-out;
 }
 
@@ -17,42 +17,42 @@
 
 .tabs {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  background: #f8fafc;
-  padding: 8px;
-  border-radius: 8px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  background: var(--color-bg-soft);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .tab {
-  padding: 10px 18px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #334155;
+  padding: var(--space-3) calc(var(--space-4) + var(--space-1));
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   min-width: 100px;
 }
 
 .tab:hover {
   background: #f1f5f9;
   border-color: #cbd5e1;
-  color: #3b82f6;
+  color: var(--color-primary);
 }
 
 .activeTab {
-  padding: 10px 18px;
-  background: #3b82f6;
-  color: #ffffff;
+  padding: var(--space-3) calc(var(--space-4) + var(--space-1));
+  background: var(--color-primary);
+  color: var(--color-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   min-width: 100px;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   font-size: 15px;
 }
 
@@ -66,14 +66,14 @@
 }
 
 .settingsForm {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--space-4);
   max-width: 800px;
   margin: 0 auto;
 }
@@ -81,11 +81,11 @@
 .inputGroup {
   display: grid;
   grid-template-columns: 1fr 3fr;
-  gap: 15px;
+  gap: var(--space-4);
   align-items: center;
   position: relative;
   padding: 10px 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .inputGroup:last-child {
@@ -93,28 +93,28 @@
 }
 
 .inputGroup label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1e293b;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
 }
 
 .inputGroup input,
 .inputGroup textarea {
   width: 100%;
-  padding: 10px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
-  color: #334155;
-  background: #f8fafc;
-  transition: all 0.2s ease;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-soft);
+  transition: all var(--transition-fast);
 }
 
 .inputGroup input:focus,
 .inputGroup textarea:focus {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+  box-shadow: var(--focus-ring);
 }
 
 .inputGroup textarea {
@@ -123,8 +123,8 @@
 }
 
 .inputGroup span {
-  font-size: 14px;
-  color: #64748b;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
 }
 
 .suggestions {
@@ -132,9 +132,9 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   max-height: 200px;
   overflow-y: auto;
   z-index: 10;
@@ -145,8 +145,8 @@
 .suggestions li {
   padding: 12px 16px;
   cursor: pointer;
-  font-size: 14px;
-  color: #334155;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   transition: background-color 0.2s ease;
 }
 
@@ -155,19 +155,19 @@
 }
 
 .actionButton {
-  padding: 10px 20px;
-  background: #3b82f6;
-  color: #ffffff;
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-primary);
+  color: var(--color-bg);
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .actionButton:hover {
-  background: #2563eb;
+  background: var(--color-primary-hover);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -180,7 +180,7 @@
 .cardList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .cardItem {
@@ -188,7 +188,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .cardItem:last-child {
@@ -197,13 +197,13 @@
 
 .removeButton {
   background: #ef4444;
-  color: #ffffff;
+  color: var(--color-bg);
   border: none;
   padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .removeButton:hover {
@@ -221,11 +221,11 @@
   left: 50%;
   transform: translateX(-50%);
   background: #1e293b;
-  color: #ffffff;
+  color: var(--color-bg);
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   z-index: 1000;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -240,8 +240,8 @@
   justify-content: center;
   align-items: center;
   height: 100%;
-  font-size: 16px;
-  color: #64748b;
+  font-size: var(--font-size-md);
+  color: var(--color-muted);
 }
 
 /* --- Новые стили для "современных" карт --- */
@@ -264,8 +264,8 @@
 
 .cardTile {
   position: relative;
-  background: radial-gradient(120% 120% at 0% 0%, #f8fafc 0%, #ffffff 60%);
-  border: 1px solid #e2e8f0;
+  background: radial-gradient(120% 120% at 0% 0%, var(--color-bg-soft) 0%, var(--color-bg) 60%);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
@@ -284,16 +284,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #334155;
-  font-weight: 600;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
 }
 
 .cardBrandDot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--color-primary);
   display: inline-block;
 }
 
@@ -305,7 +305,7 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   letter-spacing: 1px;
   font-size: 18px;
-  color: #0f172a;
+  color: var(--color-text);
 }
 
 .cardMeta {
@@ -324,7 +324,7 @@
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .cardStatus.ok {
@@ -369,27 +369,27 @@
 }
 
 .emptyBlock {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 24px;
   text-align: center;
 }
 
 .emptyTitle {
-  font-weight: 600;
-  color: #0f172a;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
   margin-bottom: 6px;
 }
 
 .emptySub {
-  color: #64748b;
-  font-size: 14px;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
 }
 .primaryRow {
   margin-top: 6px;
   padding-top: 6px;
-  border-top: 1px dashed #e2e8f0;
+  border-top: 1px dashed var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -397,15 +397,15 @@
 .primaryLabel {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: #334155;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
   font-size: 13px;
   user-select: none;
 }
 .primaryRadio {
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -418,8 +418,8 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
