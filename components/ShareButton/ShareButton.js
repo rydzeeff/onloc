@@ -240,12 +240,12 @@ export default function ShareButton({
           aria-label="Поделиться"
           onClick={() => setOpen(false)}
         >
-          <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
+          <div className={`${styles.sheet} ui-card`} onClick={(e) => e.stopPropagation()}>
             <div className={styles.header}>
               <h3 className={styles.title}>Поделиться</h3>
               <button
                 type="button"
-                className={styles.close}
+                className={`${styles.close} ui-focus-visible`}
                 onClick={() => setOpen(false)}
                 aria-label="Закрыть"
               >
@@ -255,7 +255,7 @@ export default function ShareButton({
 
             <div className={styles.content}>
               <div className={styles.grid}>
-                <button type="button" className={styles.item} onClick={handleCopy}>
+                <button type="button" className={`${styles.item} ui-focus-visible`} onClick={handleCopy}>
                   <span className={styles.icon}>
                     <CopyIcon />
                   </span>
@@ -266,7 +266,7 @@ export default function ShareButton({
                 </button>
 
                 <a
-                  className={styles.item}
+                  className={`${styles.item} ui-focus-visible`}
                   href={vkHref}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -282,7 +282,7 @@ export default function ShareButton({
                 </a>
 
                 <a
-                  className={styles.item}
+                  className={`${styles.item} ui-focus-visible`}
                   href={tgHref}
                   target="_blank"
                   rel="noopener noreferrer"
