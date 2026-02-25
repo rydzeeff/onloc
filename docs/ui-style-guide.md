@@ -48,6 +48,7 @@
 - Shared foundation + глобальная типографическая база.
 - `filters` (desktop/mobile): переход на токены для текстов, бордеров, bg и части отступов/типографики.
 - `messages-common`: переход ключевых повторяющихся цветов/бордеров/радиусов на токены.
+- `messages` (desktop/mobile): выравнены container/panel/input/button/header/card-паттерны и основные spacing/типографика через foundation-токены без изменения поведения чатов.
 - `ShareButton` (UI-only): использование токенов + подключение базовых паттернов (`ui-card`, `ui-focus-visible`).
 
 ## 5) Правила добавления новых стилей
@@ -61,8 +62,8 @@
 
 ## 6) Rollout roadmap
 ### Этап 2
-- Довести токены до остальных CSS-модулей страниц (trips/dashboard/messages variants).
-- Выравнять типографику заголовков/подзаголовков и вертикальный rhythm.
+- ✅ `messages` (desktop/mobile) переведены на foundation-токены для базовых visual primitives.
+- В процессе: оставшиеся pages (trips/dashboard/settings variants) и довыравнивание вертикального rhythm.
 
 ### Этап 3
 - Консолидация дублирующихся модулей и вариантов стилей.
