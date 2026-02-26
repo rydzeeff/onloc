@@ -20,3 +20,5 @@ uploads/
 
 # misc
 .DS_Store
+
+android-app/.gradle/
