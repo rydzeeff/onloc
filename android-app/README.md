@@ -105,4 +105,7 @@ buildConfigField("String", "WEB_APP_URL", "\"https://onloc.ru\"")
 - **`Plugin com.android.application not found`**: сервер не может скачать Android Gradle Plugin (доступ к `google()`/`mavenCentral()` закрыт).
 - **`sdkmanager: command not found`**: не настроен `PATH` к `cmdline-tools/latest/bin`.
 - **Сборка падает на Java**: используйте JDK 17 и корректный `JAVA_HOME`.
+<<<<<<< HEAD
 - **`defaultConfig contains custom BuildConfig fields, but the feature is disabled`**: добавьте в `app/build.gradle.kts` блок `android { buildFeatures { buildConfig = true } }`.
+=======
+>>>>>>> origin/main
