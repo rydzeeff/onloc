@@ -93,6 +93,17 @@ useEffect(() => {
   return () => t && clearTimeout(t);
 }, [isProcessing]);
 
+  // После завершения навигации разрешаем следующие redirect-guards.
+  useEffect(() => {
+    const releaseRedirectLock = () => setIsRedirecting(false);
+    router.events.on('routeChangeComplete', releaseRedirectLock);
+    router.events.on('routeChangeError', releaseRedirectLock);
+    return () => {
+      router.events.off('routeChangeComplete', releaseRedirectLock);
+      router.events.off('routeChangeError', releaseRedirectLock);
+    };
+  }, [router.events]);
+
 
   // блокируем рендер сетапа на клиенте до редиректа
   const [blockSetupRender, setBlockSetupRender] = useState(false);
