@@ -301,7 +301,7 @@ useEffect(() => {
       tbank_registered: !!row.tbank_registered,
       tbank_shop_code: row.tbank_shop_code || "", // numeric
       tbank_code: row.tbank_code || "",           // article
-      site_url: row.site_url || "https://onloc.ru",
+      site_url: row.site_url || process.env.NEXT_PUBLIC_BASE_URL,
     };
   };
 
@@ -475,7 +475,7 @@ setIsSaved(false);
       okveds: filteredOkveds,
       status: "acting",
       tbank_registered: false,
-      site_url: "https://onloc.ru",
+      site_url: process.env.NEXT_PUBLIC_BASE_URL,
     };
   };
 
@@ -530,7 +530,7 @@ setIsSaved(false);
         okveds: [],
         status: "acting",
         tbank_registered: false,
-        site_url: "https://onloc.ru",
+        site_url: process.env.NEXT_PUBLIC_BASE_URL,
       };
       setCompanyData(filled);
       setShowInnInput(false);
@@ -720,7 +720,7 @@ const handleSaveCompany = async () => {
         payment_corr_account: p.corrAccount,
         bank_name: p.bankName,
         payment_details: p.payment_details,
-        site_url: "https://onloc.ru",
+        site_url: process.env.NEXT_PUBLIC_BASE_URL,
       }),
     });
 
@@ -768,7 +768,7 @@ if (!response.ok) {
         tbank_registered: true,
         tbank_shop_code: shopCode,
         tbank_code: articleCode || null,
-        site_url: "https://onloc.ru",
+        site_url: process.env.NEXT_PUBLIC_BASE_URL,
       };
 
       const up = await supabase.from("mycompany").upsert(basePayload).select().single();

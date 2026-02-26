@@ -5,6 +5,8 @@ import { retry } from 'https://deno.land/x/retry@v2.0.0/mod.ts';
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const supabase = createClient(supabaseUrl, supabaseKey);
+const baseUrl = Deno.env.get('NEXT_PUBLIC_BASE_URL');
+if (!baseUrl) throw new Error('Missing NEXT_PUBLIC_BASE_URL env variable');
 
 serve(async (req) => {
   try {
@@ -374,7 +376,7 @@ serve(async (req) => {
         }
 
         // Уведомление об ошибке через вебхук
-        await fetch('https://onloc.ru/api/webhooks/payout-error', {
+        await fetch(`${baseUrl}/api/webhooks/payout-error`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -97,7 +97,7 @@ export default async function handler(req, res) {
         country: 'RUS',
       },
 
-      siteUrl: asString(site_url) || 'https://onloc.ru',
+      siteUrl: asString(site_url) || process.env.NEXT_PUBLIC_BASE_URL,
 
       bankAccount: {
         account: asString(payment_account),
