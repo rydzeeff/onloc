@@ -1,10 +1,13 @@
 // pages/api/tbank/canceltrip.js
 import { createClient } from '@supabase/supabase-js';
+import { getTbankConfig } from './_config';
 import crypto from 'crypto';
+
+const tbankConfig = getTbankConfig();
 
 // --- TBank helpers: closeSpDeal (+ простой sha256-токен) ---
 function tbToken(params) {
-  const withPwd = { ...params, Password: process.env.TBANK_SECRET || '' };
+  const withPwd = { ...params, Password: tbankConfig.terminalSecret || '' };
   // сортируем по ключу и конкатим значения
   const sorted = Object.keys(withPwd)
     .filter((k) => !['Token','DigestValue','SignatureValue','X509SerialNumber'].includes(k))
@@ -18,9 +21,7 @@ async function closeSpDeal({ terminalKey, dealId }) {
   if (!terminalKey) throw new Error('TerminalKey is empty');
   if (!dealId) throw new Error('SpAccumulationId (dealId) is empty');
 
-  const apiUrl = process.env.TBANK_ENV === 'production'
-    ? 'https://securepay.tinkoff.ru/v2/closeSpDeal'
-    : 'https://rest-api-test.tinkoff.ru/v2/closeSpDeal';
+  const apiUrl = `${tbankConfig.eacqBaseV2}/closeSpDeal`;
 
   const params = { TerminalKey: terminalKey, SpAccumulationId: String(dealId) };
   const body = { ...params, Token: tbToken(params) };
@@ -109,7 +110,7 @@ export default async function handler(req, res) {
             .maybeSingle();
           if (tripRow?.deal_id) {
             await closeSpDeal({
-             terminalKey: process.env.TBANK_TERMINAL_KEY,
+             terminalKey: tbankConfig.terminalKeyEacq || tbankConfig.terminalKeyBase,
               dealId: tripRow.deal_id,
             });
           }
@@ -403,7 +404,7 @@ try {
       try {
         if (tripRow?.deal_id) {
           await closeSpDeal({
-            terminalKey: process.env.TBANK_TERMINAL_KEY,
+            terminalKey: tbankConfig.terminalKeyEacq || tbankConfig.terminalKeyBase,
             dealId: tripRow.deal_id,
           });
         }

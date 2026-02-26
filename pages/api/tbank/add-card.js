@@ -1,6 +1,7 @@
 // pages/api/tbank/add-card.js
 import { createClient } from "@supabase/supabase-js";
 import crypto, { randomUUID } from "crypto";
+import { getTbankConfig } from "./_config";
 
 const supabase = createClient(
   process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -9,17 +10,15 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const RAW_BASE = process.env.TBANK_API_BASE || "https://rest-api-test.tinkoff.ru";
-const TBANK_BASE = RAW_BASE.replace(/\/+$/, "");
+const tbankConfig = getTbankConfig();
+const TBANK_BASE = tbankConfig.restBase;
 const DEBUG_VERBOSE = process.env.TBANK_DEBUG_VERBOSE === "1";
 
 // [E2C] аккуратный хелпер: добавляем E2C один раз
 const ensureE2C = (tk) => (!tk ? tk : tk.endsWith("E2C") ? tk : `${tk}E2C`);
 
 // База хоста формы (fallback, если банк вернул GUID вместо полного URL)
-const FORM_BASE =
-  (process.env.TBANK_FORM_BASE || "").trim() ||
-  (/test/i.test(TBANK_BASE) ? "https://securepayments-test.tcsbank.ru" : "https://securepay.tinkoff.ru");
+const FORM_BASE = tbankConfig.formBase;
 
 const HIDDEN = "[hidden]";
 const maskMid = (s, L = 10, R = 10) =>
@@ -58,7 +57,7 @@ const logE = (cid, msg, extra = {}) => console.error(`[TBANK][add-card][${cid}] 
 
 // Token по мануалу: SHA256 от конкатенации значений (ключи отсортированы) + Password
 const tokenMaterials = (params) => {
-  const withPwd = { ...params, Password: process.env.TBANK_SECRET ?? "" };
+  const withPwd = { ...params, Password: tbankConfig.terminalSecret ?? "" };
   const orderedKeys = Object.keys(withPwd)
     .filter((k) => !["Token", "DigestValue", "SignatureValue", "X509SerialNumber"].includes(k))
     .sort();
@@ -133,8 +132,8 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    if (!process.env.TBANK_TERMINAL_KEY) return res.status(500).json({ error: "Server misconfigured (TBANK_TERMINAL_KEY)" });
-    if (!process.env.TBANK_SECRET) return res.status(500).json({ error: "Server misconfigured (TBANK_SECRET)" });
+    if (!tbankConfig.terminalKeyBase) return res.status(500).json({ error: "Server misconfigured (TBANK_TERMINAL_KEY)" });
+    if (!tbankConfig.terminalSecret) return res.status(500).json({ error: "Server misconfigured (TBANK_SECRET)" });
 
     const auth = req.headers.authorization?.split(" ")[1];
     if (!auth) return res.status(401).json({ error: "Unauthorized" });
@@ -148,7 +147,7 @@ export default async function handler(req, res) {
     const userId = userRes.user.id;
 
     // [E2C] используем выплатный терминал
-    const TerminalKey = ensureE2C(process.env.TBANK_TERMINAL_KEY);
+    const TerminalKey = tbankConfig.terminalKeyA2c || ensureE2C(tbankConfig.terminalKeyBase);
     if (!TerminalKey) return res.status(500).json({ error: "Server misconfigured (TerminalKey)" });
 
     // 1) проверяем/создаём покупателя (idempotent)

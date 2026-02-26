@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import os from 'os';
+import { getTbankConfig } from './_config';
 
 // ---- Supabase client (RLS через пользовательский токен) ----
 const supabase = createClient(
@@ -20,6 +21,7 @@ const maskToken = (t) => (t ? mask(t, 6, 6) : t);
 const log = (...a) => console.log('[cancel]', ...a);
 const logErr = (...a) => console.error('[cancel]', ...a);
 const EPS = 0.005;
+const tbankConfig = getTbankConfig();
 
 // Вспомогатель: абсолютный BASE_URL для внутренних вызовов (payout)
 function getBaseUrl(req) {
@@ -34,9 +36,9 @@ function getBaseUrl(req) {
 
 // ---- Token builder for TBank v2 (SHA-256 over sorted values + Password) + подробные логи ----
 function generateTokenWithLogs(params) {
-  if (!process.env.TBANK_SECRET) throw new Error('TBANK_SECRET не задан');
+  if (!tbankConfig.terminalSecret) throw new Error('TBANK_SECRET не задан');
 
-  const paramsWithPassword = { ...params, Password: process.env.TBANK_SECRET };
+  const paramsWithPassword = { ...params, Password: tbankConfig.terminalSecret };
   const sorted = Object.keys(paramsWithPassword)
     .sort()
     .reduce((acc, k) => {
@@ -57,7 +59,7 @@ function generateTokenWithLogs(params) {
 
   const concat = Object.values(sorted).join('');
   // В склейке тоже замаскируем секрет
-  const maskedConcat = concat.replace(String(process.env.TBANK_SECRET), mask(process.env.TBANK_SECRET));
+  const maskedConcat = concat.replace(String(tbankConfig.terminalSecret), mask(tbankConfig.terminalSecret));
   log('Token concatenated:', maskedConcat);
 
   const token = crypto.createHash('sha256').update(concat).digest('hex');
@@ -149,10 +151,7 @@ async function closeSpDeal({ terminalKey, dealId }) {
   const token = generateTokenWithLogs(params);
   const body = { ...params, Token: token };
 
-  const apiUrl =
-    process.env.TBANK_ENV === 'production'
-      ? 'https://securepay.tinkoff.ru/v2/closeSpDeal'
-      : 'https://rest-api-test.tinkoff.ru/v2/closeSpDeal';
+  const apiUrl = `${tbankConfig.eacqBaseV2}/closeSpDeal`;
 
   log('closeSpDeal request', { url: apiUrl, body: { ...body, Token: maskToken(body.Token) } });
 
@@ -187,8 +186,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { TBANK_TERMINAL_KEY, TBANK_SECRET, TBANK_ENV } = process.env;
-    log('Env check', { terminalKey: mask(TBANK_TERMINAL_KEY), secretSet: !!TBANK_SECRET, env: TBANK_ENV || 'unknown' });
+    const TBANK_TERMINAL_KEY = tbankConfig.terminalKeyEacq || tbankConfig.terminalKeyBase;
+    const TBANK_SECRET = tbankConfig.terminalSecret;
+    log('Env check', { terminalKey: mask(TBANK_TERMINAL_KEY), secretSet: !!TBANK_SECRET, apiBase: tbankConfig.restBase });
 
     if (!TBANK_TERMINAL_KEY || !TBANK_SECRET) {
       logErr('Config error: TBANK_TERMINAL_KEY/TBANK_SECRET missing');
@@ -338,10 +338,7 @@ export default async function handler(req, res) {
     const token = generateTokenWithLogs(tinkoffBody);
     tinkoffBody.Token = token;
 
-    const apiUrl =
-      TBANK_ENV === 'production'
-        ? 'https://securepay.tinkoff.ru/v2/Cancel'
-        : 'https://rest-api-test.tinkoff.ru/v2/Cancel';
+    const apiUrl = `${tbankConfig.eacqBaseV2}/Cancel`;
 
     const bodyForLog = { ...tinkoffBody, Token: maskToken(tinkoffBody.Token) };
     log('TBank Cancel request', { url: apiUrl, body: bodyForLog });

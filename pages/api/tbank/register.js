@@ -23,6 +23,7 @@ export default async function handler(req, res) {
       kpp,
       ogrn,
       legalAddress,
+      address,
       phone,
       ceo_first_name,
       ceo_last_name,
@@ -52,7 +53,8 @@ export default async function handler(req, res) {
     const _ogrn = onlyDigits(ogrn);
     const _kpp = isIP ? '000000000' : (onlyDigits(kpp) || '000000000');
 
-    const addr = parseAddress(asString(legalAddress) || '');
+    const legalAddressNormalized = asString(legalAddress) || asString(address);
+    const addr = parseAddress(legalAddressNormalized || '');
 
     // Пэйлоад без `name2` — серверная схема Merchant его не принимает
     const payload = {
@@ -73,7 +75,7 @@ export default async function handler(req, res) {
           country: 'RUS',
           city: asString(addr?.city) || 'Москва',
           // Ваша parseAddress уже собирает «улица, дом» в street — оставляем как есть
-          street: asString(addr?.street) || asString(legalAddress),
+          street: asString(addr?.street) || legalAddressNormalized,
           description: 'Юридический адрес',
         },
       ],

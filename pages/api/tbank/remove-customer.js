@@ -1,5 +1,6 @@
 // pages/api/tbank/remove-customer.js
 import crypto from "crypto";
+import { getTbankConfig } from "./_config";
 
 /**
  * ENV, которые используются:
@@ -12,7 +13,7 @@ import crypto from "crypto";
  * - protocol: "a2c"  -> /e2c/v2/RemoveCustomer (Выплаты, выплатный терминал), TerminalKey С суффиксом E2C
  */
 
-const TBANK_BASE_DEFAULT = "https://rest-api-test.tinkoff.ru";
+const tbankConfig = getTbankConfig();
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -28,9 +29,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "customerKey is required" });
   }
 
-  const TBANK_BASE = (process.env.TBANK_BASE || TBANK_BASE_DEFAULT).replace(/\/+$/, "");
-  const BASE_TK = process.env.TBANK_TERMINAL_KEY || "";
-  const SECRET = process.env.TBANK_SECRET || "";
+  const TBANK_BASE = tbankConfig.restBase;
+  const BASE_TK = tbankConfig.terminalKeyBase || "";
+  const SECRET = tbankConfig.terminalSecret || "";
 
   if (!BASE_TK) {
     return res.status(500).json({ error: "TBANK_TERMINAL_KEY is not set" });

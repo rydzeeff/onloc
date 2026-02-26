@@ -4,16 +4,18 @@
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
+import { getTbankConfig } from './_config';
 
-const TBANK_BASE = (process.env.TBANK_API_BASE || 'https://rest-api-test.tinkoff.ru').replace(/\/+$/, '');
-const PASSWORD   = process.env.TBANK_PASSWORD || process.env.TBANK_SECRET || '';
+const tbankConfig = getTbankConfig();
+const TBANK_BASE = tbankConfig.restBase;
+const PASSWORD   = tbankConfig.terminalSecret || '';
 
 const LOGNS = 'TBANK';
 const SCOPE = 'payment';        // сохраняем карты в этом скоупе
 
 // Терминал для ОПЛАТ: БЕЗ суффикса E2C (EACQ протокол, /v2/*)
 const stripE2C = (tk) => (!tk ? tk : tk.replace(/E2C$/i, ''));
-const TERMINAL_KEY = stripE2C(process.env.TBANK_TERMINAL_KEY || '');
+const TERMINAL_KEY = tbankConfig.terminalKeyEacq || stripE2C(tbankConfig.terminalKeyBase || '');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,

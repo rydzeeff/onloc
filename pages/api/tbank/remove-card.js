@@ -5,11 +5,13 @@
 // чтобы не смешивать «оплатные» и «выплатные» карты. Для «оплатных» используйте /api/tbank/remove-card-payment.
 
 import crypto from 'crypto';
+import { getTbankConfig } from './_config';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
-const TBANK_BASE = (process.env.TBANK_API_BASE || 'https://rest-api-test.tinkoff.ru').replace(/\/+$/,'');
-const PASSWORD   = process.env.TBANK_PASSWORD || process.env.TBANK_SECRET || '';
+const tbankConfig = getTbankConfig();
+const TBANK_BASE = tbankConfig.restBase;
+const PASSWORD   = tbankConfig.terminalSecret || '';
 
 const LOGNS   = 'TBANK';
 const METHOD  = 'remove-card';
@@ -18,7 +20,7 @@ const SCOPE   = 'payout'; // критично: работаем только с 
 
 // A2C: Терминальный ключ обязательно с суффиксом E2C
 const ensureE2C    = (tk) => (!tk ? tk : (tk.endsWith('E2C') ? tk : `${tk}E2C`));
-const TERMINAL_KEY = ensureE2C(process.env.TBANK_TERMINAL_KEY || '');
+const TERMINAL_KEY = tbankConfig.terminalKeyA2c || ensureE2C(tbankConfig.terminalKeyBase || '');
 
 function log(rid, msg, obj) {
   const base = `[${LOGNS}][${METHOD}][${rid}] ${msg}`;

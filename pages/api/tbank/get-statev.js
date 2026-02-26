@@ -1,5 +1,6 @@
 // pages/api/tbank/get-state.js
 import crypto from "crypto";
+import { getTbankConfig } from "./_config";
 
 const genReqId = () =>
   `${Date.now().toString(36)}-${crypto.randomBytes(3).toString("hex")}`;
@@ -15,10 +16,11 @@ const maskKey = (k) => (k ? mask(k, 4, 4) : k);
 
 const log = (id, ...a) => console.log(`[tbank-getstate][${id}]`, ...a);
 const logErr = (id, ...a) => console.error(`[tbank-getstate][${id}]`, ...a);
+const tbankConfig = getTbankConfig();
 
 // === Token (SHA-256 hex по отсортированным значениям) ===
 const generateToken = (params, reqId) => {
-  const pwd = process.env.TBANK_SECRET || "";
+  const pwd = tbankConfig.terminalSecret || "";
   const base = { ...params, Password: pwd };
 
   const excluded = ["Token", "DigestValue", "SignatureValue", "X509SerialNumber"];
@@ -89,7 +91,7 @@ export default async function handler(req, res) {
     }
 
     // ⚠️ Выплатный терминал: тот же ключ + суффикс E2C
-    const terminalKeyRaw = process.env.TBANK_TERMINAL_KEY || "";
+    const terminalKeyRaw = tbankConfig.terminalKeyA2c || tbankConfig.terminalKeyBase || "";
     const terminalKey = ensureE2CTerminal(terminalKeyRaw);
     if (!terminalKeyRaw) {
       return res.status(500).json({
@@ -114,10 +116,8 @@ export default async function handler(req, res) {
       Token: params.Token, // намеренно без маски, как и раньше, для отладки
     };
 
-    // ✅ URL выплат (E2C v2): тест/боевой по мануалу
-    // Тест:  https://rest-api-test.tinkoff.ru/e2c/v2/GetState
-    // Боевой: https://securepay.tinkoff.ru/e2c/v2/GetState
-    const url = "https://rest-api-test.tinkoff.ru/e2c/v2/GetState";
+    // ✅ URL выплат (E2C v2): берётся централизованно из конфигурации
+    const url = `${tbankConfig.a2cBaseV2}/GetState`;
 
     // === ЛОГИ ЗАПРОСА ===
     log(reqId, "=== OUTGOING REQUEST ===");

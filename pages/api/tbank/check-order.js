@@ -1,6 +1,7 @@
 // /pages/api/tbank/check-order.js
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
+import { getTbankConfig } from './_config';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -19,6 +20,7 @@ const maskKey = (k) => (k ? mask(k, 4, 4) : k);
 
 const log = (id, ...a) => console.log(`[tbank-checkorder][${id}]`, ...a);
 const logErr = (id, ...a) => console.error(`[tbank-checkorder][${id}]`, ...a);
+const tbankConfig = getTbankConfig();
 
 // EACQ терминал: убрать суффикс E2C, если вдруг указан
 const stripE2C = (tk) => (tk ? tk.replace(/E2C$/i, '') : tk);
@@ -29,7 +31,7 @@ const stripE2C = (tk) => (tk ? tk.replace(/E2C$/i, '') : tk);
  * (это сделано намеренно для совместимости с текущими логами и сравнениями).
  */
 const generateToken = (params, reqId) => {
-  const pwd = process.env.TBANK_SECRET || '';
+  const pwd = tbankConfig.terminalSecret || '';
   const base = { ...params, Password: pwd };
 
   const pairs = Object.keys(base)
@@ -63,15 +65,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Не указан OrderId' });
     }
 
-    const terminalKeyRaw = process.env.TBANK_TERMINAL_KEY || '';
+    const terminalKeyRaw = tbankConfig.terminalKeyBase || '';
     if (!terminalKeyRaw) {
       return res.status(500).json({ error: 'Отсутствует TBANK_TERMINAL_KEY в переменных окружения' });
     }
     const terminalKey = stripE2C(terminalKeyRaw);
 
     // Базовый URL: по умолчанию тестовый, можно переопределить TBANK_BASE
-    const BASE = (process.env.TBANK_BASE || 'https://rest-api-test.tinkoff.ru')     // без /v2 на конце
-      .replace(/\/+$/, '') + '/v2';
+    const BASE = tbankConfig.eacqBaseV2;
     const endpoint = `${BASE}/CheckOrder`; // v2/CheckOrder
 
     // EACQ v2 — OrderId как строка
