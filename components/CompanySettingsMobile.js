@@ -599,7 +599,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
           inn: companyData.inn,
           kpp: isCompanyEntity ? (companyData.kpp || "") : "",
           ogrn: companyData.ogrn,
-          address: companyData.legalAddress,
+          legalAddress: companyData.legalAddress,
           phone: companyData.phone,
           ceo_first_name: companyData.ceo_first_name,
           ceo_last_name: companyData.ceo_last_name,
