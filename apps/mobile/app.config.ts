@@ -9,10 +9,17 @@ export default {
     orientation: 'portrait',
     userInterfaceStyle: 'light',
     assetBundlePatterns: ['**/*'],
+
+    plugins: ['expo-font'],
+
     android: {
       package: 'com.onloc.mobile'
     },
     extra: {
+      eas: {
+        projectId: '1a6f7fad-c434-43ea-90e6-173067e038e8'
+      },
+
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       backendBaseUrl: process.env.EXPO_PUBLIC_BACKEND_BASE_URL

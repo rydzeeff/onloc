@@ -1,7 +1,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '../providers/AuthProvider';
-import AppNavigator from '../navigation/AppNavigator';
+import { AuthProvider } from './providers/AuthProvider';
+import AppNavigator from './navigation/AppNavigator';
 
 const queryClient = new QueryClient();
 
