@@ -94,7 +94,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
       tbank_registered: !!row?.tbank_registered,
       tbank_shop_code: row?.tbank_shop_code || "",
       tbank_code: row?.tbank_code || "",
-      site_url: row?.site_url || "https://onloc.ru",
+      site_url: row?.site_url || process.env.NEXT_PUBLIC_BASE_URL,
       avatar_url: row?.avatar_url || "",
     };
   };
@@ -434,7 +434,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
       tbank_registered: false,
       tbank_shop_code: "",
       tbank_code: "",
-      site_url: "https://onloc.ru",
+      site_url: process.env.NEXT_PUBLIC_BASE_URL,
       avatar_url: companyAvatarUrl || "/avatar-default.svg",
     };
   };
@@ -487,7 +487,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
           tbank_registered: false,
           tbank_shop_code: "",
           tbank_code: "",
-          site_url: "https://onloc.ru",
+          site_url: process.env.NEXT_PUBLIC_BASE_URL,
           avatar_url: companyAvatarUrl || "/avatar-default.svg",
         };
 
@@ -609,7 +609,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
           payment_corr_account: paymentData.corrAccount,
           bank_name: paymentData.bankName,
           payment_details: paymentData.payment_details,
-          site_url: "https://onloc.ru",
+          site_url: process.env.NEXT_PUBLIC_BASE_URL,
         }),
       });
 
@@ -640,7 +640,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
         tbank_registered: true,
         tbank_shop_code: shopCode ? String(shopCode) : null,
         tbank_code: tbankCode ? String(tbankCode) : null,
-        site_url: "https://onloc.ru",
+        site_url: process.env.NEXT_PUBLIC_BASE_URL,
         avatar_url: companyAvatarUrl || "/avatar-default.svg",
         payment_account: paymentData.account,
         payment_bik: paymentData.bik,
