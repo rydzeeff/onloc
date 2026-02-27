@@ -34,3 +34,21 @@ export async function leaveTrip(tripId: string, userId: string) {
     .eq('user_id', userId);
   if (error) throw error;
 }
+
+export async function acceptParticipant(tripId: string, participantUserId: string) {
+  const { error } = await supabase
+    .from('trip_participants')
+    .update({ status: 'confirmed' })
+    .eq('trip_id', tripId)
+    .eq('user_id', participantUserId);
+  if (error) throw error;
+}
+
+export async function rejectParticipant(tripId: string, participantUserId: string) {
+  const { error } = await supabase
+    .from('trip_participants')
+    .update({ status: 'rejected' })
+    .eq('trip_id', tripId)
+    .eq('user_id', participantUserId);
+  if (error) throw error;
+}
