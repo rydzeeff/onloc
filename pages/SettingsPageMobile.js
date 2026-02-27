@@ -4,13 +4,15 @@ import { useRouter } from 'next/router';
 import mobileStyles from '../styles/settings.mobile.module.css';
 import AvatarEditorMobile from '../components/AvatarEditorMobile';
 import CompanySettingsMobile from '../components/CompanySettingsMobile';
+import { getCurrentPositionWithPermission, registerPushAndSyncToken, isNativePlatform } from '../lib/mobile/capacitor';
+import { NativeSettingsMenuRows, PermissionsView, NotificationsView } from '../components/mobile/NativeSettingsPanels';
 
 const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
   const { user, session, supabase } = useAuth();
   const router = useRouter();
 
   // Текущее представление настроек: меню -> экран
-  const [view, setView] = useState('menu'); // 'menu' | 'individual' | 'cards' | 'company'
+  const [view, setView] = useState('menu'); // 'menu' | 'individual' | 'cards' | 'company' | 'permissions' | 'notifications'
   const [cardsTab, setCardsTab] = useState('payment'); // 'payment' | 'payout'
 
   const [isLoading, setIsLoading] = useState(true);
@@ -18,6 +20,18 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [message, setMessage] = useState(null);
+
+  const [nativeInfo, setNativeInfo] = useState({
+    isNative: false,
+    geolocationStatus: 'Не запрошено',
+    pushStatus: 'Не подключено',
+  });
+
+  useEffect(() => {
+    isNativePlatform().then((isNative) => {
+      setNativeInfo((prev) => ({ ...prev, isNative }));
+    });
+  }, []);
 
   // ===== профиль =====
   const [profileData, setProfileData] = useState({
@@ -48,6 +62,31 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
     setMessage(text);
     if (text) setTimeout(() => setMessage(null), ms);
   }, []);
+
+  const handleRequestGeolocation = useCallback(async () => {
+    try {
+      const position = await getCurrentPositionWithPermission();
+      const lat = Number(position?.coords?.latitude || 0).toFixed(6);
+      const lon = Number(position?.coords?.longitude || 0).toFixed(6);
+      setProfileData((prev) => ({ ...prev, geoLat: lat, geoLon: lon }));
+      setNativeInfo((prev) => ({ ...prev, geolocationStatus: `Разрешено (${lat}, ${lon})` }));
+      toast('Геопозиция обновлена');
+    } catch (error) {
+      setNativeInfo((prev) => ({ ...prev, geolocationStatus: `Ошибка: ${error.message}` }));
+      toast('Не удалось получить геопозицию');
+    }
+  }, [toast]);
+
+  const handleEnablePush = useCallback(async () => {
+    try {
+      const token = await registerPushAndSyncToken(user?.id);
+      setNativeInfo((prev) => ({ ...prev, pushStatus: token ? `Токен получен (${token.slice(0, 12)}...)` : 'Недоступно на web' }));
+      toast('Push-токен сохранён');
+    } catch (error) {
+      setNativeInfo((prev) => ({ ...prev, pushStatus: `Ошибка: ${error.message}` }));
+      toast('Не удалось подключить push');
+    }
+  }, [toast, user?.id]);
 
   // Выход из аккаунта (перенесён в меню настроек)
   const handleLogout = useCallback(async () => {
@@ -580,6 +619,8 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
               <div className={mobileStyles.menuChevron} aria-hidden="true">›</div>
             </button>
 
+            <NativeSettingsMenuRows nativeInfo={nativeInfo} setView={setView} />
+
             <button
               type="button"
               className={`${mobileStyles.menuRow} ${mobileStyles.menuRowDanger}`}
@@ -827,6 +868,22 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
               <CompanySettingsMobile user={user} supabase={supabase} profilePhone={profileData.phone} />
             </div>
           </div>
+        )}
+
+        {view === 'permissions' && (
+          <PermissionsView
+            nativeInfo={nativeInfo}
+            setView={setView}
+            onRequestGeolocation={handleRequestGeolocation}
+          />
+        )}
+
+        {view === 'notifications' && (
+          <NotificationsView
+            nativeInfo={nativeInfo}
+            setView={setView}
+            onEnablePush={handleEnablePush}
+          />
         )}
 
         {message && <div className={mobileStyles.snackbar}>{message}</div>}

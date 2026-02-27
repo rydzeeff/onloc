@@ -9,7 +9,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint \"**/*.{js,jsx,mjs,cjs}\" --no-inline-config",
-    "test": "npx jest"
+    "test": "npx jest",
+    "build:web": "next build",
+    "cap:sync": "npx cap sync",
+    "android:open": "npx cap open android",
+    "ios:open": "npx cap open ios"
   },
   "keywords": [
     "nextjs",
@@ -59,7 +63,15 @@
     "tesseract.js": "^6.0.0",
     "uuid": "^8.3.2",
     "web-push": "^3.6.7",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/geolocation": "^6.1.0",
+    "@capacitor/ios": "^6.2.1",
+    "@capacitor/preferences": "^6.0.2",
+    "@capacitor/push-notifications": "^6.0.2",
+    "@capacitor/app": "^6.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",
