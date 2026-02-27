@@ -2,6 +2,7 @@ import { useState, useEffect, useLayoutEffect, createContext, useContext } from 
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { initializeRealtime, cleanupRealtime } from '../lib/realtime';
+import { restoreSessionFromPreferences, cacheSessionInPreferences, setupAppUrlListener } from '../lib/mobile/capacitor';
 import 'react-image-crop/dist/ReactCrop.css';
 import '../styles/foundation.css';
 import '../styles/globals.css';
@@ -119,6 +120,21 @@ useEffect(() => {
     return () => window.removeEventListener('resize', setVhVariable);
   }, []);
 
+  useEffect(() => {
+    restoreSessionFromPreferences().catch((error) => {
+      console.warn('[mobile] restore session failed:', error);
+    });
+
+    let dispose = () => {};
+    setupAppUrlListener(router).then((fn) => {
+      dispose = fn;
+    }).catch((error) => {
+      console.warn('[mobile] app url listener failed:', error);
+    });
+
+    return () => dispose();
+  }, [router]);
+
   /* --- Авторизация + BroadcastChannel лидер-вкладки --- */
   useEffect(() => {
     try {
@@ -142,6 +158,9 @@ useEffect(() => {
       setSession(nextSession || null);
       setUser(nextSession?.user ?? null);
       setLoading(false);
+      cacheSessionInPreferences(nextSession).catch((error) => {
+        console.warn('[mobile] cache session failed:', error);
+      });
       // как только хоть какая сессия пришла — снимаем первичный лоадер
       setIsInitialLoading(false);
     });

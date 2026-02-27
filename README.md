@@ -38,3 +38,16 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 Для сборки Android-обёртки проекта используйте каталог `android-app/` и инструкции в `android-app/README.md`.
 
+
+## Mobile (Capacitor)
+
+См. `MOBILE_BUILD.md` для сборки iOS/Android, deep links и публикации.
+
+Основные команды:
+
+```bash
+npm run build:web
+npm run cap:sync
+npm run android:open
+npm run ios:open
+```
