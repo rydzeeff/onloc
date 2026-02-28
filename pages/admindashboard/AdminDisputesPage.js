@@ -21,32 +21,60 @@ import { useChatAttachments } from '../../hooks/useChatAttachments';
 
 // Комиссии платформы/банка
 import { platformSettings } from '../../lib/platformSettings';
+import { calculateNetAmountAfterFees } from '../../lib/tbankFees';
 
 const pct = (v) => Number.isFinite(v) ? v : 0;
 
-function computeFeesBreakdown(sumRub) {
-  const ps = pct(platformSettings?.platformFeePercent);
-  const tb = pct(platformSettings?.tbankFeePercent);
-  const totalPct = ps + tb;
-  const feePlatform = +(sumRub * ps / 100).toFixed(2);
-  const feeTbank = +(sumRub * tb / 100).toFixed(2);
-  const net = +(sumRub - feePlatform - feeTbank).toFixed(2);
-  return { ps, tb, totalPct, feePlatform, feeTbank, net };
+function resolveFeeRules(snapshot = {}) {
+  return {
+    platformPercent: pct(snapshot?.platformPercent ?? platformSettings?.platformFeePercent),
+    tbankCardPercent: pct(snapshot?.tbankCardPercent ?? platformSettings?.tbankFeePercent),
+    tbankCardMinRub: pct(snapshot?.tbankCardMinRub ?? platformSettings?.tbankCardFeeMinRub),
+    tbankPayoutPercent: pct(snapshot?.tbankPayoutPercent ?? platformSettings?.tbankPayoutFeePercent),
+    tbankPayoutMinRub: pct(snapshot?.tbankPayoutMinRub ?? platformSettings?.tbankPayoutFeeMinRub),
+  };
+}
+
+function computeFeesBreakdown(sumRub, snapshot = {}) {
+  const rules = resolveFeeRules(snapshot);
+  const gross = Number(sumRub) || 0;
+  const calc = calculateNetAmountAfterFees(gross, rules.platformPercent, {
+    cardFeePercent: rules.tbankCardPercent,
+    cardFeeMinRub: rules.tbankCardMinRub,
+    payoutFeePercent: rules.tbankPayoutPercent,
+    payoutFeeMinRub: rules.tbankPayoutMinRub,
+  });
+
+  return {
+    ps: rules.platformPercent,
+    tb: rules.tbankCardPercent,
+    feePlatform: calc.platformFee,
+    feeTbank: calc.tbankFee,
+    feeTbankCard: calc.tbankCardFee,
+    feeTbankPayout: calc.tbankPayoutFee,
+    net: calc.netAmount,
+  };
 }
 
 function fmtRub(x) {
   return (Number(x) || 0).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function buildDecisionMessage({ tripTitle, total, refund, payout, feesRefund, feesPayout, description }) {
-  // проценты от общей суммы
-  const refPct = total > 0 ? Math.round((refund / total) * 100) : 0;
-  const payPct = total > 0 ? Math.round((payout / total) * 100) : 0;
+function getTripFeeSnapshot(src) {
+  if (!src) return null;
+  const platformRaw = src.platform_fee ?? src.platformPercent;
+  const tbankRaw = src.tbank_fee ?? src.tbankCardPercent;
+  return {
+    platformPercent: Number.isFinite(Number(platformRaw)) ? Number(platformRaw) : undefined,
+    tbankCardPercent: Number.isFinite(Number(tbankRaw)) ? Number(tbankRaw) : undefined,
+  };
+}
 
+function buildDecisionMessage({ tripTitle, refund, payout, feesPayout, description }) {
   const lines = [
     `🧩 Решение администрации по поездке «${tripTitle || ''}» после обсуждения:`,
-    `• Возврат участнику: ${refPct}% (${fmtRub(refund)} ₽) — без комиссий.`,
-    `• Выплата организатору: ${payPct}% (${fmtRub(payout)} ₽) — за вычетом ${feesPayout.tb}% Т-банк (${fmtRub(feesPayout.feeTbank)} ₽) и ${feesPayout.ps}% площадки «Онлок» (${fmtRub(feesPayout.feePlatform)} ₽).`,
+    `• Возврат участнику: ${fmtRub(refund)} ₽ — без комиссий.`,
+    `• Выплата организатору: ${fmtRub(payout)} ₽ — за вычетом комиссии Т-банка (${fmtRub(feesPayout.feeTbank)} ₽) и комиссии площадки «Онлок» (${fmtRub(feesPayout.feePlatform)} ₽).`,
   ];
   if (description && description.trim()) {
     lines.push(`• Описание: ${description.trim()}`);
@@ -98,6 +126,7 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     paymentId: null,   // последний payment_id участника
     originalPaid: null, // сумма исходной оплаты участника (для валидации)
     paymentDbId: null,
+    feeSnapshot: null,
   });
 
   const canModerate = !!(permissions.is_admin || permissions.can_tab);
@@ -214,7 +243,7 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
         payout_amount_cents,
         initiator_confirmed,
         respondent_confirmed,
-        trips (title),
+        trips (title, platform_fee, tbank_fee),
         profiles_initiator:profiles!initiator_id (first_name, last_name),
         profiles_respondent:profiles!respondent_id (first_name, last_name)
       `)
@@ -568,16 +597,15 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     const payout = +(sumTotal - refund).toFixed(2);
 
     // Разбивка комиссий (для текста)
-    const feesRefund = computeFeesBreakdown(refund);
-    const feesPayout = computeFeesBreakdown(payout);
+    const feeSnapshot = getTripFeeSnapshot(dispute?.trips);
+    const feesRefund = computeFeesBreakdown(refund, feeSnapshot);
+    const feesPayout = computeFeesBreakdown(payout, feeSnapshot);
 
     // Подготовим текст-опрос
     const decisionText = buildDecisionMessage({
       tripTitle: dispute.trips?.title,
-      total: sumTotal,
       refund,
       payout,
-      feesRefund,
       feesPayout,
       description,
     });
@@ -693,10 +721,17 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     // deal_id + organizer
     const { data: trip } = await supabase
       .from('trips')
-      .select('deal_id, creator_id')
+      .select('deal_id, creator_id, platform_fee, tbank_fee')
       .eq('id', dispute.trip_id)
       .maybeSingle();
-    if (trip) { out.dealId = trip.deal_id || null; out.organizerId = trip.creator_id || null; }
+    if (trip) {
+      out.dealId = trip.deal_id || null;
+      out.organizerId = trip.creator_id || null;
+      out.feeSnapshot = {
+        platformPercent: Number.isFinite(Number(trip.platform_fee)) ? Number(trip.platform_fee) : platformSettings.platformFeePercent,
+        tbankCardPercent: Number.isFinite(Number(trip.tbank_fee)) ? Number(trip.tbank_fee) : platformSettings.tbankFeePercent,
+      };
+    }
 
     // если в диспуте уже лежат согласованные суммы — используем их
     if ((dispute.refund_amount_cents ?? null) !== null || (dispute.payout_amount_cents ?? null) !== null) {
@@ -730,10 +765,11 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
       paymentId: guess.paymentId,
       originalPaid: guess.originalPaid || guess.total || 0,
       paymentDbId: guess.paymentDbId || null,
+      feeSnapshot: guess.feeSnapshot || null,
     });
   }
   function closeSettleModal() {
-    setSettleModal({ open: false, dispute: null, total: '', refund: '', loading: false, organizerId: null, dealId: null, paymentId: null, originalPaid: null, paymentDbId: null });
+    setSettleModal({ open: false, dispute: null, total: '', refund: '', loading: false, organizerId: null, dealId: null, paymentId: null, originalPaid: null, paymentDbId: null, feeSnapshot: null });
   }
 
   // API вызовы к tbank-* (через ваши pages/api/tbank/*)
@@ -761,7 +797,7 @@ async function doRefund({ paymentId, tripId, participantId, amount, reason, sour
   }
   return data;
 }
-  async function doPayout({ tripId, organizerId, dealId, participantId, amount, sourcePaymentId }) {
+async function doPayout({ tripId, organizerId, dealId, participantId, amount, sourcePaymentId, feeSnapshot }) {
     if (!amount || amount <= 0) return true;
     if (!dealId) throw new Error('deal_id не найден для поездки');
 
@@ -780,7 +816,7 @@ async function doRefund({ paymentId, tripId, participantId, amount, reason, sour
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         tripId,
-        amount: computeFeesBreakdown(amount).net, // ✅ шлём NET
+        amount: computeFeesBreakdown(amount, feeSnapshot).net, // ✅ шлём NET
         mode: 'admin-settle-net',                 // ✅ сервер НЕ пересчитывает комиссии
         dealId,
         recipientId,
@@ -838,6 +874,7 @@ async function doRefund({ paymentId, tripId, participantId, amount, reason, sour
           participantId: row.initiator_id,
           amount: payout,
           sourcePaymentId: settleModal.paymentDbId, // 👈 привязка к чеку
+          feeSnapshot: settleModal.feeSnapshot,
         });
         await sendChatSystem(row.chatId, `✅ Выплата организатору выполнена: ${fmtRub(payout)} ₽.`);
       }
@@ -865,7 +902,7 @@ async function doRefund({ paymentId, tripId, participantId, amount, reason, sour
   const formatTime = (iso) => (!iso ? '' : new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }));
 
   // вспомогательная панель комиссий
-  const FeesInfo = ({ sum, kind = 'payout' }) => {
+  const FeesInfo = ({ sum, kind = 'payout', snapshot = null }) => {
     const s = Number(sum) || 0;
 if (kind === 'refund') {
      return (
@@ -875,11 +912,11 @@ if (kind === 'refund') {
        </div>
      );
    }
-   const { ps, tb, feePlatform, feeTbank, net } = computeFeesBreakdown(s);
+   const { feePlatform, feeTbank, net } = computeFeesBreakdown(s, snapshot);
    return (
      <div style={{ marginTop: 4, padding: '8px 10px', border: '1px dashed #e5e7eb', borderRadius: 8, background: '#fafafa', fontSize: 13 }}>
        <div>Комиссии считаются от введённой суммы.</div>
-       <div>Т-банк: {tb}% ({fmtRub(feeTbank)} ₽), Площадка «Онлок»: {ps}% ({fmtRub(feePlatform)} ₽)</div>
+       <div>Т-банк: {fmtRub(feeTbank)} ₽, Площадка «Онлок»: {fmtRub(feePlatform)} ₽</div>
        <div>К получению «на руки»: {fmtRub(net)} ₽</div>
      </div>
   );
@@ -1265,9 +1302,6 @@ if (kind === 'refund') {
                 const invalid = refund > total || refund < 0 || total <= 0;
                 const payout = Math.max(total - refund, 0);
 
-                const feesR = computeFeesBreakdown(refund);
-                const feesP = computeFeesBreakdown(payout);
-
                 return (
                   <div>
                     <div style={{
@@ -1286,9 +1320,9 @@ if (kind === 'refund') {
 
                     <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
                       <div style={{ fontWeight: 600 }}>Возврат:</div>
- <FeesInfo sum={refund} kind="refund" />
+                      <FeesInfo sum={refund} kind="refund" snapshot={getTripFeeSnapshot(closingModal.dispute?.trips)} />
                       <div style={{ fontWeight: 600, marginTop: 6 }}>Разбивка комиссий по выплате:</div>
-                      <FeesInfo sum={payout} />
+                      <FeesInfo sum={payout} snapshot={getTripFeeSnapshot(closingModal.dispute?.trips)} />
                     </div>
                   </div>
                 );
@@ -1377,9 +1411,6 @@ if (kind === 'refund') {
                 const invalid = refund > total || refund < 0 || total <= 0;
                 const payout = Math.max(total - refund, 0);
 
-                const feesR = computeFeesBreakdown(refund);
-                const feesP = computeFeesBreakdown(payout);
-
                 let summaryLine = '';
                 if (invalid) summaryLine = 'Ошибка: сумма возврата больше общей суммы, либо общая сумма ≤ 0.';
                 else if (refund === 0) summaryLine = `Будет выполнена только выплата организатору: ${fmtRub(payout)} ₽.`;
@@ -1402,9 +1433,9 @@ if (kind === 'refund') {
 
                     <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
                       <div style={{ fontWeight: 600 }}>Возврат:</div>
- <FeesInfo sum={refund} kind="refund" />
+                      <FeesInfo sum={refund} kind="refund" snapshot={settleModal.feeSnapshot} />
                       <div style={{ fontWeight: 600, marginTop: 6 }}>Разбивка комиссий по выплате:</div>
-                      <FeesInfo sum={payout} />
+                      <FeesInfo sum={payout} snapshot={settleModal.feeSnapshot} />
                     </div>
                   </div>
                 );
