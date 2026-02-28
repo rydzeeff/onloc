@@ -32,6 +32,8 @@ const AvatarEditorMobile = ({
 
   // Помогает понимать “ждём ли мы результат выбора”
   const pendingPickRef = useRef(false);
+  const pickWatchIntervalRef = useRef(null);
+  const pickWatchTimeoutRef = useRef(null);
 
   const toast = (text, ms = 3000) => {
     setMessage(text);
@@ -84,10 +86,43 @@ const AvatarEditorMobile = ({
     return false;
   };
 
+  const clearPickWatch = () => {
+    if (pickWatchIntervalRef.current) {
+      clearInterval(pickWatchIntervalRef.current);
+      pickWatchIntervalRef.current = null;
+    }
+    if (pickWatchTimeoutRef.current) {
+      clearTimeout(pickWatchTimeoutRef.current);
+      pickWatchTimeoutRef.current = null;
+    }
+  };
+
+  const startPickWatch = () => {
+    clearPickWatch();
+
+    pickWatchIntervalRef.current = setInterval(() => {
+      if (!pendingPickRef.current) {
+        clearPickWatch();
+        return;
+      }
+
+      if (tryPickFromInput()) {
+        clearPickWatch();
+      }
+    }, 250);
+
+    pickWatchTimeoutRef.current = setTimeout(() => {
+      clearPickWatch();
+    }, 15000);
+  };
+
   const handleImageSelect = (e) => {
     const input = e?.currentTarget || e?.target;
     const file = input?.files?.[0];
-    if (!file) return;
+    if (!file) {
+      startPickWatch();
+      return;
+    }
     processPickedFile(file, input);
   };
 
@@ -122,6 +157,7 @@ const AvatarEditorMobile = ({
     window.addEventListener('pageshow', onPageShow);
 
     return () => {
+      clearPickWatch();
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pageshow', onPageShow);
@@ -431,6 +467,7 @@ const AvatarEditorMobile = ({
                 return;
               }
               pendingPickRef.current = true;
+              startPickWatch();
             }}
             onClick={(e) => {
               if (!canEditAvatar) {
@@ -440,6 +477,7 @@ const AvatarEditorMobile = ({
               }
               // НИЧЕГО НЕ СБРАСЫВАЕМ ЗДЕСЬ — это как раз может ломать камеру на Android
               pendingPickRef.current = true;
+              startPickWatch();
             }}
             onChange={handleImageSelect}
             onInput={handleImageSelect} // страховка для Android/WebView
