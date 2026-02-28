@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[1823],{9594:(_,e,n)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/TripsPageMobile",function(){return n(3728)}])}},_=>{_.O(0,[1121,6701,8230,9851,3728,636,6593,8792],()=>_(_.s=9594)),_N_E=_.O()}]);

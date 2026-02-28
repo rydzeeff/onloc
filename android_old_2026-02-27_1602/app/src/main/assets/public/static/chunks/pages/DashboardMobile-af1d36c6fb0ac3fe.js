@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[3802],{5619:(_,n,e)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/DashboardMobile",function(){return e(5203)}])}},_=>{_.O(0,[8513,149,8230,9167,224,6085,8494,9726,7162,668,9681,5823,1422,5819,2020,5691,880,1935,2164,4787,636,6593,8792],()=>_(_.s=5619)),_N_E=_.O()}]);

@@ -1,0 +1,34 @@
+{
+	"appId": "ru.onloc.app",
+	"appName": "Onloc",
+	"webDir": ".next",
+	"server": {
+		"url": "https://onloc.ru",
+		"cleartext": false,
+		"allowNavigation": [
+			"onloc.ru",
+			"*.onloc.ru"
+		]
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 1200,
+			"launchAutoHide": true,
+			"backgroundColor": "#ffffff",
+			"androidSplashResourceName": "splash",
+			"androidScaleType": "CENTER_CROP",
+			"showSpinner": false,
+			"iosSpinnerStyle": "small",
+			"spinnerColor": "#2563eb"
+		}
+	},
+	"ios": {
+		"scheme": "onlocapp",
+		"contentInset": "always"
+	},
+	"android": {
+		"allowMixedContent": false,
+		"captureInput": true,
+		"webContentsDebuggingEnabled": false
+	}
+}
