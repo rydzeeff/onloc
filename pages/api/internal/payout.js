@@ -17,6 +17,7 @@
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import { platformSettings } from "../../../lib/platformSettings";
+import { calculateNetAmountAfterFees } from "../../../lib/tbankFees";
 
 // ---------------- CORS ----------------
 const corsHeaders = {
@@ -76,11 +77,14 @@ function computeNetFromGrossUsingTripPercents(gross, trip) {
     ? Number(trip.tbank_fee)
     : Number(platformSettings?.tbankFeePercent || 0);
 
-  const total = Math.max(0, platformPercent + tbankPercent);
-  const netRaw = Number(gross) * (1 - total / 100);
-  const net = Math.floor(netRaw * 100) / 100; // ↓↓↓ вниз до копейки
+  const { netAmount: net } = calculateNetAmountAfterFees(Number(gross), platformPercent, {
+    cardFeePercent: tbankPercent,
+    cardFeeMinRub: platformSettings.tbankCardFeeMinRub,
+    payoutFeePercent: platformSettings.tbankPayoutFeePercent,
+    payoutFeeMinRub: platformSettings.tbankPayoutFeeMinRub,
+  });
 
-  return { net, platformPercent, tbankPercent, totalPercent: total };
+  return { net, platformPercent, tbankPercent, totalPercent: null };
 }
 
 // ---------- phone normalization ----------
