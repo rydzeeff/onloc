@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[9952],{3868:(e,n,t)=>{"use strict";t.d(n,{t:()=>_});let _={platformFeePercent:10,tbankFeePercent:2.5,paymentOpenWindowDays:25}},8888:(e,n,t)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/trips/EditTripMobile",function(){return t(5819)}])}},e=>{e.O(0,[149,9726,5819,636,6593,8792],()=>e(e.s=8888)),_N_E=e.O()}]);

@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import { platformSettings } from '../../../lib/platformSettings';
+import { calculateNetAmountAfterFees } from '../../../lib/tbankFees';
 import { getTbankConfig } from './_config';
 
 const supabase = createClient(
@@ -61,14 +62,20 @@ async function getAuthUserFromReq(req, reqId) {
 
 // ---------- комиссии ----------
 function computeNetFromGrossUsingTripPercents(gross, trip) {
-   const platformPercent = Number.isFinite(Number(trip?.platform_fee))
-     ? Number(trip.platform_fee) : Number(platformSettings?.platformFeePercent || 0);
-   const tbankPercent = Number.isFinite(Number(trip?.tbank_fee))
-     ? Number(trip.tbank_fee) : Number(platformSettings?.tbankFeePercent || 0);
-   const total = Math.max(0, platformPercent + tbankPercent);
-   const netRaw = Number(gross) * (1 - total / 100);
-  const net = Math.floor(netRaw * 100) / 100; // ↓↓↓ вниз до копейки
-  return { net, platformPercent, tbankPercent, totalPercent: total };
+  const platformPercent = Number.isFinite(Number(trip?.platform_fee))
+    ? Number(trip.platform_fee)
+    : Number(platformSettings?.platformFeePercent || 0);
+  const tbankPercent = Number.isFinite(Number(trip?.tbank_fee))
+    ? Number(trip.tbank_fee)
+    : Number(platformSettings?.tbankFeePercent || 0);
+
+  const { netAmount: net } = calculateNetAmountAfterFees(Number(gross), platformPercent, {
+    cardFeePercent: tbankPercent,
+    cardFeeMinRub: platformSettings.tbankCardFeeMinRub,
+    payoutFeePercent: platformSettings.tbankPayoutFeePercent,
+    payoutFeeMinRub: platformSettings.tbankPayoutFeeMinRub,
+  });
+  return { net, platformPercent, tbankPercent, totalPercent: null };
 }
 
 // ---------- Token генерация ----------

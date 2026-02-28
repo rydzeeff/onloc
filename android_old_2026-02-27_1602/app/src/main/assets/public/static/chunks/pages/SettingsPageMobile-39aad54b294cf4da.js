@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[2224],{5204:(_,e,n)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/SettingsPageMobile",function(){return n(1935)}])}},_=>{_.O(0,[1935,636,6593,8792],()=>_(_.s=5204)),_N_E=_.O()}]);

@@ -1,0 +1,359 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    },
+    {
+      "source": "/",
+      "destination": "/trips",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/(?:/)?$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/trip/[id]",
+      "regex": "^/trip/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/trip/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/view/[id]",
+      "regex": "^/view/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/view/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/AuthMobile",
+      "regex": "^/AuthMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/AuthMobile(?:/)?$"
+    },
+    {
+      "page": "/AuthPC",
+      "regex": "^/AuthPC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/AuthPC(?:/)?$"
+    },
+    {
+      "page": "/DashboardMobile",
+      "regex": "^/DashboardMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/DashboardMobile(?:/)?$"
+    },
+    {
+      "page": "/DashboardPC",
+      "regex": "^/DashboardPC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/DashboardPC(?:/)?$"
+    },
+    {
+      "page": "/DesktopMessagesPage",
+      "regex": "^/DesktopMessagesPage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/DesktopMessagesPage(?:/)?$"
+    },
+    {
+      "page": "/MobileMessagesPage",
+      "regex": "^/MobileMessagesPage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/MobileMessagesPage(?:/)?$"
+    },
+    {
+      "page": "/MyTripsSection",
+      "regex": "^/MyTripsSection(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/MyTripsSection(?:/)?$"
+    },
+    {
+      "page": "/MyTripsSectionMobile",
+      "regex": "^/MyTripsSectionMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/MyTripsSectionMobile(?:/)?$"
+    },
+    {
+      "page": "/SettingsPageMobile",
+      "regex": "^/SettingsPageMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/SettingsPageMobile(?:/)?$"
+    },
+    {
+      "page": "/SettingsPagePC",
+      "regex": "^/SettingsPagePC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/SettingsPagePC(?:/)?$"
+    },
+    {
+      "page": "/TripParticipantsPageMobile",
+      "regex": "^/TripParticipantsPageMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/TripParticipantsPageMobile(?:/)?$"
+    },
+    {
+      "page": "/TripParticipantsPagePC",
+      "regex": "^/TripParticipantsPagePC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/TripParticipantsPagePC(?:/)?$"
+    },
+    {
+      "page": "/TripsPageMobile",
+      "regex": "^/TripsPageMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/TripsPageMobile(?:/)?$"
+    },
+    {
+      "page": "/TripsPagePC",
+      "regex": "^/TripsPagePC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/TripsPagePC(?:/)?$"
+    },
+    {
+      "page": "/admindashboard/AdminChatsPage",
+      "regex": "^/admindashboard/AdminChatsPage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admindashboard/AdminChatsPage(?:/)?$"
+    },
+    {
+      "page": "/admindashboard/AdminCompaniesPage",
+      "regex": "^/admindashboard/AdminCompaniesPage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admindashboard/AdminCompaniesPage(?:/)?$"
+    },
+    {
+      "page": "/admindashboard/AdminDisputesPage",
+      "regex": "^/admindashboard/AdminDisputesPage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admindashboard/AdminDisputesPage(?:/)?$"
+    },
+    {
+      "page": "/admindashboard/AdminPanel",
+      "regex": "^/admindashboard/AdminPanel(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admindashboard/AdminPanel(?:/)?$"
+    },
+    {
+      "page": "/auth",
+      "regex": "^/auth(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth(?:/)?$"
+    },
+    {
+      "page": "/card-result",
+      "regex": "^/card\\-result(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/card\\-result(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/messages",
+      "regex": "^/messages(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/messages(?:/)?$"
+    },
+    {
+      "page": "/mobile/auth-callback",
+      "regex": "^/mobile/auth\\-callback(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/mobile/auth\\-callback(?:/)?$"
+    },
+    {
+      "page": "/participants",
+      "regex": "^/participants(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/participants(?:/)?$"
+    },
+    {
+      "page": "/payment-result",
+      "regex": "^/payment\\-result(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/payment\\-result(?:/)?$"
+    },
+    {
+      "page": "/profile/ProfileSetupMobile",
+      "regex": "^/profile/ProfileSetupMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/profile/ProfileSetupMobile(?:/)?$"
+    },
+    {
+      "page": "/profile/ProfileSetupPC",
+      "regex": "^/profile/ProfileSetupPC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/profile/ProfileSetupPC(?:/)?$"
+    },
+    {
+      "page": "/profile/setup",
+      "regex": "^/profile/setup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/profile/setup(?:/)?$"
+    },
+    {
+      "page": "/tbank-check-order",
+      "regex": "^/tbank\\-check\\-order(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/tbank\\-check\\-order(?:/)?$"
+    },
+    {
+      "page": "/tbank-get-state",
+      "regex": "^/tbank\\-get\\-state(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/tbank\\-get\\-state(?:/)?$"
+    },
+    {
+      "page": "/tbank-get-statev",
+      "regex": "^/tbank\\-get\\-statev(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/tbank\\-get\\-statev(?:/)?$"
+    },
+    {
+      "page": "/tbank-remove-customer",
+      "regex": "^/tbank\\-remove\\-customer(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/tbank\\-remove\\-customer(?:/)?$"
+    },
+    {
+      "page": "/trip/TripDetailsPageMobile",
+      "regex": "^/trip/TripDetailsPageMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trip/TripDetailsPageMobile(?:/)?$"
+    },
+    {
+      "page": "/trip/TripDetailsPagePC",
+      "regex": "^/trip/TripDetailsPagePC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trip/TripDetailsPagePC(?:/)?$"
+    },
+    {
+      "page": "/trips",
+      "regex": "^/trips(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trips(?:/)?$"
+    },
+    {
+      "page": "/trips/CreateTripMobile",
+      "regex": "^/trips/CreateTripMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trips/CreateTripMobile(?:/)?$"
+    },
+    {
+      "page": "/trips/CreateTripPC",
+      "regex": "^/trips/CreateTripPC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trips/CreateTripPC(?:/)?$"
+    },
+    {
+      "page": "/trips/EditTripMobile",
+      "regex": "^/trips/EditTripMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trips/EditTripMobile(?:/)?$"
+    },
+    {
+      "page": "/trips/EditTripPC",
+      "regex": "^/trips/EditTripPC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trips/EditTripPC(?:/)?$"
+    },
+    {
+      "page": "/trips/create-trip",
+      "regex": "^/trips/create\\-trip(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trips/create\\-trip(?:/)?$"
+    },
+    {
+      "page": "/trips/edit-trip",
+      "regex": "^/trips/edit\\-trip(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trips/edit\\-trip(?:/)?$"
+    },
+    {
+      "page": "/view/TripViewPageMobile",
+      "regex": "^/view/TripViewPageMobile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/view/TripViewPageMobile(?:/)?$"
+    },
+    {
+      "page": "/view/TripViewPagePC",
+      "regex": "^/view/TripViewPagePC(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/view/TripViewPagePC(?:/)?$"
+    }
+  ],
+  "dataRoutes": [
+    {
+      "page": "/auth",
+      "dataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/auth\\.json$"
+    },
+    {
+      "page": "/dashboard",
+      "dataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/dashboard\\.json$"
+    },
+    {
+      "page": "/participants",
+      "dataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/participants\\.json$"
+    },
+    {
+      "page": "/trip/[id]",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "dataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/trip/([^/]+?)\\.json$",
+      "namedDataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/trip/(?<nxtPid>[^/]+?)\\.json$"
+    },
+    {
+      "page": "/trips/create-trip",
+      "dataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/trips/create-trip\\.json$"
+    },
+    {
+      "page": "/trips/edit-trip",
+      "dataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/trips/edit-trip\\.json$"
+    },
+    {
+      "page": "/view/[id]",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "dataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/view/([^/]+?)\\.json$",
+      "namedDataRouteRegex": "^/_next/data/LhJyY\\-Vr7bBzKGy2TeHp5/view/(?<nxtPid>[^/]+?)\\.json$"
+    }
+  ],
+  "rsc": {
+    "header": "RSC",
+    "varyHeader": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Router-Segment-Prefetch",
+    "prefetchHeader": "Next-Router-Prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "Next-Router-Segment-Prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Onloc</string>
+    <string name="title_activity_main">Onloc</string>
+    <string name="package_name">ru.onloc.app</string>
+    <string name="custom_url_scheme">ru.onloc.app</string>
+</resources>
