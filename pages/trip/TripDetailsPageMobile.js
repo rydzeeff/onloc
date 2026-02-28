@@ -1314,11 +1314,3 @@ const handleBackToTrips = () => {
     </div>
   );
 }
-
-if (typeof window !== 'undefined' && !window.ymaps) {
-  const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
-  const script = document.createElement('script');
-  script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${apiKey}`;
-  script.async = true;
-  document.body.appendChild(script);
-}
