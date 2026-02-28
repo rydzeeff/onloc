@@ -266,7 +266,7 @@ export default function CreateTripPC({ toLocation }) {
                     <h3>Расчёт выплат</h3>
                     <p>Цена поездки: {tripData.price} ₽ <span className={styles.hint}>(сумма, которую заплатят участники)</span></p>
                     <p>Комиссия площадки ({platformSettings.platformFeePercent}%): {tripData.platformFee.toFixed(2)} ₽</p>
-                    <p>Комиссия Т-Банка ({platformSettings.tbankFeePercent}%): {tripData.tbankFee.toFixed(2)} ₽</p>
+                    <p>Комиссия Т-Банка: {tripData.tbankFee.toFixed(2)} ₽</p>
                     <p className={styles.netAmount}>
                       Итого на счёт: {tripData.netAmount.toFixed(2)} ₽ <span className={styles.hint}>(вы получите после комиссий)</span>
                     </p>
