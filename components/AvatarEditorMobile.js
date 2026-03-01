@@ -34,7 +34,6 @@ const AvatarEditorMobile = ({
   const pendingPickRef = useRef(false);
   const pickWatchIntervalRef = useRef(null);
   const pickWatchTimeoutRef = useRef(null);
-  const debugEnabledRef = useRef(false);
 
   const setGlobalPickPending = (value) => {
     if (typeof window === 'undefined') return;
@@ -46,65 +45,7 @@ const AvatarEditorMobile = ({
     return Boolean(window.__onlocAvatarPickPending);
   };
 
-  const readDebugEnabled = () => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const href = String(window.location?.href || '');
-      const hasParamOn = /[?&#]avatarDebug=1(?:[&#]|$)/.test(href);
-      const hasParamOff = /[?&#]avatarDebug=0(?:[&#]|$)/.test(href);
-
-      if (hasParamOn) {
-        try {
-          window.localStorage?.setItem('onloc_avatar_debug', '1');
-          window.sessionStorage?.setItem('onloc_avatar_debug', '1');
-        } catch (_) {}
-        return true;
-      }
-
-      if (hasParamOff) {
-        try {
-          window.localStorage?.removeItem('onloc_avatar_debug');
-          window.sessionStorage?.removeItem('onloc_avatar_debug');
-        } catch (_) {}
-        return false;
-      }
-
-      return (
-        window.sessionStorage?.getItem('onloc_avatar_debug') === '1' ||
-        window.localStorage?.getItem('onloc_avatar_debug') === '1'
-      );
-    } catch (_) {
-      return false;
-    }
-  };
-
-  const persistDebugEntry = (entry) => {
-    if (typeof window === 'undefined') return;
-    try {
-      const key = 'onloc_avatar_debug_logs';
-      const raw = window.localStorage?.getItem(key);
-      const list = raw ? JSON.parse(raw) : [];
-      const next = [...list, entry].slice(-250);
-      window.localStorage?.setItem(key, JSON.stringify(next));
-      window.__onlocAvatarDebugLogs = next;
-    } catch (_) {}
-  };
-
-  const logDebug = (event, payload = {}, level = 'log') => {
-    if (!debugEnabledRef.current) return;
-
-    const entry = {
-      ts: new Date().toISOString(),
-      event,
-      payload,
-      level,
-    };
-
-    const logger =
-      level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
-    logger('[AvatarDebug]', event, payload);
-    persistDebugEntry(entry);
-  };
+  const logDebug = () => {};
 
   const toast = (text, ms = 3000) => {
     setMessage(text);
@@ -114,75 +55,15 @@ const AvatarEditorMobile = ({
   const galleryAccept = '.jpg,.jpeg,.png,.webp,.bmp,.gif';
 
   useEffect(() => {
-    debugEnabledRef.current = readDebugEnabled();
-
     if (typeof window === 'undefined') return;
 
     if (getGlobalPickPending()) {
       pendingPickRef.current = true;
-      logDebug('resume_pick_watch_after_remount');
       startPickWatch();
     }
 
-    if (debugEnabledRef.current) {
-      logDebug('debug_enabled', {
-        userAgent: window.navigator?.userAgent,
-        href: window.location?.href,
-      });
-    }
-
-    window.onlocAvatarDebugDump = () => {
-      try {
-        const logs = JSON.parse(window.localStorage?.getItem('onloc_avatar_debug_logs') || '[]');
-        console.log('[AvatarDebug][dump]', logs);
-        return logs;
-      } catch (_) {
-        return [];
-      }
-    };
-
-    window.onlocAvatarDebugClear = () => {
-      try {
-        window.localStorage?.removeItem('onloc_avatar_debug_logs');
-        window.__onlocAvatarDebugLogs = [];
-      } catch (_) {}
-    };
-
-    const onWindowError = (event) => {
-      logDebug(
-        'window_error',
-        {
-          message: event?.message,
-          filename: event?.filename,
-          lineno: event?.lineno,
-          colno: event?.colno,
-        },
-        'error'
-      );
-    };
-
-    const onUnhandledRejection = (event) => {
-      logDebug('unhandled_rejection', { reason: String(event?.reason || '') }, 'error');
-    };
-
-    const onPageHide = (event) => {
-      logDebug('page_hide', { persisted: Boolean(event?.persisted) }, 'warn');
-    };
-
-    const onBeforeUnload = () => {
-      logDebug('before_unload', {}, 'warn');
-    };
-
-    window.addEventListener('error', onWindowError);
-    window.addEventListener('unhandledrejection', onUnhandledRejection);
-    window.addEventListener('pagehide', onPageHide);
-    window.addEventListener('beforeunload', onBeforeUnload);
-
     return () => {
-      window.removeEventListener('error', onWindowError);
-      window.removeEventListener('unhandledrejection', onUnhandledRejection);
-      window.removeEventListener('pagehide', onPageHide);
-      window.removeEventListener('beforeunload', onBeforeUnload);
+      // noop
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
