@@ -39,10 +39,30 @@ const AvatarEditorMobile = ({
   const readDebugEnabled = () => {
     if (typeof window === 'undefined') return false;
     try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('avatarDebug') === '1') return true;
-      if (params.get('avatarDebug') === '0') return false;
-      return window.localStorage?.getItem('onloc_avatar_debug') === '1';
+      const href = String(window.location?.href || '');
+      const hasParamOn = /[?&#]avatarDebug=1(?:[&#]|$)/.test(href);
+      const hasParamOff = /[?&#]avatarDebug=0(?:[&#]|$)/.test(href);
+
+      if (hasParamOn) {
+        try {
+          window.localStorage?.setItem('onloc_avatar_debug', '1');
+          window.sessionStorage?.setItem('onloc_avatar_debug', '1');
+        } catch (_) {}
+        return true;
+      }
+
+      if (hasParamOff) {
+        try {
+          window.localStorage?.removeItem('onloc_avatar_debug');
+          window.sessionStorage?.removeItem('onloc_avatar_debug');
+        } catch (_) {}
+        return false;
+      }
+
+      return (
+        window.sessionStorage?.getItem('onloc_avatar_debug') === '1' ||
+        window.localStorage?.getItem('onloc_avatar_debug') === '1'
+      );
     } catch (_) {
       return false;
     }
@@ -129,12 +149,24 @@ const AvatarEditorMobile = ({
       logDebug('unhandled_rejection', { reason: String(event?.reason || '') }, 'error');
     };
 
+    const onPageHide = (event) => {
+      logDebug('page_hide', { persisted: Boolean(event?.persisted) }, 'warn');
+    };
+
+    const onBeforeUnload = () => {
+      logDebug('before_unload', {}, 'warn');
+    };
+
     window.addEventListener('error', onWindowError);
     window.addEventListener('unhandledrejection', onUnhandledRejection);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('beforeunload', onBeforeUnload);
 
     return () => {
       window.removeEventListener('error', onWindowError);
       window.removeEventListener('unhandledrejection', onUnhandledRejection);
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('beforeunload', onBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
