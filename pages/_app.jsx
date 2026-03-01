@@ -155,8 +155,17 @@ useEffect(() => {
     // SPEED: вместо тяжёлого getSession с 10с таймаутом подписываемся и используем session из колбэка
     const { data: authListener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       console.log('[authStateChange] Event:', event);
-      setSession(nextSession || null);
-      setUser(nextSession?.user ?? null);
+      // На части Android/WebView во время возврата из file picker возможны транзиентные
+      // события без nextSession. Не сбрасываем user/session в null, кроме реального SIGNED_OUT,
+      // чтобы не размонтировать dashboard и не оборвать выбор файла.
+      setSession((prev) => {
+        if (nextSession) return nextSession;
+        return event === 'SIGNED_OUT' ? null : prev;
+      });
+      setUser((prev) => {
+        if (nextSession?.user) return nextSession.user;
+        return event === 'SIGNED_OUT' ? null : prev;
+      });
       setLoading(false);
       cacheSessionInPreferences(nextSession).catch((error) => {
         console.warn('[mobile] cache session failed:', error);

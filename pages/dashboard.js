@@ -17,7 +17,10 @@ export default function Dashboard({ initialSection, initialTrips, initialTripId 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  if (loading || isMobile === null) return <div>Loading...</div>;
+  // Важно: не размонтируем Dashboard при кратковременных auth-loading переходах,
+  // иначе mobile file picker (avatar input) может оборваться в момент возврата из камеры/галереи.
+  if (isMobile === null) return <div>Loading...</div>;
+  if (!user && loading) return <div>Loading...</div>;
   if (!user) {
     router.push('/auth');
     return null;

@@ -57,6 +57,7 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
   const [removingId, setRemovingId] = useState(null);
   const [settingPrimaryId, setSettingPrimaryId] = useState(null);
   const syncOnceRef = useRef(false);
+  const profileLoadedRef = useRef(false);
 
   const toast = useCallback((text, ms = 2500) => {
     setMessage(text);
@@ -139,8 +140,8 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
   };
 
   // ===== загрузка профиля =====
-  const fetchProfile = useCallback(async () => {
-    setIsLoading(true);
+  const fetchProfile = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     try {
       if (!supabase) throw new Error('no supabase');
       if (!session || !user) throw new Error('no session');
@@ -164,11 +165,12 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
         about: data?.about || '',
         phone: data?.phone || '+7',
       });
+      profileLoadedRef.current = true;
     } catch (error) {
       console.error('Ошибка загрузки профиля:', { message: error?.message, stack: error?.stack });
       toast('Не удалось загрузить профиль', 3000);
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, [supabase, session, user?.id, toast]);
 
@@ -439,7 +441,7 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
   // ===== init =====
   useEffect(() => {
     if (user && session) {
-      fetchProfile();
+      fetchProfile({ silent: profileLoadedRef.current });
 
       refreshBothScopes();
 
@@ -448,7 +450,7 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
         syncBothAndLoad();
       }
     }
-  }, [user?.id, session?.access_token, fetchProfile, refreshBothScopes, syncBothAndLoad]);
+  }, [user?.id, Boolean(session), fetchProfile, refreshBothScopes, syncBothAndLoad]);
 
   if (isLoading) {
     return (
