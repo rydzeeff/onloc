@@ -152,6 +152,31 @@ useEffect(() => {
       setLoading(false);
     }, INITIAL_CAP_MS);
 
+    // Глобальные хелперы для диагностики аватара (чтобы не падать,
+    // если консольная команда вызвана до монтирования AvatarEditorMobile).
+    if (typeof window !== 'undefined') {
+      if (typeof window.onlocAvatarDebugClear !== 'function') {
+        window.onlocAvatarDebugClear = () => {
+          try {
+            window.localStorage?.removeItem('onloc_avatar_debug_logs');
+            window.__onlocAvatarDebugLogs = [];
+          } catch (_) {}
+        };
+      }
+
+      if (typeof window.onlocAvatarDebugDump !== 'function') {
+        window.onlocAvatarDebugDump = () => {
+          try {
+            const logs = JSON.parse(window.localStorage?.getItem('onloc_avatar_debug_logs') || '[]');
+            console.log('[AvatarDebug][dump]', logs);
+            return logs;
+          } catch (_) {
+            return [];
+          }
+        };
+      }
+    }
+
     // SPEED: вместо тяжёлого getSession с 10с таймаутом подписываемся и используем session из колбэка
     const { data: authListener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       console.log('[authStateChange] Event:', event);
