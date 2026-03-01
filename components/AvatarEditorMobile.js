@@ -40,6 +40,8 @@ const AvatarEditorMobile = ({
     if (text) setTimeout(() => setMessage(null), ms);
   };
 
+  const galleryAccept = '.jpg,.jpeg,.png,.webp,.bmp,.gif';
+
   // Освобождаем blob-url, чтобы не текла память
   useEffect(() => {
     return () => {
@@ -123,6 +125,20 @@ const AvatarEditorMobile = ({
       startPickWatch();
       return;
     }
+
+    const isImageByMime = String(file.type || '').startsWith('image/');
+    const isImageByName = /\.(jpe?g|png|webp|bmp|gif)$/i.test(String(file.name || ''));
+
+    if (!isImageByMime && !isImageByName) {
+      toast('Выберите файл изображения из галереи');
+      try {
+        input.value = '';
+      } catch (_) {}
+      pendingPickRef.current = false;
+      clearPickWatch();
+      return;
+    }
+
     processPickedFile(file, input);
   };
 
@@ -457,7 +473,9 @@ const AvatarEditorMobile = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            // Не используем image/*, чтобы не провоцировать системный сценарий "Снять фото".
+            // На части браузеров это снижает шанс показа камеры и оставляет выбор готового файла.
+            accept={galleryAccept}
             className={styles.fileOverlay}
             onPointerDown={(e) => {
               // фиксируем ожидание результата выбора
