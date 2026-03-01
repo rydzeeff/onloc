@@ -32,11 +32,15 @@ const AvatarEditorMobile = ({
 
   // Помогает понимать “ждём ли мы результат выбора”
   const pendingPickRef = useRef(false);
+  const pickWatchIntervalRef = useRef(null);
+  const pickWatchTimeoutRef = useRef(null);
 
   const toast = (text, ms = 3000) => {
     setMessage(text);
     if (text) setTimeout(() => setMessage(null), ms);
   };
+
+  const galleryAccept = '.jpg,.jpeg,.png,.webp,.bmp,.gif';
 
   // Освобождаем blob-url, чтобы не текла память
   useEffect(() => {
@@ -84,10 +88,57 @@ const AvatarEditorMobile = ({
     return false;
   };
 
+  const clearPickWatch = () => {
+    if (pickWatchIntervalRef.current) {
+      clearInterval(pickWatchIntervalRef.current);
+      pickWatchIntervalRef.current = null;
+    }
+    if (pickWatchTimeoutRef.current) {
+      clearTimeout(pickWatchTimeoutRef.current);
+      pickWatchTimeoutRef.current = null;
+    }
+  };
+
+  const startPickWatch = () => {
+    clearPickWatch();
+
+    pickWatchIntervalRef.current = setInterval(() => {
+      if (!pendingPickRef.current) {
+        clearPickWatch();
+        return;
+      }
+
+      if (tryPickFromInput()) {
+        clearPickWatch();
+      }
+    }, 250);
+
+    pickWatchTimeoutRef.current = setTimeout(() => {
+      clearPickWatch();
+    }, 15000);
+  };
+
   const handleImageSelect = (e) => {
     const input = e?.currentTarget || e?.target;
     const file = input?.files?.[0];
-    if (!file) return;
+    if (!file) {
+      startPickWatch();
+      return;
+    }
+
+    const isImageByMime = String(file.type || '').startsWith('image/');
+    const isImageByName = /\.(jpe?g|png|webp|bmp|gif)$/i.test(String(file.name || ''));
+
+    if (!isImageByMime && !isImageByName) {
+      toast('Выберите файл изображения из галереи');
+      try {
+        input.value = '';
+      } catch (_) {}
+      pendingPickRef.current = false;
+      clearPickWatch();
+      return;
+    }
+
     processPickedFile(file, input);
   };
 
@@ -122,6 +173,7 @@ const AvatarEditorMobile = ({
     window.addEventListener('pageshow', onPageShow);
 
     return () => {
+      clearPickWatch();
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pageshow', onPageShow);
@@ -421,7 +473,9 @@ const AvatarEditorMobile = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            // Не используем image/*, чтобы не провоцировать системный сценарий "Снять фото".
+            // На части браузеров это снижает шанс показа камеры и оставляет выбор готового файла.
+            accept={galleryAccept}
             className={styles.fileOverlay}
             onPointerDown={(e) => {
               // фиксируем ожидание результата выбора
@@ -431,6 +485,7 @@ const AvatarEditorMobile = ({
                 return;
               }
               pendingPickRef.current = true;
+              startPickWatch();
             }}
             onClick={(e) => {
               if (!canEditAvatar) {
@@ -440,6 +495,7 @@ const AvatarEditorMobile = ({
               }
               // НИЧЕГО НЕ СБРАСЫВАЕМ ЗДЕСЬ — это как раз может ломать камеру на Android
               pendingPickRef.current = true;
+              startPickWatch();
             }}
             onChange={handleImageSelect}
             onInput={handleImageSelect} // страховка для Android/WebView
