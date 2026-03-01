@@ -637,27 +637,22 @@ const AvatarEditorMobile = ({
             // На части браузеров это снижает шанс показа камеры и оставляет выбор готового файла.
             accept={galleryAccept}
             className={styles.fileOverlay}
-            onPointerDown={(e) => {
-              // фиксируем ожидание результата выбора
-              if (!canEditAvatar) {
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-              }
-              pendingPickRef.current = true;
-              logDebug('input_pointer_down');
-              startPickWatch();
-            }}
             onClick={(e) => {
               if (!canEditAvatar) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
               }
-              // НИЧЕГО НЕ СБРАСЫВАЕМ ЗДЕСЬ — это как раз может ломать камеру на Android
-              pendingPickRef.current = true;
-              logDebug('input_click');
-              startPickWatch();
+
+              // В Яндекс/Android дублирующиеся pointer/click перед открытием picker могут
+              // приводить к нестабильному поведению. Оставляем единый вход через click.
+              if (!pendingPickRef.current) {
+                pendingPickRef.current = true;
+                logDebug('input_click');
+                startPickWatch();
+              } else {
+                logDebug('input_click_duplicate', {}, 'warn');
+              }
             }}
             onChange={handleImageSelect}
             onInput={handleImageSelect} // страховка для Android/WebView
