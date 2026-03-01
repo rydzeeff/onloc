@@ -36,6 +36,16 @@ const AvatarEditorMobile = ({
   const pickWatchTimeoutRef = useRef(null);
   const debugEnabledRef = useRef(false);
 
+  const setGlobalPickPending = (value) => {
+    if (typeof window === 'undefined') return;
+    window.__onlocAvatarPickPending = Boolean(value);
+  };
+
+  const getGlobalPickPending = () => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(window.__onlocAvatarPickPending);
+  };
+
   const readDebugEnabled = () => {
     if (typeof window === 'undefined') return false;
     try {
@@ -107,6 +117,12 @@ const AvatarEditorMobile = ({
     debugEnabledRef.current = readDebugEnabled();
 
     if (typeof window === 'undefined') return;
+
+    if (getGlobalPickPending()) {
+      pendingPickRef.current = true;
+      logDebug('resume_pick_watch_after_remount');
+      startPickWatch();
+    }
 
     if (debugEnabledRef.current) {
       logDebug('debug_enabled', {
@@ -213,6 +229,7 @@ const AvatarEditorMobile = ({
     }
 
     pendingPickRef.current = false;
+    setGlobalPickPending(false);
     return true;
   };
 
@@ -225,6 +242,11 @@ const AvatarEditorMobile = ({
 
   const clearPickWatch = (reason = 'manual') => {
     logDebug('pick_watch_clear', { reason });
+
+    if (reason === 'timeout' || reason === 'manual' || reason === 'pending_false') {
+      pendingPickRef.current = false;
+      setGlobalPickPending(false);
+    }
 
     if (pickWatchIntervalRef.current) {
       clearInterval(pickWatchIntervalRef.current);
@@ -285,6 +307,7 @@ const AvatarEditorMobile = ({
         input.value = '';
       } catch (_) {}
       pendingPickRef.current = false;
+      setGlobalPickPending(false);
       clearPickWatch();
       return;
     }
@@ -604,6 +627,7 @@ const AvatarEditorMobile = ({
     setStep('view');
     setSelectedImage(null);
     pendingPickRef.current = false;
+    setGlobalPickPending(false);
   };
 
   return (
@@ -648,6 +672,7 @@ const AvatarEditorMobile = ({
               // приводить к нестабильному поведению. Оставляем единый вход через click.
               if (!pendingPickRef.current) {
                 pendingPickRef.current = true;
+                setGlobalPickPending(true);
                 logDebug('input_click');
                 startPickWatch();
               } else {
