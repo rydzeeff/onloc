@@ -287,33 +287,65 @@ const AvatarEditorMobile = ({
       filesLength: input?.files?.length || 0,
       hasFile: Boolean(file),
     });
+
     if (!file) {
       logDebug('input_event_without_file', { eventType: e?.type }, 'warn');
       startPickWatch();
       return;
     }
 
-    const isImageByMime = String(file.type || '').startsWith('image/');
-    const isImageByName = /\.(jpe?g|png|webp|bmp|gif)$/i.test(String(file.name || ''));
-
-    if (!isImageByMime && !isImageByName) {
+    // На Android/WebView у валидного изображения type/name могут приходить пустыми,
+    // поэтому блокируем только заведомо пустой/битый файл.
+    if (!file.size || Number(file.size) <= 0) {
       logDebug(
-        'invalid_file_type',
+        'invalid_file_payload',
         { fileName: file?.name, fileType: file?.type, fileSize: file?.size },
         'warn'
       );
-      toast('Выберите файл изображения из галереи');
-      try {
-        input.value = '';
-      } catch (_) {}
+      toast('Не удалось получить файл изображения');
       pendingPickRef.current = false;
       setGlobalPickPending(false);
-      clearPickWatch();
+      clearPickWatch('empty_file');
       return;
     }
 
     processPickedFile(file, input);
   };
+
+  useEffect(() => {
+    if (step !== 'view') return;
+
+    const input = fileInputRef.current;
+    if (!input) return;
+
+    const onNativeInputEvent = (evt) => {
+      pendingPickRef.current = true;
+      setGlobalPickPending(true);
+
+      logDebug('native_input_event', {
+        eventType: evt?.type,
+        filesLength: input.files?.length || 0,
+        hasFile: Boolean(input.files?.[0]),
+      });
+
+      const file = input.files?.[0];
+      if (file) {
+        handleImageSelect({ currentTarget: input, type: `native:${evt?.type || 'event'}` });
+        clearPickWatch('native_file_detected');
+      } else {
+        startPickWatch();
+      }
+    };
+
+    input.addEventListener('change', onNativeInputEvent);
+    input.addEventListener('input', onNativeInputEvent);
+
+    return () => {
+      input.removeEventListener('change', onNativeInputEvent);
+      input.removeEventListener('input', onNativeInputEvent);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   /**
    * Android / Яндекс / WebView:
@@ -407,8 +439,26 @@ const AvatarEditorMobile = ({
       ctx.stroke();
     };
 
-    img.onload = draw;
-    if (img.complete) draw();
+    img.onerror = () => {
+      logDebug('img_decode_error', { src: selectedImage }, 'error');
+      toast('Это изображение не поддерживается браузером. Попробуйте JPG/PNG.');
+      setStep('view');
+      setSelectedImage(null);
+      pendingPickRef.current = false;
+      setGlobalPickPending(false);
+    };
+
+    if (typeof img.decode === 'function') {
+      img
+        .decode()
+        .then(draw)
+        .catch(() => {
+          if (typeof img.onerror === 'function') img.onerror();
+        });
+    } else {
+      img.onload = draw;
+      if (img.complete) draw();
+    }
   }, [step, selectedImage, crop]);
 
   // Touch-управление кропом
@@ -679,8 +729,6 @@ const AvatarEditorMobile = ({
                 logDebug('input_click_duplicate', {}, 'warn');
               }
             }}
-            onChange={handleImageSelect}
-            onInput={handleImageSelect} // страховка для Android/WebView
           />
         </div>
       )}
