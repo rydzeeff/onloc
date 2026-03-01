@@ -32,11 +32,160 @@ const AvatarEditorMobile = ({
 
   // Помогает понимать “ждём ли мы результат выбора”
   const pendingPickRef = useRef(false);
+  const pickWatchIntervalRef = useRef(null);
+  const pickWatchTimeoutRef = useRef(null);
+  const debugEnabledRef = useRef(false);
+
+  const setGlobalPickPending = (value) => {
+    if (typeof window === 'undefined') return;
+    window.__onlocAvatarPickPending = Boolean(value);
+  };
+
+  const getGlobalPickPending = () => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(window.__onlocAvatarPickPending);
+  };
+
+  const readDebugEnabled = () => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const href = String(window.location?.href || '');
+      const hasParamOn = /[?&#]avatarDebug=1(?:[&#]|$)/.test(href);
+      const hasParamOff = /[?&#]avatarDebug=0(?:[&#]|$)/.test(href);
+
+      if (hasParamOn) {
+        try {
+          window.localStorage?.setItem('onloc_avatar_debug', '1');
+          window.sessionStorage?.setItem('onloc_avatar_debug', '1');
+        } catch (_) {}
+        return true;
+      }
+
+      if (hasParamOff) {
+        try {
+          window.localStorage?.removeItem('onloc_avatar_debug');
+          window.sessionStorage?.removeItem('onloc_avatar_debug');
+        } catch (_) {}
+        return false;
+      }
+
+      return (
+        window.sessionStorage?.getItem('onloc_avatar_debug') === '1' ||
+        window.localStorage?.getItem('onloc_avatar_debug') === '1'
+      );
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const persistDebugEntry = (entry) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const key = 'onloc_avatar_debug_logs';
+      const raw = window.localStorage?.getItem(key);
+      const list = raw ? JSON.parse(raw) : [];
+      const next = [...list, entry].slice(-250);
+      window.localStorage?.setItem(key, JSON.stringify(next));
+      window.__onlocAvatarDebugLogs = next;
+    } catch (_) {}
+  };
+
+  const logDebug = (event, payload = {}, level = 'log') => {
+    if (!debugEnabledRef.current) return;
+
+    const entry = {
+      ts: new Date().toISOString(),
+      event,
+      payload,
+      level,
+    };
+
+    const logger =
+      level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
+    logger('[AvatarDebug]', event, payload);
+    persistDebugEntry(entry);
+  };
 
   const toast = (text, ms = 3000) => {
     setMessage(text);
     if (text) setTimeout(() => setMessage(null), ms);
   };
+
+  const galleryAccept = '.jpg,.jpeg,.png,.webp,.bmp,.gif';
+
+  useEffect(() => {
+    debugEnabledRef.current = readDebugEnabled();
+
+    if (typeof window === 'undefined') return;
+
+    if (getGlobalPickPending()) {
+      pendingPickRef.current = true;
+      logDebug('resume_pick_watch_after_remount');
+      startPickWatch();
+    }
+
+    if (debugEnabledRef.current) {
+      logDebug('debug_enabled', {
+        userAgent: window.navigator?.userAgent,
+        href: window.location?.href,
+      });
+    }
+
+    window.onlocAvatarDebugDump = () => {
+      try {
+        const logs = JSON.parse(window.localStorage?.getItem('onloc_avatar_debug_logs') || '[]');
+        console.log('[AvatarDebug][dump]', logs);
+        return logs;
+      } catch (_) {
+        return [];
+      }
+    };
+
+    window.onlocAvatarDebugClear = () => {
+      try {
+        window.localStorage?.removeItem('onloc_avatar_debug_logs');
+        window.__onlocAvatarDebugLogs = [];
+      } catch (_) {}
+    };
+
+    const onWindowError = (event) => {
+      logDebug(
+        'window_error',
+        {
+          message: event?.message,
+          filename: event?.filename,
+          lineno: event?.lineno,
+          colno: event?.colno,
+        },
+        'error'
+      );
+    };
+
+    const onUnhandledRejection = (event) => {
+      logDebug('unhandled_rejection', { reason: String(event?.reason || '') }, 'error');
+    };
+
+    const onPageHide = (event) => {
+      logDebug('page_hide', { persisted: Boolean(event?.persisted) }, 'warn');
+    };
+
+    const onBeforeUnload = () => {
+      logDebug('before_unload', {}, 'warn');
+    };
+
+    window.addEventListener('error', onWindowError);
+    window.addEventListener('unhandledrejection', onUnhandledRejection);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('beforeunload', onBeforeUnload);
+
+    return () => {
+      window.removeEventListener('error', onWindowError);
+      window.removeEventListener('unhandledrejection', onUnhandledRejection);
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Освобождаем blob-url, чтобы не текла память
   useEffect(() => {
@@ -59,6 +208,12 @@ const AvatarEditorMobile = ({
       } catch (_) {}
     }
 
+    logDebug('process_picked_file', {
+      fileName: file?.name,
+      fileType: file?.type,
+      fileSize: file?.size,
+    });
+
     const url = URL.createObjectURL(file);
     setSelectedImage(url);
     setStep('crop');
@@ -74,6 +229,7 @@ const AvatarEditorMobile = ({
     }
 
     pendingPickRef.current = false;
+    setGlobalPickPending(false);
     return true;
   };
 
@@ -84,10 +240,78 @@ const AvatarEditorMobile = ({
     return false;
   };
 
+  const clearPickWatch = (reason = 'manual') => {
+    logDebug('pick_watch_clear', { reason });
+
+    if (reason === 'timeout' || reason === 'manual' || reason === 'pending_false') {
+      pendingPickRef.current = false;
+      setGlobalPickPending(false);
+    }
+
+    if (pickWatchIntervalRef.current) {
+      clearInterval(pickWatchIntervalRef.current);
+      pickWatchIntervalRef.current = null;
+    }
+    if (pickWatchTimeoutRef.current) {
+      clearTimeout(pickWatchTimeoutRef.current);
+      pickWatchTimeoutRef.current = null;
+    }
+  };
+
+  const startPickWatch = () => {
+    clearPickWatch('restart');
+    logDebug('pick_watch_start');
+
+    pickWatchIntervalRef.current = setInterval(() => {
+      if (!pendingPickRef.current) {
+        clearPickWatch('pending_false');
+        return;
+      }
+
+      if (tryPickFromInput()) {
+        clearPickWatch('file_detected');
+      }
+    }, 250);
+
+    pickWatchTimeoutRef.current = setTimeout(() => {
+      clearPickWatch('timeout');
+    }, 15000);
+  };
+
   const handleImageSelect = (e) => {
     const input = e?.currentTarget || e?.target;
     const file = input?.files?.[0];
-    if (!file) return;
+
+    logDebug('input_event', {
+      eventType: e?.type,
+      filesLength: input?.files?.length || 0,
+      hasFile: Boolean(file),
+    });
+    if (!file) {
+      logDebug('input_event_without_file', { eventType: e?.type }, 'warn');
+      startPickWatch();
+      return;
+    }
+
+    const isImageByMime = String(file.type || '').startsWith('image/');
+    const isImageByName = /\.(jpe?g|png|webp|bmp|gif)$/i.test(String(file.name || ''));
+
+    if (!isImageByMime && !isImageByName) {
+      logDebug(
+        'invalid_file_type',
+        { fileName: file?.name, fileType: file?.type, fileSize: file?.size },
+        'warn'
+      );
+      toast('Выберите файл изображения из галереи');
+      try {
+        input.value = '';
+      } catch (_) {}
+      pendingPickRef.current = false;
+      setGlobalPickPending(false);
+      clearPickWatch();
+      return;
+    }
+
     processPickedFile(file, input);
   };
 
@@ -99,6 +323,7 @@ const AvatarEditorMobile = ({
   useEffect(() => {
     const burstTry = () => {
       if (step !== 'view' && step !== 'crop') return;
+      logDebug('burst_try', { step, visibility: document.visibilityState });
 
       // серия попыток — на реальных устройствах files может появиться через 1–3 сек
       [0, 80, 200, 450, 900, 1600, 2500, 4000].forEach((ms) => {
@@ -122,6 +347,7 @@ const AvatarEditorMobile = ({
     window.addEventListener('pageshow', onPageShow);
 
     return () => {
+      clearPickWatch('effect_cleanup');
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pageshow', onPageShow);
@@ -284,10 +510,12 @@ const AvatarEditorMobile = ({
   }, [step]);
 
   const handleSaveCrop = async () => {
+    logDebug('save_crop_start', { type });
     setStep('uploading');
     setIsLoading(true);
 
     if (!supabase || !user?.id) {
+      logDebug('save_crop_no_session', { hasSupabase: Boolean(supabase), userId: user?.id }, 'error');
       toast('Нет активной сессии. Перезайдите в аккаунт.');
       setStep('view');
       setIsLoading(false);
@@ -296,6 +524,7 @@ const AvatarEditorMobile = ({
 
     const canvas = canvasRef.current;
     if (!canvas) {
+      logDebug('save_crop_no_canvas', {}, 'error');
       toast('Ошибка: нет данных изображения.');
       setStep('view');
       setIsLoading(false);
@@ -307,6 +536,7 @@ const AvatarEditorMobile = ({
     const croppedCtx = croppedCanvas.getContext('2d');
 
     if (!croppedCtx) {
+      logDebug('save_crop_no_context', {}, 'error');
       toast('Ошибка подготовки изображения.');
       setStep('view');
       setIsLoading(false);
@@ -320,6 +550,7 @@ const AvatarEditorMobile = ({
 
     const blob = await new Promise((resolve) => croppedCanvas.toBlob(resolve, 'image/jpeg', 0.9));
     if (!blob) {
+      logDebug('save_crop_blob_failed', {}, 'error');
       toast('Ошибка: не удалось создать файл изображения.');
       setStep('view');
       setIsLoading(false);
@@ -338,6 +569,7 @@ const AvatarEditorMobile = ({
 
     const { error: uploadError } = await supabase.storage.from(bucket).upload(uploadPath, file, { upsert: true });
     if (uploadError) {
+      logDebug('upload_error', { message: uploadError?.message, bucket, uploadPath }, 'error');
       toast('Ошибка загрузки аватара');
       setStep('view');
       setIsLoading(false);
@@ -377,8 +609,10 @@ const AvatarEditorMobile = ({
     }
 
     if (updateError) {
+      logDebug('profile_update_error', { message: updateError?.message, type }, 'error');
       toast(updateError?.message ? `Ошибка сохранения аватара: ${updateError.message}` : 'Ошибка сохранения аватара');
     } else {
+      logDebug('avatar_update_success', { publicUrl, type });
       updateAvatarUrl?.(publicUrl);
       toast('Аватар успешно обновлён');
       setStep('view');
@@ -389,9 +623,11 @@ const AvatarEditorMobile = ({
   };
 
   const handleCancel = () => {
+    logDebug('crop_cancel');
     setStep('view');
     setSelectedImage(null);
     pendingPickRef.current = false;
+    setGlobalPickPending(false);
   };
 
   return (
@@ -421,25 +657,27 @@ const AvatarEditorMobile = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            // Не используем image/*, чтобы не провоцировать системный сценарий "Снять фото".
+            // На части браузеров это снижает шанс показа камеры и оставляет выбор готового файла.
+            accept={galleryAccept}
             className={styles.fileOverlay}
-            onPointerDown={(e) => {
-              // фиксируем ожидание результата выбора
-              if (!canEditAvatar) {
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-              }
-              pendingPickRef.current = true;
-            }}
             onClick={(e) => {
               if (!canEditAvatar) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
               }
-              // НИЧЕГО НЕ СБРАСЫВАЕМ ЗДЕСЬ — это как раз может ломать камеру на Android
-              pendingPickRef.current = true;
+
+              // В Яндекс/Android дублирующиеся pointer/click перед открытием picker могут
+              // приводить к нестабильному поведению. Оставляем единый вход через click.
+              if (!pendingPickRef.current) {
+                pendingPickRef.current = true;
+                setGlobalPickPending(true);
+                logDebug('input_click');
+                startPickWatch();
+              } else {
+                logDebug('input_click_duplicate', {}, 'warn');
+              }
             }}
             onChange={handleImageSelect}
             onInput={handleImageSelect} // страховка для Android/WebView
