@@ -177,6 +177,11 @@
   outline: none;
 }
 
+.input::placeholder,
+.phoneInput::placeholder {
+  color: #9ca3af;
+}
+
 .input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
@@ -382,6 +387,13 @@
   display: none;
 }
 
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
+.compactInputGroup {
+  gap: 6px;
+}
+
+=======
+>>>>>>> main
 .keyboardNextButton {
   position: fixed;
   left: 12px;
