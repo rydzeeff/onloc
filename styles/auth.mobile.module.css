@@ -387,6 +387,11 @@
   display: none;
 }
 
+.actionButtonHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .compactInputGroup {
   gap: 6px;
 }

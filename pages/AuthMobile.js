@@ -34,7 +34,7 @@ export default function AuthMobile({ initialMode, router }) {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(null);
   const initialViewportHeightRef = useRef(0);
-
+  const compactActionLockRef = useRef(false);
 
   const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
   const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
@@ -147,7 +147,6 @@ export default function AuthMobile({ initialMode, router }) {
     viewport?.addEventListener('scroll', updateKeyboardState);
     document.addEventListener('focusin', updateKeyboardState);
     document.addEventListener('focusout', handleFocusOut);
-
 
     return () => {
       window.removeEventListener('resize', updateKeyboardState);
@@ -492,11 +491,11 @@ export default function AuthMobile({ initialMode, router }) {
     }
   };
 
-  const isRegisterStepOne = (mode === 'register' || mode === 'recover') && step === 1;
+  const isRegisterStepOne = mode === 'register' && step === 1;
+  const isRecoverPhoneStep = mode === 'recover' && step === 1;
   const isRecoverSetPasswordStep = mode === 'recover' && step === 3 && verified;
   const isLoginStep = mode === 'login';
   const isCompactKeyboardMode = keyboardOpen && (isRegisterStepOne || isLoginStep || isRecoverSetPasswordStep);
-
   const canContinueFromStepOne =
     !loading &&
     Boolean(phone) &&
@@ -505,7 +504,27 @@ export default function AuthMobile({ initialMode, router }) {
     (mode !== 'register' || (Boolean(password) && Boolean(confirmPassword) && !registerPasswordsMismatch && !registerPasswordWeak));
   const canSubmitLogin = !loading && Boolean(phone) && phone.length === 10 && phone.startsWith('9') && Boolean(password);
   const canSubmitRecover = !loading && !recoverPasswordsMismatch && !recoverPasswordWeak && Boolean(newPassword) && Boolean(newConfirmPassword);
+  const showRegisterStepOneButton = isRecoverPhoneStep || canContinueFromStepOne;
+  const showRecoverSubmitButton = canSubmitRecover;
+  const showCompactActionButton = isLoginStep || (isRegisterStepOne && canContinueFromStepOne) || (isRecoverSetPasswordStep && canSubmitRecover);
 
+  const handleCompactPrimaryAction = () => {
+    if (compactActionLockRef.current) return;
+    compactActionLockRef.current = true;
+    setTimeout(() => {
+      compactActionLockRef.current = false;
+    }, 250);
+
+    if (isLoginStep) {
+      login();
+      return;
+    }
+    if (isRecoverSetPasswordStep) {
+      recoverPassword();
+      return;
+    }
+    setStep(2);
+  };
 
   // -----------------------------
   // Render
@@ -664,7 +683,7 @@ export default function AuthMobile({ initialMode, router }) {
               <button
                 onClick={() => setStep(2)}
                 disabled={!canContinueFromStepOne}
-                className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''}`}
+                className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''} ${!showRegisterStepOneButton ? mobileStyles.actionButtonHidden : ''}`}
               >
                 Далее
               </button>
@@ -817,7 +836,7 @@ export default function AuthMobile({ initialMode, router }) {
               {recoverPasswordWeak && <div className={mobileStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
               {recoverPasswordsMismatch && <div className={mobileStyles.inlineError}>Пароли не совпадают</div>}
 
-              <button onClick={recoverPassword} disabled={!canSubmitRecover} className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''}`}>
+              <button onClick={recoverPassword} disabled={!canSubmitRecover} className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''} ${!showRecoverSubmitButton ? mobileStyles.actionButtonHidden : ''}`}>
                 {loading ? '...' : 'Сменить пароль'}
               </button>
             </div>
@@ -825,19 +844,10 @@ export default function AuthMobile({ initialMode, router }) {
         </div>
       </div>
 
-      {isCompactKeyboardMode && (
+      {isCompactKeyboardMode && showCompactActionButton && (
         <button
-          onClick={() => {
-            if (isLoginStep) {
-              login();
-              return;
-            }
-            if (isRecoverSetPasswordStep) {
-              recoverPassword();
-              return;
-            }
-            setStep(2);
-          }}
+          onPointerDown={handleCompactPrimaryAction}
+          onClick={handleCompactPrimaryAction}
           disabled={isLoginStep ? !canSubmitLogin : isRecoverSetPasswordStep ? !canSubmitRecover : !canContinueFromStepOne}
           className={`${mobileStyles.actionButton} ${mobileStyles.keyboardNextButton}`}
         >
