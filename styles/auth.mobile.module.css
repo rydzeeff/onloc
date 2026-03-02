@@ -177,6 +177,11 @@
   outline: none;
 }
 
+.input::placeholder,
+.phoneInput::placeholder {
+  color: #9ca3af;
+}
+
 .input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
@@ -363,6 +368,38 @@
   font-size: var(--font-size-sm);
   text-align: center;
   margin-top: -4px;
+}
+
+
+.containerKeyboard {
+  justify-content: flex-start;
+  padding: 8px 12px 88px;
+}
+
+.cardKeyboard {
+  margin-top: 8px;
+  margin-bottom: 0;
+  padding-top: 14px;
+  padding-bottom: 12px;
+}
+
+.inlineNextHidden {
+  display: none;
+}
+
+.compactInputGroup {
+  gap: 6px;
+}
+
+.keyboardNextButton {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  max-width: none;
+  width: auto;
+  z-index: 20;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 360px) {
