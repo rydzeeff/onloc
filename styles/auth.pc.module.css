@@ -114,6 +114,53 @@
   box-sizing: border-box;
 }
 
+.passwordWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.passwordWrapper .input {
+  padding-right: 50px;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-muted);
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eyeButton:hover {
+  color: var(--color-primary);
+}
+
+.iconSvg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.passwordError .input {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.inlineError {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: -6px;
+}
+
 .phoneInput:focus,
 .input:focus {
   outline: none;

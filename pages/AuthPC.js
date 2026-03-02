@@ -22,6 +22,13 @@ export default function AuthPC({ initialMode, router }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showNewConfirmPassword, setShowNewConfirmPassword] = useState(false);
+
+  const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
+  const recoverPasswordsMismatch = mode === 'recover' && verified && Boolean(newPassword) && Boolean(newConfirmPassword) && newPassword !== newConfirmPassword;
 
   useEffect(() => {
     setProcessing(true);
@@ -98,6 +105,24 @@ if (queryMethod) setVerificationMethod(queryMethod);
 
   const handlePhoneChange = (e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10));
 
+  function EyeIcon({ open = false }) {
+    return (
+      <svg className={pcStyles.iconSvg} viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="2" />
+        {!open && (
+          <path d="M4 20L20 4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        )}
+      </svg>
+    );
+  }
   const startVerification = async () => {
     setError('');
     if (!phone || phone.length !== 10 || !phone.startsWith('9')) {
@@ -402,6 +427,10 @@ const resetVerificationStep = () => {
     setConfirmPassword('');
     setNewPassword('');
     setNewConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setShowNewPassword(false);
+    setShowNewConfirmPassword(false);
     setError('');
     setResendCooldown(0);
     setCallFadeOut(false);
@@ -453,27 +482,38 @@ const resetVerificationStep = () => {
                 <>
                   <div className={pcStyles.inputGroup}>
                     <label className={pcStyles.label}>Пароль</label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={loading}
-                      className={pcStyles.input}
-                    />
+                    <div className={`${pcStyles.passwordWrapper} ${registerPasswordsMismatch ? pcStyles.passwordError : ''}`}>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
+                        className={pcStyles.input}
+                      />
+                      <button type="button" className={pcStyles.eyeButton} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
+                        <EyeIcon open={showPassword} />
+                      </button>
+                    </div>
                   </div>
 
                   {mode === 'register' && (
                     <div className={pcStyles.inputGroup}>
                       <label className={pcStyles.label}>Подтверждение пароля</label>
-                      <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        disabled={loading}
-                        className={pcStyles.input}
-                      />
+                      <div className={`${pcStyles.passwordWrapper} ${registerPasswordsMismatch ? pcStyles.passwordError : ''}`}>
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          disabled={loading}
+                          className={pcStyles.input}
+                        />
+                        <button type="button" className={pcStyles.eyeButton} onClick={() => setShowConfirmPassword((v) => !v)} aria-label={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                          <EyeIcon open={showConfirmPassword} />
+                        </button>
+                      </div>
                     </div>
                   )}
+                  {registerPasswordsMismatch && <div className={pcStyles.inlineError}>Пароли не совпадают</div>}
                 </>
               )}
 
@@ -576,25 +616,37 @@ const resetVerificationStep = () => {
                 <div className={`${pcStyles.formContent} ${pcStyles.fadeIn}`}>
                   <div className={pcStyles.inputGroup}>
                     <label className={pcStyles.label}>Новый пароль</label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      disabled={loading}
-                      className={pcStyles.input}
-                    />
+                    <div className={`${pcStyles.passwordWrapper} ${recoverPasswordsMismatch ? pcStyles.passwordError : ''}`}>
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        disabled={loading}
+                        className={pcStyles.input}
+                      />
+                      <button type="button" className={pcStyles.eyeButton} onClick={() => setShowNewPassword((v) => !v)} aria-label={showNewPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewPassword ? "Скрыть пароль" : "Показать пароль"}>
+                        <EyeIcon open={showNewPassword} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className={pcStyles.inputGroup}>
                     <label className={pcStyles.label}>Подтвердите пароль</label>
-                    <input
-                      type="password"
-                      value={newConfirmPassword}
-                      onChange={(e) => setNewConfirmPassword(e.target.value)}
-                      disabled={loading}
-                      className={pcStyles.input}
-                    />
+                    <div className={`${pcStyles.passwordWrapper} ${recoverPasswordsMismatch ? pcStyles.passwordError : ''}`}>
+                      <input
+                        type={showNewConfirmPassword ? 'text' : 'password'}
+                        value={newConfirmPassword}
+                        onChange={(e) => setNewConfirmPassword(e.target.value)}
+                        disabled={loading}
+                        className={pcStyles.input}
+                      />
+                      <button type="button" className={pcStyles.eyeButton} onClick={() => setShowNewConfirmPassword((v) => !v)} aria-label={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                        <EyeIcon open={showNewConfirmPassword} />
+                      </button>
+                    </div>
                   </div>
+
+                  {recoverPasswordsMismatch && <div className={pcStyles.inlineError}>Пароли не совпадают</div>}
 
                   <div className={pcStyles.buttonWrapper}>
                     <button type="submit" disabled={loading} className={pcStyles.actionButton}>
