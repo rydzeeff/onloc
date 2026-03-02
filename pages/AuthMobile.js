@@ -35,6 +35,7 @@ export default function AuthMobile({ initialMode, router }) {
   const [viewportHeight, setViewportHeight] = useState(null);
   const initialViewportHeightRef = useRef(0);
   const compactActionLockRef = useRef(false);
+  const compactControlSkipClickRef = useRef(false);
 
   const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
   const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
@@ -526,6 +527,25 @@ export default function AuthMobile({ initialMode, router }) {
     setStep(2);
   };
 
+  const handleCompactControlPointerDown = (event, action) => {
+    if (!isCompactKeyboardMode) return;
+    event.preventDefault();
+    compactControlSkipClickRef.current = true;
+    action();
+
+    setTimeout(() => {
+      compactControlSkipClickRef.current = false;
+    }, 0);
+  };
+
+  const handleCompactControlClick = (event, action) => {
+    if (compactControlSkipClickRef.current) {
+      event.preventDefault();
+      return;
+    }
+    action();
+  };
+
   // -----------------------------
   // Render
   // -----------------------------
@@ -604,7 +624,7 @@ export default function AuthMobile({ initialMode, router }) {
                     disabled={loading}
                     className={mobileStyles.input}
                   />
-                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
+                  <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowPassword((v) => !v))} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
                     <EyeIcon open={showPassword} />
                   </button>
                 </div>
@@ -615,7 +635,8 @@ export default function AuthMobile({ initialMode, router }) {
               </button>
 
               <button
-                onClick={() => handleSectionChange('recover')}
+                onPointerDown={(e) => handleCompactControlPointerDown(e, () => handleSectionChange('recover'))}
+                onClick={(e) => handleCompactControlClick(e, () => handleSectionChange('recover'))}
                 disabled={loading}
                 className={mobileStyles.secondaryButton}
               >
@@ -654,7 +675,7 @@ export default function AuthMobile({ initialMode, router }) {
                         disabled={loading}
                         className={mobileStyles.input}
                       />
-                      <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
+                      <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowPassword((v) => !v))} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
                         <EyeIcon open={showPassword} />
                       </button>
                     </div>
@@ -670,7 +691,7 @@ export default function AuthMobile({ initialMode, router }) {
                         disabled={loading}
                         className={mobileStyles.input}
                       />
-                      <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowConfirmPassword((v) => !v)} aria-label={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                      <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowConfirmPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowConfirmPassword((v) => !v))} aria-label={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
                         <EyeIcon open={showConfirmPassword} />
                       </button>
                     </div>
@@ -810,7 +831,7 @@ export default function AuthMobile({ initialMode, router }) {
                     disabled={loading}
                     className={mobileStyles.input}
                   />
-                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowNewPassword((v) => !v)} aria-label={showNewPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewPassword ? "Скрыть пароль" : "Показать пароль"}>
+                  <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowNewPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowNewPassword((v) => !v))} aria-label={showNewPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewPassword ? "Скрыть пароль" : "Показать пароль"}>
                     <EyeIcon open={showNewPassword} />
                   </button>
                 </div>
@@ -827,7 +848,7 @@ export default function AuthMobile({ initialMode, router }) {
                     disabled={loading}
                     className={mobileStyles.input}
                   />
-                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowNewConfirmPassword((v) => !v)} aria-label={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                  <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowNewConfirmPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowNewConfirmPassword((v) => !v))} aria-label={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
                     <EyeIcon open={showNewConfirmPassword} />
                   </button>
                 </div>
