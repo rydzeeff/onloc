@@ -31,6 +31,8 @@ export default function AuthMobile({ initialMode, router }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showNewConfirmPassword, setShowNewConfirmPassword] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(null);
 
   const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
   const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
@@ -103,6 +105,32 @@ export default function AuthMobile({ initialMode, router }) {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const updateKeyboardState = () => {
+      const viewport = window.visualViewport;
+      const currentHeight = viewport ? Math.round(viewport.height) : window.innerHeight;
+      const heightDiff = window.innerHeight - currentHeight;
+
+      setViewportHeight(currentHeight);
+      setKeyboardOpen(heightDiff > 150);
+    };
+
+    updateKeyboardState();
+
+    const viewport = window.visualViewport;
+    window.addEventListener('resize', updateKeyboardState);
+    viewport?.addEventListener('resize', updateKeyboardState);
+    viewport?.addEventListener('scroll', updateKeyboardState);
+
+    return () => {
+      window.removeEventListener('resize', updateKeyboardState);
+      viewport?.removeEventListener('resize', updateKeyboardState);
+      viewport?.removeEventListener('scroll', updateKeyboardState);
+    };
+  }, []);
 
   // -----------------------------
   // Helpers
@@ -438,13 +466,26 @@ export default function AuthMobile({ initialMode, router }) {
     }
   };
 
+  const isRegisterStepOne = (mode === 'register' || mode === 'recover') && step === 1;
+  const isCompactKeyboardMode = keyboardOpen && isRegisterStepOne;
+  const canContinueFromStepOne =
+    !loading &&
+    Boolean(phone) &&
+    phone.length === 10 &&
+    phone.startsWith('9') &&
+    (mode !== 'register' || (Boolean(password) && Boolean(confirmPassword) && !registerPasswordsMismatch && !registerPasswordWeak));
+
   // -----------------------------
   // Render
   // -----------------------------
   return (
-    <div className={mobileStyles.container}>
-      <div className={mobileStyles.card}>
-        <div className={mobileStyles.header}>
+    <div
+      className={`${mobileStyles.container} ${isCompactKeyboardMode ? mobileStyles.containerKeyboard : ''}`}
+      style={viewportHeight ? { minHeight: `${viewportHeight}px` } : undefined}
+    >
+      <div className={`${mobileStyles.card} ${isCompactKeyboardMode ? mobileStyles.cardKeyboard : ''}`}>
+        {!isCompactKeyboardMode && (
+          <div className={mobileStyles.header}>
           <h1 className={mobileStyles.title}>
             {mode === 'login' ? 'Вход' : mode === 'register' ? 'Регистрация' : 'Восстановление'}
           </h1>
@@ -455,9 +496,10 @@ export default function AuthMobile({ initialMode, router }) {
               ? 'Создайте аккаунт для участия в поездках'
               : 'Подтвердите номер и задайте новый пароль'}
           </p>
-        </div>
+          </div>
+        )}
 
-        <div className={mobileStyles.tabs}>
+        {!isCompactKeyboardMode && <div className={mobileStyles.tabs}>
           <button
             className={`${mobileStyles.tabButton} ${mode === 'login' ? mobileStyles.activeTab : ''}`}
             onClick={() => handleSectionChange('login')}
@@ -472,7 +514,7 @@ export default function AuthMobile({ initialMode, router }) {
           >
             Регистрация
           </button>
-        </div>
+        </div>}
 
         {error && <div className={mobileStyles.error}>{error}</div>}
 
@@ -586,14 +628,8 @@ export default function AuthMobile({ initialMode, router }) {
 
               <button
                 onClick={() => setStep(2)}
-                disabled={
-                  loading ||
-                  !phone ||
-                  phone.length !== 10 ||
-                  !phone.startsWith('9') ||
-                  (mode === 'register' && (!password || !confirmPassword || registerPasswordsMismatch || registerPasswordWeak))
-                }
-                className={mobileStyles.actionButton}
+                disabled={!canContinueFromStepOne}
+                className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''}`}
               >
                 Далее
               </button>
@@ -751,6 +787,16 @@ export default function AuthMobile({ initialMode, router }) {
           )}
         </div>
       </div>
+
+      {isCompactKeyboardMode && (
+        <button
+          onClick={() => setStep(2)}
+          disabled={!canContinueFromStepOne}
+          className={`${mobileStyles.actionButton} ${mobileStyles.keyboardNextButton}`}
+        >
+          Далее
+        </button>
+      )}
     </div>
   );
 }
