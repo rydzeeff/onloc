@@ -387,10 +387,13 @@
   display: none;
 }
 
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
 .compactInputGroup {
   gap: 6px;
 }
 
+=======
+>>>>>>> main
 .keyboardNextButton {
   position: fixed;
   left: 12px;

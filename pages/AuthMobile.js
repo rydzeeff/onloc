@@ -33,7 +33,10 @@ export default function AuthMobile({ initialMode, router }) {
   const [showNewConfirmPassword, setShowNewConfirmPassword] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(null);
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
   const initialViewportHeightRef = useRef(0);
+=======
+>>>>>>> main
 
   const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
   const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
@@ -110,6 +113,7 @@ export default function AuthMobile({ initialMode, router }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
     const isInputElement = (element) => {
       if (!element || !(element instanceof HTMLElement)) return false;
       const tag = element.tagName;
@@ -138,21 +142,38 @@ export default function AuthMobile({ initialMode, router }) {
       ? Math.round(window.visualViewport.height)
       : window.innerHeight;
 
+=======
+    const updateKeyboardState = () => {
+      const viewport = window.visualViewport;
+      const currentHeight = viewport ? Math.round(viewport.height) : window.innerHeight;
+      const heightDiff = window.innerHeight - currentHeight;
+
+      setViewportHeight(currentHeight);
+      setKeyboardOpen(heightDiff > 150);
+    };
+
+>>>>>>> main
     updateKeyboardState();
 
     const viewport = window.visualViewport;
     window.addEventListener('resize', updateKeyboardState);
     viewport?.addEventListener('resize', updateKeyboardState);
     viewport?.addEventListener('scroll', updateKeyboardState);
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
     document.addEventListener('focusin', updateKeyboardState);
     document.addEventListener('focusout', handleFocusOut);
+=======
+>>>>>>> main
 
     return () => {
       window.removeEventListener('resize', updateKeyboardState);
       viewport?.removeEventListener('resize', updateKeyboardState);
       viewport?.removeEventListener('scroll', updateKeyboardState);
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
       document.removeEventListener('focusin', updateKeyboardState);
       document.removeEventListener('focusout', handleFocusOut);
+=======
+>>>>>>> main
     };
   }, []);
 
@@ -491,17 +512,24 @@ export default function AuthMobile({ initialMode, router }) {
   };
 
   const isRegisterStepOne = (mode === 'register' || mode === 'recover') && step === 1;
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
   const isRecoverSetPasswordStep = mode === 'recover' && step === 3 && verified;
   const isLoginStep = mode === 'login';
   const isCompactKeyboardMode = keyboardOpen && (isRegisterStepOne || isLoginStep || isRecoverSetPasswordStep);
+=======
+  const isCompactKeyboardMode = keyboardOpen && isRegisterStepOne;
+>>>>>>> main
   const canContinueFromStepOne =
     !loading &&
     Boolean(phone) &&
     phone.length === 10 &&
     phone.startsWith('9') &&
     (mode !== 'register' || (Boolean(password) && Boolean(confirmPassword) && !registerPasswordsMismatch && !registerPasswordWeak));
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
   const canSubmitLogin = !loading && Boolean(phone) && phone.length === 10 && phone.startsWith('9') && Boolean(password);
   const canSubmitRecover = !loading && !recoverPasswordsMismatch && !recoverPasswordWeak && Boolean(newPassword) && Boolean(newConfirmPassword);
+=======
+>>>>>>> main
 
   // -----------------------------
   // Render
@@ -823,6 +851,7 @@ export default function AuthMobile({ initialMode, router }) {
 
       {isCompactKeyboardMode && (
         <button
+<<<<<<< codex/improve-phone-and-password-input-flow-bfhk24
           onClick={() => {
             if (isLoginStep) {
               login();
@@ -838,6 +867,13 @@ export default function AuthMobile({ initialMode, router }) {
           className={`${mobileStyles.actionButton} ${mobileStyles.keyboardNextButton}`}
         >
           {isLoginStep ? 'Войти' : isRecoverSetPasswordStep ? 'Сменить пароль' : 'Далее'}
+=======
+          onClick={() => setStep(2)}
+          disabled={!canContinueFromStepOne}
+          className={`${mobileStyles.actionButton} ${mobileStyles.keyboardNextButton}`}
+        >
+          Далее
+>>>>>>> main
         </button>
       )}
     </div>
