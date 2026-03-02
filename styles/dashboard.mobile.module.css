@@ -338,6 +338,22 @@ overflow: visible;
   color: #64748b;
 }
 
+.repeatTripButton {
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.repeatTripButton:hover {
+  background: #1d4ed8;
+}
+
 /* Настройки - форма с большими тап-зонами */
 .settingsForm {
   padding: 0;
