@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-export default function TbankGetStatePage() {
+export default function TbankGetStatePage({ embedded = false }) {
   const [paymentId, setPaymentId] = useState('');
   const [clientIp, setClientIp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -12,6 +12,15 @@ export default function TbankGetStatePage() {
   const [transactions, setTransactions] = useState([]);
   const [selectedPaymentId, setSelectedPaymentId] = useState('');
   const [isE2C, setIsE2C] = useState(false);
+
+  if (!embedded) {
+    return (
+      <div style={{ maxWidth: 760, margin: '40px auto', padding: '0 16px', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif' }}>
+        <h1 style={{ marginBottom: 8 }}>Нет прямого доступа</h1>
+        <p style={{ color: '#374151' }}>Эта страница доступна только внутри админки в разделе «Т-Банк».</p>
+      </div>
+    );
+  }
 
   const loadTransactions = async () => {
     setLoadingTransactions(true);

@@ -25,8 +25,8 @@ export default function AdminTbankToolsPage() {
         ))}
       </div>
 
-      {activeTool === 'getstate' && <TbankGetStatePage />}
-      {activeTool === 'checkorder' && <TbankCheckOrderPage />}
+      {activeTool === 'getstate' && <TbankGetStatePage embedded />}
+      {activeTool === 'checkorder' && <TbankCheckOrderPage embedded />}
     </div>
   );
 }

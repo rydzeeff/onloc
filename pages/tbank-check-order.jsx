@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-export default function TbankCheckOrderPage() {
+export default function TbankCheckOrderPage({ embedded = false }) {
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -10,6 +10,15 @@ export default function TbankCheckOrderPage() {
   const [error, setError] = useState('');
   const [orders, setOrders] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState('');
+
+  if (!embedded) {
+    return (
+      <div style={{ maxWidth: 760, margin: '40px auto', padding: '0 16px', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif' }}>
+        <h1 style={{ marginBottom: 8 }}>Нет прямого доступа</h1>
+        <p style={{ color: '#374151' }}>Эта страница доступна только внутри админки в разделе «Т-Банк».</p>
+      </div>
+    );
+  }
 
   const loadOrders = async () => {
     setLoadingOrders(true);
