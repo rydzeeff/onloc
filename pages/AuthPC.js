@@ -27,8 +27,16 @@ export default function AuthPC({ initialMode, router }) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showNewConfirmPassword, setShowNewConfirmPassword] = useState(false);
 
+  const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
   const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
   const recoverPasswordsMismatch = mode === 'recover' && verified && Boolean(newPassword) && Boolean(newConfirmPassword) && newPassword !== newConfirmPassword;
+  const registerPasswordWeak = mode === 'register' && Boolean(password) && !isPasswordComplex(password);
+  const recoverPasswordWeak = mode === 'recover' && verified && Boolean(newPassword) && !isPasswordComplex(newPassword);
+
+  const isPrimarySubmitDisabled =
+    loading ||
+    (!verificationSent && mode === 'register' && (registerPasswordsMismatch || registerPasswordWeak)) ||
+    (verificationSent && mode === 'recover' && verified && (recoverPasswordsMismatch || recoverPasswordWeak));
 
   useEffect(() => {
     setProcessing(true);
@@ -138,8 +146,8 @@ if (queryMethod) setVerificationMethod(queryMethod);
         setError('Пароли не совпадают');
         return;
       }
-      if (password.length < 8) {
-        setError('Пароль должен быть не менее 8 символов');
+      if (!isPasswordComplex(password)) {
+        setError('Пароль: минимум 8 символов, 1 заглавная буква и 1 цифра');
         return;
       }
     }
@@ -358,8 +366,8 @@ setVerificationSent(true);
       setError('Пароли не совпадают');
       return;
     }
-    if (newPassword.length < 8) {
-      setError('Пароль должен быть не менее 8 символов');
+    if (!isPasswordComplex(newPassword)) {
+      setError('Пароль: минимум 8 символов, 1 заглавная буква и 1 цифра');
       return;
     }
 
@@ -482,7 +490,7 @@ const resetVerificationStep = () => {
                 <>
                   <div className={pcStyles.inputGroup}>
                     <label className={pcStyles.label}>Пароль</label>
-                    <div className={`${pcStyles.passwordWrapper} ${registerPasswordsMismatch ? pcStyles.passwordError : ''}`}>
+                    <div className={`${pcStyles.passwordWrapper} ${(registerPasswordsMismatch || registerPasswordWeak) ? pcStyles.passwordError : ''}`}>
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={password}
@@ -513,6 +521,7 @@ const resetVerificationStep = () => {
                       </div>
                     </div>
                   )}
+                  {registerPasswordWeak && <div className={pcStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
                   {registerPasswordsMismatch && <div className={pcStyles.inlineError}>Пароли не совпадают</div>}
                 </>
               )}
@@ -540,7 +549,7 @@ const resetVerificationStep = () => {
               )}
 
               <div className={pcStyles.buttonWrapper}>
-                <button type="submit" disabled={loading} className={pcStyles.actionButton}>
+                <button type="submit" disabled={isPrimarySubmitDisabled} className={pcStyles.actionButton}>
                   {loading ? '...' : mode === 'login' ? 'Войти' : mode === 'register' ? 'Верификация' : 'Восстановить'}
                 </button>
               </div>
@@ -562,7 +571,7 @@ const resetVerificationStep = () => {
                     />
                   </div>
 
-                  <button type="submit" disabled={loading} className={pcStyles.actionButton}>
+                  <button type="submit" disabled={isPrimarySubmitDisabled} className={pcStyles.actionButton}>
                     {loading ? '...' : 'Подтвердить'}
                   </button>
 
@@ -616,7 +625,7 @@ const resetVerificationStep = () => {
                 <div className={`${pcStyles.formContent} ${pcStyles.fadeIn}`}>
                   <div className={pcStyles.inputGroup}>
                     <label className={pcStyles.label}>Новый пароль</label>
-                    <div className={`${pcStyles.passwordWrapper} ${recoverPasswordsMismatch ? pcStyles.passwordError : ''}`}>
+                    <div className={`${pcStyles.passwordWrapper} ${(recoverPasswordsMismatch || recoverPasswordWeak) ? pcStyles.passwordError : ''}`}>
                       <input
                         type={showNewPassword ? 'text' : 'password'}
                         value={newPassword}
@@ -646,10 +655,11 @@ const resetVerificationStep = () => {
                     </div>
                   </div>
 
+                  {recoverPasswordWeak && <div className={pcStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
                   {recoverPasswordsMismatch && <div className={pcStyles.inlineError}>Пароли не совпадают</div>}
 
                   <div className={pcStyles.buttonWrapper}>
-                    <button type="submit" disabled={loading} className={pcStyles.actionButton}>
+                    <button type="submit" disabled={isPrimarySubmitDisabled} className={pcStyles.actionButton}>
                       {loading ? '...' : 'Обновить пароль'}
                     </button>
                   </div>

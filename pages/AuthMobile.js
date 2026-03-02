@@ -32,8 +32,11 @@ export default function AuthMobile({ initialMode, router }) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showNewConfirmPassword, setShowNewConfirmPassword] = useState(false);
 
+  const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
   const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
   const recoverPasswordsMismatch = mode === 'recover' && verified && Boolean(newPassword) && Boolean(newConfirmPassword) && newPassword !== newConfirmPassword;
+  const registerPasswordWeak = mode === 'register' && Boolean(password) && !isPasswordComplex(password);
+  const recoverPasswordWeak = mode === 'recover' && verified && Boolean(newPassword) && !isPasswordComplex(newPassword);
 
   // -----------------------------
   // Effects
@@ -173,8 +176,8 @@ export default function AuthMobile({ initialMode, router }) {
       setError('Пароли не совпадают');
       return;
     }
-    if (mode === 'register' && password.length < 8) {
-      setError('Пароль должен быть не менее 8 символов');
+    if (mode === 'register' && !isPasswordComplex(password)) {
+      setError('Пароль: минимум 8 символов, 1 заглавная буква и 1 цифра');
       return;
     }
     if ((mode === 'register' || mode === 'recover') && !verificationMethod) {
@@ -358,8 +361,8 @@ export default function AuthMobile({ initialMode, router }) {
       setError('Пароли не совпадают');
       return;
     }
-    if (newPassword.length < 8) {
-      setError('Пароль должен быть не менее 8 символов');
+    if (!isPasswordComplex(newPassword)) {
+      setError('Пароль: минимум 8 символов, 1 заглавная буква и 1 цифра');
       return;
     }
 
@@ -548,7 +551,7 @@ export default function AuthMobile({ initialMode, router }) {
                 <>
                   <div className={mobileStyles.inputGroup}>
                     <label className={mobileStyles.label}>Пароль</label>
-                    <div className={`${mobileStyles.passwordWrapper} ${registerPasswordsMismatch ? mobileStyles.passwordError : ''}`}>
+                    <div className={`${mobileStyles.passwordWrapper} ${(registerPasswordsMismatch || registerPasswordWeak) ? mobileStyles.passwordError : ''}`}>
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={password}
@@ -576,13 +579,20 @@ export default function AuthMobile({ initialMode, router }) {
                       </button>
                     </div>
                   </div>
+                  {registerPasswordWeak && <div className={mobileStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
                   {registerPasswordsMismatch && <div className={mobileStyles.inlineError}>Пароли не совпадают</div>}
                 </>
               )}
 
               <button
                 onClick={() => setStep(2)}
-                disabled={loading || !phone || phone.length !== 10 || !phone.startsWith('9')}
+                disabled={
+                  loading ||
+                  !phone ||
+                  phone.length !== 10 ||
+                  !phone.startsWith('9') ||
+                  (mode === 'register' && (!password || !confirmPassword || registerPasswordsMismatch || registerPasswordWeak))
+                }
                 className={mobileStyles.actionButton}
               >
                 Далее
@@ -614,7 +624,11 @@ export default function AuthMobile({ initialMode, router }) {
                 </div>
               </div>
 
-              <button onClick={startVerification} disabled={loading || !verificationMethod} className={mobileStyles.actionButton}>
+              <button
+                onClick={startVerification}
+                disabled={loading || !verificationMethod || (mode === 'register' && (registerPasswordsMismatch || registerPasswordWeak))}
+                className={mobileStyles.actionButton}
+              >
                 {loading ? '...' : 'Продолжить'}
               </button>
             </div>
@@ -697,7 +711,7 @@ export default function AuthMobile({ initialMode, router }) {
             <div className={mobileStyles.formContent}>
               <div className={mobileStyles.inputGroup}>
                 <label className={mobileStyles.label}>Новый пароль</label>
-                <div className={`${mobileStyles.passwordWrapper} ${recoverPasswordsMismatch ? mobileStyles.passwordError : ''}`}>
+                <div className={`${mobileStyles.passwordWrapper} ${(recoverPasswordsMismatch || recoverPasswordWeak) ? mobileStyles.passwordError : ''}`}>
                   <input
                     type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
@@ -727,9 +741,10 @@ export default function AuthMobile({ initialMode, router }) {
                 </div>
               </div>
 
+              {recoverPasswordWeak && <div className={mobileStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
               {recoverPasswordsMismatch && <div className={mobileStyles.inlineError}>Пароли не совпадают</div>}
 
-              <button onClick={recoverPassword} disabled={loading} className={mobileStyles.actionButton}>
+              <button onClick={recoverPassword} disabled={loading || recoverPasswordsMismatch || recoverPasswordWeak} className={mobileStyles.actionButton}>
                 {loading ? '...' : 'Сменить пароль'}
               </button>
             </div>
