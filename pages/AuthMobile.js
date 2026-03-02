@@ -27,6 +27,16 @@ export default function AuthMobile({ initialMode, router }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showNewConfirmPassword, setShowNewConfirmPassword] = useState(false);
+
+  const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
+  const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
+  const recoverPasswordsMismatch = mode === 'recover' && verified && Boolean(newPassword) && Boolean(newConfirmPassword) && newPassword !== newConfirmPassword;
+  const registerPasswordWeak = mode === 'register' && Boolean(password) && !isPasswordComplex(password);
+  const recoverPasswordWeak = mode === 'recover' && verified && Boolean(newPassword) && !isPasswordComplex(newPassword);
 
   // -----------------------------
   // Effects
@@ -116,6 +126,24 @@ export default function AuthMobile({ initialMode, router }) {
     return { response, result };
   };
 
+  function EyeIcon({ open = false }) {
+    return (
+      <svg className={mobileStyles.iconSvg} viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="2" />
+        {!open && (
+          <path d="M4 20L20 4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        )}
+      </svg>
+    );
+  }
   function PhoneIcon() {
     return (
       <svg className={mobileStyles.topNavIcon} viewBox="0 0 24 24" aria-hidden="true">
@@ -148,8 +176,8 @@ export default function AuthMobile({ initialMode, router }) {
       setError('Пароли не совпадают');
       return;
     }
-    if (mode === 'register' && password.length < 8) {
-      setError('Пароль должен быть не менее 8 символов');
+    if (mode === 'register' && !isPasswordComplex(password)) {
+      setError('Пароль: минимум 8 символов, 1 заглавная буква и 1 цифра');
       return;
     }
     if ((mode === 'register' || mode === 'recover') && !verificationMethod) {
@@ -333,8 +361,8 @@ export default function AuthMobile({ initialMode, router }) {
       setError('Пароли не совпадают');
       return;
     }
-    if (newPassword.length < 8) {
-      setError('Пароль должен быть не менее 8 символов');
+    if (!isPasswordComplex(newPassword)) {
+      setError('Пароль: минимум 8 символов, 1 заглавная буква и 1 цифра');
       return;
     }
 
@@ -386,6 +414,10 @@ export default function AuthMobile({ initialMode, router }) {
     setConfirmPassword('');
     setNewPassword('');
     setNewConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setShowNewPassword(false);
+    setShowNewConfirmPassword(false);
     setError('');
     setResendCooldown(0);
 
@@ -470,13 +502,18 @@ export default function AuthMobile({ initialMode, router }) {
 
               <div className={mobileStyles.inputGroup}>
                 <label className={mobileStyles.label}>Пароль</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  className={mobileStyles.input}
-                />
+                <div className={mobileStyles.passwordWrapper}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    className={mobileStyles.input}
+                  />
+                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
+                    <EyeIcon open={showPassword} />
+                  </button>
+                </div>
               </div>
 
               <button onClick={login} disabled={loading} className={mobileStyles.actionButton}>
@@ -514,30 +551,48 @@ export default function AuthMobile({ initialMode, router }) {
                 <>
                   <div className={mobileStyles.inputGroup}>
                     <label className={mobileStyles.label}>Пароль</label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={loading}
-                      className={mobileStyles.input}
-                    />
+                    <div className={`${mobileStyles.passwordWrapper} ${(registerPasswordsMismatch || registerPasswordWeak) ? mobileStyles.passwordError : ''}`}>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
+                        className={mobileStyles.input}
+                      />
+                      <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
+                        <EyeIcon open={showPassword} />
+                      </button>
+                    </div>
                   </div>
                   <div className={mobileStyles.inputGroup}>
                     <label className={mobileStyles.label}>Подтвердите пароль</label>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      disabled={loading}
-                      className={mobileStyles.input}
-                    />
+                    <div className={`${mobileStyles.passwordWrapper} ${registerPasswordsMismatch ? mobileStyles.passwordError : ''}`}>
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={loading}
+                        className={mobileStyles.input}
+                      />
+                      <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowConfirmPassword((v) => !v)} aria-label={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                        <EyeIcon open={showConfirmPassword} />
+                      </button>
+                    </div>
                   </div>
+                  {registerPasswordWeak && <div className={mobileStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
+                  {registerPasswordsMismatch && <div className={mobileStyles.inlineError}>Пароли не совпадают</div>}
                 </>
               )}
 
               <button
                 onClick={() => setStep(2)}
-                disabled={loading || !phone || phone.length !== 10 || !phone.startsWith('9')}
+                disabled={
+                  loading ||
+                  !phone ||
+                  phone.length !== 10 ||
+                  !phone.startsWith('9') ||
+                  (mode === 'register' && (!password || !confirmPassword || registerPasswordsMismatch || registerPasswordWeak))
+                }
                 className={mobileStyles.actionButton}
               >
                 Далее
@@ -569,7 +624,11 @@ export default function AuthMobile({ initialMode, router }) {
                 </div>
               </div>
 
-              <button onClick={startVerification} disabled={loading || !verificationMethod} className={mobileStyles.actionButton}>
+              <button
+                onClick={startVerification}
+                disabled={loading || !verificationMethod || (mode === 'register' && (registerPasswordsMismatch || registerPasswordWeak))}
+                className={mobileStyles.actionButton}
+              >
                 {loading ? '...' : 'Продолжить'}
               </button>
             </div>
@@ -652,27 +711,40 @@ export default function AuthMobile({ initialMode, router }) {
             <div className={mobileStyles.formContent}>
               <div className={mobileStyles.inputGroup}>
                 <label className={mobileStyles.label}>Новый пароль</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  disabled={loading}
-                  className={mobileStyles.input}
-                />
+                <div className={`${mobileStyles.passwordWrapper} ${(recoverPasswordsMismatch || recoverPasswordWeak) ? mobileStyles.passwordError : ''}`}>
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={loading}
+                    className={mobileStyles.input}
+                  />
+                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowNewPassword((v) => !v)} aria-label={showNewPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewPassword ? "Скрыть пароль" : "Показать пароль"}>
+                    <EyeIcon open={showNewPassword} />
+                  </button>
+                </div>
               </div>
 
               <div className={mobileStyles.inputGroup}>
                 <label className={mobileStyles.label}>Подтвердите пароль</label>
-                <input
-                  type="password"
-                  value={newConfirmPassword}
-                  onChange={(e) => setNewConfirmPassword(e.target.value)}
-                  disabled={loading}
-                  className={mobileStyles.input}
-                />
+                <div className={`${mobileStyles.passwordWrapper} ${recoverPasswordsMismatch ? mobileStyles.passwordError : ''}`}>
+                  <input
+                    type={showNewConfirmPassword ? 'text' : 'password'}
+                    value={newConfirmPassword}
+                    onChange={(e) => setNewConfirmPassword(e.target.value)}
+                    disabled={loading}
+                    className={mobileStyles.input}
+                  />
+                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowNewConfirmPassword((v) => !v)} aria-label={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                    <EyeIcon open={showNewConfirmPassword} />
+                  </button>
+                </div>
               </div>
 
-              <button onClick={recoverPassword} disabled={loading} className={mobileStyles.actionButton}>
+              {recoverPasswordWeak && <div className={mobileStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
+              {recoverPasswordsMismatch && <div className={mobileStyles.inlineError}>Пароли не совпадают</div>}
+
+              <button onClick={recoverPassword} disabled={loading || recoverPasswordsMismatch || recoverPasswordWeak} className={mobileStyles.actionButton}>
                 {loading ? '...' : 'Сменить пароль'}
               </button>
             </div>
