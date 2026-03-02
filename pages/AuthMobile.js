@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import mobileStyles from '../styles/auth.mobile.module.css';
 import { useAuth } from './_app';
@@ -31,6 +31,11 @@ export default function AuthMobile({ initialMode, router }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showNewConfirmPassword, setShowNewConfirmPassword] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(null);
+  const initialViewportHeightRef = useRef(0);
+  const compactActionLockRef = useRef(false);
+  const compactControlSkipClickRef = useRef(false);
 
   const isPasswordComplex = (value) => /^(?=.*[A-ZА-ЯЁ])(?=.*\d).{8,}$/.test(value);
   const registerPasswordsMismatch = mode === 'register' && Boolean(password) && Boolean(confirmPassword) && password !== confirmPassword;
@@ -103,6 +108,55 @@ export default function AuthMobile({ initialMode, router }) {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const isInputElement = (element) => {
+      if (!element || !(element instanceof HTMLElement)) return false;
+      const tag = element.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA';
+    };
+
+    const updateKeyboardState = () => {
+      const viewport = window.visualViewport;
+      const currentHeight = viewport ? Math.round(viewport.height) : window.innerHeight;
+      const baselineHeight = initialViewportHeightRef.current || currentHeight;
+      const activeElement = document.activeElement;
+      const hasFocusedInput = isInputElement(activeElement);
+      const heightDiff = baselineHeight - currentHeight;
+
+      if (currentHeight > initialViewportHeightRef.current) {
+        initialViewportHeightRef.current = currentHeight;
+      }
+
+      setViewportHeight(currentHeight);
+      setKeyboardOpen(hasFocusedInput && heightDiff > 120);
+    };
+
+    const handleFocusOut = () => setTimeout(updateKeyboardState, 80);
+
+    initialViewportHeightRef.current = window.visualViewport
+      ? Math.round(window.visualViewport.height)
+      : window.innerHeight;
+
+    updateKeyboardState();
+
+    const viewport = window.visualViewport;
+    window.addEventListener('resize', updateKeyboardState);
+    viewport?.addEventListener('resize', updateKeyboardState);
+    viewport?.addEventListener('scroll', updateKeyboardState);
+    document.addEventListener('focusin', updateKeyboardState);
+    document.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      window.removeEventListener('resize', updateKeyboardState);
+      viewport?.removeEventListener('resize', updateKeyboardState);
+      viewport?.removeEventListener('scroll', updateKeyboardState);
+      document.removeEventListener('focusin', updateKeyboardState);
+      document.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
 
   // -----------------------------
   // Helpers
@@ -438,13 +492,71 @@ export default function AuthMobile({ initialMode, router }) {
     }
   };
 
+  const isRegisterStepOne = mode === 'register' && step === 1;
+  const isRecoverPhoneStep = mode === 'recover' && step === 1;
+  const isRecoverSetPasswordStep = mode === 'recover' && step === 3 && verified;
+  const isLoginStep = mode === 'login';
+  const isCompactKeyboardMode = keyboardOpen && (isRegisterStepOne || isLoginStep || isRecoverSetPasswordStep);
+  const canContinueFromStepOne =
+    !loading &&
+    Boolean(phone) &&
+    phone.length === 10 &&
+    phone.startsWith('9') &&
+    (mode !== 'register' || (Boolean(password) && Boolean(confirmPassword) && !registerPasswordsMismatch && !registerPasswordWeak));
+  const canSubmitLogin = !loading && Boolean(phone) && phone.length === 10 && phone.startsWith('9') && Boolean(password);
+  const canSubmitRecover = !loading && !recoverPasswordsMismatch && !recoverPasswordWeak && Boolean(newPassword) && Boolean(newConfirmPassword);
+  const showRegisterStepOneButton = isRecoverPhoneStep || canContinueFromStepOne;
+  const showRecoverSubmitButton = canSubmitRecover;
+  const showCompactActionButton = isLoginStep || (isRegisterStepOne && canContinueFromStepOne) || (isRecoverSetPasswordStep && canSubmitRecover);
+
+  const handleCompactPrimaryAction = () => {
+    if (compactActionLockRef.current) return;
+    compactActionLockRef.current = true;
+    setTimeout(() => {
+      compactActionLockRef.current = false;
+    }, 250);
+
+    if (isLoginStep) {
+      login();
+      return;
+    }
+    if (isRecoverSetPasswordStep) {
+      recoverPassword();
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleCompactControlPointerDown = (event, action) => {
+    if (!isCompactKeyboardMode) return;
+    event.preventDefault();
+    compactControlSkipClickRef.current = true;
+    action();
+
+    setTimeout(() => {
+      compactControlSkipClickRef.current = false;
+    }, 0);
+  };
+
+  const handleCompactControlClick = (event, action) => {
+    if (compactControlSkipClickRef.current) {
+      event.preventDefault();
+      return;
+    }
+    action();
+  };
+
   // -----------------------------
   // Render
   // -----------------------------
   return (
-    <div className={mobileStyles.container}>
-      <div className={mobileStyles.card}>
-        <div className={mobileStyles.header}>
+    <div
+      className={`${mobileStyles.container} ${isCompactKeyboardMode ? mobileStyles.containerKeyboard : ''}`}
+      style={viewportHeight ? { minHeight: `${viewportHeight}px` } : undefined}
+    >
+      <div className={`${mobileStyles.card} ${isCompactKeyboardMode ? mobileStyles.cardKeyboard : ''}`}>
+        {!isCompactKeyboardMode && (
+          <div className={mobileStyles.header}>
           <h1 className={mobileStyles.title}>
             {mode === 'login' ? 'Вход' : mode === 'register' ? 'Регистрация' : 'Восстановление'}
           </h1>
@@ -455,9 +567,10 @@ export default function AuthMobile({ initialMode, router }) {
               ? 'Создайте аккаунт для участия в поездках'
               : 'Подтвердите номер и задайте новый пароль'}
           </p>
-        </div>
+          </div>
+        )}
 
-        <div className={mobileStyles.tabs}>
+        {!isCompactKeyboardMode && <div className={mobileStyles.tabs}>
           <button
             className={`${mobileStyles.tabButton} ${mode === 'login' ? mobileStyles.activeTab : ''}`}
             onClick={() => handleSectionChange('login')}
@@ -472,7 +585,7 @@ export default function AuthMobile({ initialMode, router }) {
           >
             Регистрация
           </button>
-        </div>
+        </div>}
 
         {error && <div className={mobileStyles.error}>{error}</div>}
 
@@ -485,43 +598,45 @@ export default function AuthMobile({ initialMode, router }) {
 
           {mode === 'login' && (
             <div className={mobileStyles.formContent}>
-              <div className={mobileStyles.inputGroup}>
-                <label className={mobileStyles.label}>Телефон</label>
+              <div className={`${mobileStyles.inputGroup} ${isCompactKeyboardMode ? mobileStyles.compactInputGroup : ''}`}>
+                {!isCompactKeyboardMode && <label className={mobileStyles.label}>Телефон</label>}
                 <div className={mobileStyles.phoneWrap}>
                   <span className={mobileStyles.phonePrefix}>+7</span>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    placeholder="9001234567"
+                    placeholder={isCompactKeyboardMode ? 'Телефон' : '9001234567'}
                     disabled={loading}
                     className={mobileStyles.phoneInput}
                   />
                 </div>
               </div>
 
-              <div className={mobileStyles.inputGroup}>
-                <label className={mobileStyles.label}>Пароль</label>
+              <div className={`${mobileStyles.inputGroup} ${isCompactKeyboardMode ? mobileStyles.compactInputGroup : ''}`}>
+                {!isCompactKeyboardMode && <label className={mobileStyles.label}>Пароль</label>}
                 <div className={mobileStyles.passwordWrapper}>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    placeholder={isCompactKeyboardMode ? 'Пароль' : ''}
                     disabled={loading}
                     className={mobileStyles.input}
                   />
-                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
+                  <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowPassword((v) => !v))} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
                     <EyeIcon open={showPassword} />
                   </button>
                 </div>
               </div>
 
-              <button onClick={login} disabled={loading} className={mobileStyles.actionButton}>
+              <button onClick={login} disabled={!canSubmitLogin} className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''}`}>
                 {loading ? '...' : 'Войти'}
               </button>
 
               <button
-                onClick={() => handleSectionChange('recover')}
+                onPointerDown={(e) => handleCompactControlPointerDown(e, () => handleSectionChange('recover'))}
+                onClick={(e) => handleCompactControlClick(e, () => handleSectionChange('recover'))}
                 disabled={loading}
                 className={mobileStyles.secondaryButton}
               >
@@ -532,15 +647,15 @@ export default function AuthMobile({ initialMode, router }) {
 
           {(mode === 'register' || mode === 'recover') && step === 1 && (
             <div className={mobileStyles.formContent}>
-              <div className={mobileStyles.inputGroup}>
-                <label className={mobileStyles.label}>Телефон</label>
+              <div className={`${mobileStyles.inputGroup} ${isCompactKeyboardMode ? mobileStyles.compactInputGroup : ''}`}>
+                {!isCompactKeyboardMode && <label className={mobileStyles.label}>Телефон</label>}
                 <div className={mobileStyles.phoneWrap}>
                   <span className={mobileStyles.phonePrefix}>+7</span>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    placeholder="9001234567"
+                    placeholder={isCompactKeyboardMode ? 'Телефон' : '9001234567'}
                     disabled={loading}
                     className={mobileStyles.phoneInput}
                   />
@@ -549,32 +664,34 @@ export default function AuthMobile({ initialMode, router }) {
 
               {mode === 'register' && (
                 <>
-                  <div className={mobileStyles.inputGroup}>
-                    <label className={mobileStyles.label}>Пароль</label>
+                  <div className={`${mobileStyles.inputGroup} ${isCompactKeyboardMode ? mobileStyles.compactInputGroup : ''}`}>
+                    {!isCompactKeyboardMode && <label className={mobileStyles.label}>Пароль</label>}
                     <div className={`${mobileStyles.passwordWrapper} ${(registerPasswordsMismatch || registerPasswordWeak) ? mobileStyles.passwordError : ''}`}>
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        placeholder={isCompactKeyboardMode ? 'Пароль' : ''}
                         disabled={loading}
                         className={mobileStyles.input}
                       />
-                      <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
+                      <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowPassword((v) => !v))} aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"} title={showPassword ? "Скрыть пароль" : "Показать пароль"}>
                         <EyeIcon open={showPassword} />
                       </button>
                     </div>
                   </div>
-                  <div className={mobileStyles.inputGroup}>
-                    <label className={mobileStyles.label}>Подтвердите пароль</label>
+                  <div className={`${mobileStyles.inputGroup} ${isCompactKeyboardMode ? mobileStyles.compactInputGroup : ''}`}>
+                    {!isCompactKeyboardMode && <label className={mobileStyles.label}>Подтвердите пароль</label>}
                     <div className={`${mobileStyles.passwordWrapper} ${registerPasswordsMismatch ? mobileStyles.passwordError : ''}`}>
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder={isCompactKeyboardMode ? 'Подтвердите пароль' : ''}
                         disabled={loading}
                         className={mobileStyles.input}
                       />
-                      <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowConfirmPassword((v) => !v)} aria-label={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                      <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowConfirmPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowConfirmPassword((v) => !v))} aria-label={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
                         <EyeIcon open={showConfirmPassword} />
                       </button>
                     </div>
@@ -586,14 +703,8 @@ export default function AuthMobile({ initialMode, router }) {
 
               <button
                 onClick={() => setStep(2)}
-                disabled={
-                  loading ||
-                  !phone ||
-                  phone.length !== 10 ||
-                  !phone.startsWith('9') ||
-                  (mode === 'register' && (!password || !confirmPassword || registerPasswordsMismatch || registerPasswordWeak))
-                }
-                className={mobileStyles.actionButton}
+                disabled={!canContinueFromStepOne}
+                className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''} ${!showRegisterStepOneButton ? mobileStyles.actionButtonHidden : ''}`}
               >
                 Далее
               </button>
@@ -709,33 +820,35 @@ export default function AuthMobile({ initialMode, router }) {
 
           {step === 3 && mode === 'recover' && verified && (
             <div className={mobileStyles.formContent}>
-              <div className={mobileStyles.inputGroup}>
-                <label className={mobileStyles.label}>Новый пароль</label>
+              <div className={`${mobileStyles.inputGroup} ${isCompactKeyboardMode ? mobileStyles.compactInputGroup : ''}`}>
+                {!isCompactKeyboardMode && <label className={mobileStyles.label}>Новый пароль</label>}
                 <div className={`${mobileStyles.passwordWrapper} ${(recoverPasswordsMismatch || recoverPasswordWeak) ? mobileStyles.passwordError : ''}`}>
                   <input
                     type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder={isCompactKeyboardMode ? 'Новый пароль' : ''}
                     disabled={loading}
                     className={mobileStyles.input}
                   />
-                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowNewPassword((v) => !v)} aria-label={showNewPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewPassword ? "Скрыть пароль" : "Показать пароль"}>
+                  <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowNewPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowNewPassword((v) => !v))} aria-label={showNewPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewPassword ? "Скрыть пароль" : "Показать пароль"}>
                     <EyeIcon open={showNewPassword} />
                   </button>
                 </div>
               </div>
 
-              <div className={mobileStyles.inputGroup}>
-                <label className={mobileStyles.label}>Подтвердите пароль</label>
+              <div className={`${mobileStyles.inputGroup} ${isCompactKeyboardMode ? mobileStyles.compactInputGroup : ''}`}>
+                {!isCompactKeyboardMode && <label className={mobileStyles.label}>Подтвердите пароль</label>}
                 <div className={`${mobileStyles.passwordWrapper} ${recoverPasswordsMismatch ? mobileStyles.passwordError : ''}`}>
                   <input
                     type={showNewConfirmPassword ? 'text' : 'password'}
                     value={newConfirmPassword}
                     onChange={(e) => setNewConfirmPassword(e.target.value)}
+                    placeholder={isCompactKeyboardMode ? 'Подтвердите пароль' : ''}
                     disabled={loading}
                     className={mobileStyles.input}
                   />
-                  <button type="button" className={mobileStyles.eyeButton} onClick={() => setShowNewConfirmPassword((v) => !v)} aria-label={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
+                  <button type="button" className={mobileStyles.eyeButton} onPointerDown={(e) => handleCompactControlPointerDown(e, () => setShowNewConfirmPassword((v) => !v))} onClick={(e) => handleCompactControlClick(e, () => setShowNewConfirmPassword((v) => !v))} aria-label={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"} title={showNewConfirmPassword ? "Скрыть пароль" : "Показать пароль"}>
                     <EyeIcon open={showNewConfirmPassword} />
                   </button>
                 </div>
@@ -744,13 +857,24 @@ export default function AuthMobile({ initialMode, router }) {
               {recoverPasswordWeak && <div className={mobileStyles.inlineError}>Минимум 8 символов, 1 заглавная буква и 1 цифра</div>}
               {recoverPasswordsMismatch && <div className={mobileStyles.inlineError}>Пароли не совпадают</div>}
 
-              <button onClick={recoverPassword} disabled={loading || recoverPasswordsMismatch || recoverPasswordWeak} className={mobileStyles.actionButton}>
+              <button onClick={recoverPassword} disabled={!canSubmitRecover} className={`${mobileStyles.actionButton} ${isCompactKeyboardMode ? mobileStyles.inlineNextHidden : ''} ${!showRecoverSubmitButton ? mobileStyles.actionButtonHidden : ''}`}>
                 {loading ? '...' : 'Сменить пароль'}
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {isCompactKeyboardMode && showCompactActionButton && (
+        <button
+          onPointerDown={handleCompactPrimaryAction}
+          onClick={handleCompactPrimaryAction}
+          disabled={isLoginStep ? !canSubmitLogin : isRecoverSetPasswordStep ? !canSubmitRecover : !canContinueFromStepOne}
+          className={`${mobileStyles.actionButton} ${mobileStyles.keyboardNextButton}`}
+        >
+          {isLoginStep ? 'Войти' : isRecoverSetPasswordStep ? 'Сменить пароль' : 'Далее'}
+        </button>
+      )}
     </div>
   );
 }
