@@ -1,11 +1,50 @@
 // pages/tbank-check-order.jsx
 import { useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
-export default function TbankCheckOrderPage() {
+export default function TbankCheckOrderPage({ embedded = false }) {
   const [orderId, setOrderId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const [resp, setResp] = useState(null);
   const [error, setError] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [selectedOrderId, setSelectedOrderId] = useState('');
+
+  if (!embedded) {
+    return (
+      <div style={{ maxWidth: 760, margin: '40px auto', padding: '0 16px', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif' }}>
+        <h1 style={{ marginBottom: 8 }}>Нет прямого доступа</h1>
+        <p style={{ color: '#374151' }}>Эта страница доступна только внутри админки в разделе «Т-Банк».</p>
+      </div>
+    );
+  }
+
+  const loadOrders = async () => {
+    setLoadingOrders(true);
+    setError('');
+    try {
+      const { data, error: dbError } = await supabase
+        .from('payments')
+        .select('id, order_id, payment_id, status, amount, payment_type, created_at')
+        .not('order_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(150);
+
+      if (dbError) throw dbError;
+
+      const unique = new Map();
+      (data || []).forEach((row) => {
+        if (!unique.has(row.order_id)) unique.set(row.order_id, row);
+      });
+
+      setOrders(Array.from(unique.values()));
+    } catch (e) {
+      setError(`Не удалось загрузить заказы: ${e?.message || 'unknown error'}`);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -66,6 +105,44 @@ export default function TbankCheckOrderPage() {
             />
           </label>
 
+          <div style={{ display: 'grid', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={loadOrders}
+                disabled={loadingOrders}
+                style={{
+                  padding: '8px 12px',
+                  background: '#111827',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: loadingOrders ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {loadingOrders ? 'Загрузка...' : 'Подгрузить транзакции из Supabase'}
+              </button>
+              <span style={{ color: '#6b7280', fontSize: 13 }}>Или введите OrderId вручную</span>
+            </div>
+
+            <select
+              value={selectedOrderId}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                setSelectedOrderId(nextId);
+                setOrderId(nextId);
+              }}
+              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 10, fontSize: 14 }}
+            >
+              <option value="">Выберите заказ</option>
+              {orders.map((tx) => (
+                <option key={tx.id} value={tx.order_id}>
+                  {tx.order_id} · payment:{tx.payment_id} · {tx.status} · {tx.amount} · {new Date(tx.created_at).toLocaleString()}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
             <button
               type="submit"
@@ -80,7 +157,7 @@ export default function TbankCheckOrderPage() {
                 fontWeight: 600
               }}
             >
-              {loading ? 'Запрос...' : 'Проверить статус'}
+              {loading ? 'Запрос...' : 'Запросить'}
             </button>
             <button
               type="button"

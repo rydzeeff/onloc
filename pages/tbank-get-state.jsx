@@ -1,12 +1,46 @@
 // pages/tbank-get-state.jsx
 import { useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
-export default function TbankGetStatePage() {
+export default function TbankGetStatePage({ embedded = false }) {
   const [paymentId, setPaymentId] = useState('');
   const [clientIp, setClientIp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [resp, setResp] = useState(null);
   const [error, setError] = useState('');
+  const [transactions, setTransactions] = useState([]);
+  const [selectedPaymentId, setSelectedPaymentId] = useState('');
+  const [isE2C, setIsE2C] = useState(false);
+
+  if (!embedded) {
+    return (
+      <div style={{ maxWidth: 760, margin: '40px auto', padding: '0 16px', fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif' }}>
+        <h1 style={{ marginBottom: 8 }}>Нет прямого доступа</h1>
+        <p style={{ color: '#374151' }}>Эта страница доступна только внутри админки в разделе «Т-Банк».</p>
+      </div>
+    );
+  }
+
+  const loadTransactions = async () => {
+    setLoadingTransactions(true);
+    setError('');
+    try {
+      const { data, error: dbError } = await supabase
+        .from('payments')
+        .select('id, payment_id, order_id, amount, status, payment_type, created_at')
+        .not('payment_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (dbError) throw dbError;
+      setTransactions(data || []);
+    } catch (e) {
+      setError(`Не удалось загрузить транзакции: ${e?.message || 'unknown error'}`);
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +49,7 @@ export default function TbankGetStatePage() {
     setError('');
 
     try {
-      const r = await fetch('/api/tbank/get-state', {
+      const r = await fetch(isE2C ? '/api/tbank/get-statev' : '/api/tbank/get-state', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -68,6 +102,53 @@ export default function TbankGetStatePage() {
             />
           </label>
 
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="checkbox"
+              checked={isE2C}
+              onChange={(e) => setIsE2C(e.target.checked)}
+            />
+            <span>Выплатный терминал E2C (A2C)</span>
+          </label>
+
+          <div style={{ display: 'grid', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={loadTransactions}
+                disabled={loadingTransactions}
+                style={{
+                  padding: '8px 12px',
+                  background: '#111827',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: loadingTransactions ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {loadingTransactions ? 'Загрузка...' : 'Подгрузить транзакции из Supabase'}
+              </button>
+              <span style={{ color: '#6b7280', fontSize: 13 }}>Или введите PaymentId вручную</span>
+            </div>
+
+            <select
+              value={selectedPaymentId}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                setSelectedPaymentId(nextId);
+                setPaymentId(nextId);
+              }}
+              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 10, fontSize: 14 }}
+            >
+              <option value="">Выберите транзакцию</option>
+              {transactions.map((tx) => (
+                <option key={tx.id} value={tx.payment_id}>
+                  {tx.payment_id} · order:{tx.order_id} · {tx.status} · {tx.amount} · {new Date(tx.created_at).toLocaleString()}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <label style={{ display: 'grid', gap: 6 }}>
             <span>IP (необязательно)</span>
             <input
@@ -97,7 +178,7 @@ export default function TbankGetStatePage() {
                 fontWeight: 600
               }}
             >
-              {loading ? 'Запрос...' : 'Проверить статус'}
+              {loading ? 'Запрос...' : 'Запросить'}
             </button>
             <button
               type="button"
