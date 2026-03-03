@@ -7,6 +7,7 @@ import { useAuth } from '../_app';
 import { supabase } from '../../lib/supabaseClient';
 import ShareButton from '../../components/ShareButton';
 import { useTripAlertsCount } from '../../lib/useTripAlertsCount';
+import AlertsBell from '../../components/AlertsBell';
 
 const FROM_MARKER_ICON = '/custom-marker.png';
 const TO_MARKER_ICON = '/marker-icon.png';
@@ -14,48 +15,6 @@ const DEFAULT_AVATAR = '/avatar-default.svg';
 
 function toBool(v) {
   return v === true || v === 1 || v === '1' || v === 'true' || v === 't' || v === 'T';
-}
-
-function AlertIconWithCount({ count = 0, className }) {
-  const n = Number(count || 0);
-  const label = n > 99 ? '99+' : String(n);
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3a5 5 0 0 0-5 5v2.4c0 .7-.2 1.4-.6 2l-1.1 1.7c-.5.8 0 1.9.9 1.9h11.6c.9 0 1.4-1.1.9-1.9l-1.1-1.7a3.7 3.7 0 0 1-.6-2V8a5 5 0 0 0-5-5Z" fill={n > 0 ? '#ef4444' : 'none'} stroke={n > 0 ? '#ef4444' : 'currentColor'} strokeWidth="2"/>
-      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      {n > 0 ? <text x="12" y="11.5" textAnchor="middle" fontSize={label.length>=3?'6':'8'} fontWeight="700" fill="#fff">{label}</text> : null}
-    </svg>
-  );
-}
-
-function MsgIconWithCount({ count = 0, className }) {
-  const n = Number(count || 0);
-  const label = n > 99 ? "99+" : String(n);
-
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M21 12c0 4.418-4.03 8-9 8a10.6 10.6 0 0 1-3.61-.62L3 21l1.78-4.12A7.62 7.62 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
-        fill={n > 0 ? "#ef4444" : "none"}
-        stroke={n > 0 ? "#ef4444" : "currentColor"}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      {n > 0 ? (
-        <text
-          x="12"
-          y="13"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontSize={label.length >= 3 ? "7" : "9"}
-          fontWeight="700"
-          fill="#ffffff"
-        >
-          {label}
-        </text>
-      ) : null}
-    </svg>
-  );
 }
 
 function InfoIcon({ className }) {
@@ -158,7 +117,6 @@ export default function TripDetailsPageMobile({ tripId }) {
   } = useTripDetails({ tripId: id });
 
   const unreadAlerts = useTripAlertsCount(user?.id);
-  const handleAlertsClick = () => router.push('/dashboard?section=alerts');
 
   const leisureTypeMap = {
     tourism: 'Туризм',
@@ -609,10 +567,8 @@ const handleBackToTrips = () => {
   return (
     <div className={styles.container}>
 <header className={styles.header}>
-  {/* слева: лого + стильная кнопка "На карту" */}
+  {/* слева: кнопка "На карту" */}
   <div className={styles.headerLeft}>
-    <img src="/logo.png" alt="Onloc Logo" className={styles.logo} />
-
     <button
       type="button"
       onClick={() => {
@@ -666,21 +622,16 @@ const handleBackToTrips = () => {
       </span>
     </button>
 
-    <button
-      type="button"
-      onClick={() => {
+    <AlertsBell
+      user={user}
+      count={unreadAlerts}
+      buttonClassName={`${styles.topIconButton} ${unreadAlerts > 0 ? styles.topIconUnread : ""}`}
+      iconClassName={styles.topNavIcon}
+      onBeforeOpen={() => {
         if (infoMenuOpen) toggleInfoMenu();
         closeInfoModal();
-        handleAlertsClick();
       }}
-      className={`${styles.topIconButton} ${unreadAlerts > 0 ? styles.topIconUnread : ""}`}
-      aria-label="Оповещения"
-      title="Оповещения"
-    >
-      <span className={styles.topIconWrap}>
-        <AlertIconWithCount count={unreadAlerts} className={styles.topNavIcon} />
-      </span>
-    </button>
+    />
 
     {/* Информация */}
     <div className={styles.infoWrapper} ref={infoButtonRef}>

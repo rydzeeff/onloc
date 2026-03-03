@@ -7,6 +7,7 @@ import FiltersPC from '../components/FiltersPC';
 import { notifications, useAuth } from './_app';
 import pcStyles from '../styles/trips.pc.module.css';
 import { useTripAlertsCount } from '../lib/useTripAlertsCount';
+import AlertsBell from '../components/AlertsBell';
 
 const YMaps = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.YMaps), { ssr: false });
 const Map = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.Map), { ssr: false });
@@ -31,18 +32,6 @@ const USER_MARKER_OFFSET = [
   -USER_MARKER_SIZE[1],
 ];
 
-
-function AlertIconWithCount({ count = 0, className }) {
-  const n = Number(count || 0);
-  const label = n > 99 ? '99+' : String(n);
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3a5 5 0 0 0-5 5v2.4c0 .7-.2 1.4-.6 2l-1.1 1.7c-.5.8 0 1.9.9 1.9h11.6c.9 0 1.4-1.1.9-1.9l-1.1-1.7a3.7 3.7 0 0 1-.6-2V8a5 5 0 0 0-5-5Z" fill={n > 0 ? '#ef4444' : 'none'} stroke={n > 0 ? '#ef4444' : 'currentColor'} strokeWidth="2"/>
-      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      {n > 0 ? <text x="12" y="11.5" textAnchor="middle" fontSize={label.length>=3?'6':'8'} fontWeight="700" fill="#fff">{label}</text> : null}
-    </svg>
-  );
-}
 
 function MsgIconWithCount({ count = 0 }) {
   const n = Number(count || 0);
@@ -693,16 +682,12 @@ export default function TripsPagePC({ user, geolocation }) {
             >
               <MsgIconWithCount count={unreadMessages} />
             </button>
-            <button
-              type="button"
-              className={pcStyles.messageIcon}
-              onClick={handleAlertsClick}
-              aria-label="Оповещения"
-              title="Оповещения"
-              style={{ border: 'none' }}
-            >
-              <AlertIconWithCount count={unreadAlerts} />
-            </button>
+            <AlertsBell
+              user={user}
+              count={unreadAlerts}
+              buttonClassName={pcStyles.messageIcon}
+              scale={2}
+            />
           </div>
           <div className={pcStyles.infoWrapper} ref={infoButtonRef}>
             <button onClick={toggleInfoMenu} className={pcStyles.button}>

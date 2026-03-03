@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import pcStyles from '../styles/dashboard.pc.module.css';
 import MessagesPage from './messages';
-import AlertsPage from './AlertsPage';
+import AlertsBell from '../components/AlertsBell';
 import CreateTrip from './trips/create-trip';
 import EditTrip from './trips/edit-trip';
 import TripParticipantsPage from './participants';
@@ -203,6 +203,12 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
       <header className={pcStyles.header}>
         <img src="/logo.png" alt="Onloc Logo" className={pcStyles.logo} />
         <div className={pcStyles.authButtons}>
+          <AlertsBell
+            user={user}
+            count={unreadAlerts}
+            buttonClassName={pcStyles.button}
+            scale={2}
+          />
           <button className={pcStyles.button}>Информация</button>
           <Link href="/trips" className={`${pcStyles.button} ${pcStyles.mapButton}`}>На карту</Link>
         </div>
@@ -213,7 +219,6 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
             { id: 'myTrips', label: 'Мои поездки' },
             { id: 'create-trip', label: 'Создать' },
             { id: 'messages', label: 'Сообщения', unread: totalUnread },
-            { id: 'alerts', label: 'Оповещения', unread: unreadAlerts },
             { id: 'settings', label: 'Настройки' },
             { id: 'reviews', label: 'Отзывы' },
           ].map(item => (
