@@ -38,7 +38,7 @@ export default function AlertsBell({
   buttonClassName = '',
   iconWrapClassName = '',
   iconClassName = '',
-  scale = 1.75,
+  scale = 1.65,
   mobileEdgeToEdge = false,
   onBeforeOpen,
   onOpenChange,
