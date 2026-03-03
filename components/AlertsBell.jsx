@@ -22,6 +22,7 @@ export default function AlertsBell({
   scale = 1,
   mobileEdgeToEdge = false,
   onBeforeOpen,
+  onOpenChange,
 }) {
   const [open, setOpen] = useState(false);
   const [alerts, setAlerts] = useState([]);
@@ -76,11 +77,14 @@ export default function AlertsBell({
   useEffect(() => {
     if (!open) return;
     const onDown = (e) => {
-      if (!rootRef.current?.contains(e.target)) setOpen(false);
+      if (!rootRef.current?.contains(e.target)) {
+        setOpen(false);
+        onOpenChange?.(false);
+      }
     };
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
-  }, [open]);
+  }, [open, onOpenChange]);
 
   const hasMoreButton = useMemo(() => alerts.length >= limit, [alerts.length, limit]);
   const useEdgePanel = mobileEdgeToEdge && isNarrowViewport;
@@ -92,7 +96,11 @@ export default function AlertsBell({
         className={buttonClassName}
         onClick={() => {
           if (!open) onBeforeOpen?.();
-          setOpen((v) => !v);
+          setOpen((v) => {
+            const next = !v;
+            onOpenChange?.(next);
+            return next;
+          });
         }}
         aria-label="Оповещения"
         title="Оповещения"
@@ -117,13 +125,15 @@ export default function AlertsBell({
                 border: '1px solid #e5e7eb',
                 borderRadius: 0,
                 boxShadow: '0 10px 24px rgba(0,0,0,.14)',
-                zIndex: 3000,
+                zIndex: 1000010,
                 padding: 12,
+                display: 'flex',
+                flexDirection: 'column',
               }
-            : { position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 360, maxWidth: '92vw', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, boxShadow: '0 10px 24px rgba(0,0,0,.14)', zIndex: 3000, padding: 12 }}
+            : { position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 360, maxWidth: '92vw', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, boxShadow: '0 10px 24px rgba(0,0,0,.14)', zIndex: 1000010, padding: 12, display: 'flex', flexDirection: 'column' }}
         >
           <div style={{ fontWeight: 700, marginBottom: 8 }}>Оповещения</div>
-          <div style={{ maxHeight: useEdgePanel ? 'calc(100vh - max(env(safe-area-inset-top, 0px), 0px) - 120px)' : 360, overflow: 'auto' }}>
+          <div style={{ maxHeight: useEdgePanel ? 'calc(100vh - max(env(safe-area-inset-top, 0px), 0px) - 176px)' : 320, overflow: 'auto', flex: useEdgePanel ? 1 : 'initial', minHeight: 0 }}>
             {!alerts.length && !loading ? <div style={{ fontSize: 14, opacity: 0.7 }}>Пока оповещений нет.</div> : null}
             {alerts.map((a) => (
               <div key={a.id} style={{ border: freshIds.has(a.id) ? '2px solid #22c55e' : '1px solid #e7e7e7', borderRadius: 12, padding: 10, marginBottom: 8, background: freshIds.has(a.id) ? '#f0fdf4' : '#fff' }}>
@@ -143,6 +153,18 @@ export default function AlertsBell({
               onClick={() => setLimit((v) => v + 10)}
             >
               Показать ещё 10 оповещений
+            </button>
+          ) : null}
+          {useEdgePanel ? (
+            <button
+              type="button"
+              style={{ marginTop: 10, width: '100%', border: '1px solid #d1d5db', background: '#fff', borderRadius: 10, padding: '10px 12px', fontWeight: 600, marginBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))' }}
+              onClick={() => {
+                setOpen(false);
+                onOpenChange?.(false);
+              }}
+            >
+              Закрыть
             </button>
           ) : null}
         </div>

@@ -199,6 +199,7 @@ const [showLongPressHint, setShowLongPressHint] = useState(false);
 const [infoMenuOpen, setInfoMenuOpen] = useState(false);
 const [activeInfoModal, setActiveInfoModal] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const unreadAlerts = useTripAlertsCount(user?.id);
 
   const infoButtonRef = useRef(null);
@@ -1163,6 +1164,7 @@ const closeInfoModal = () => {
         if (isTripsSheetOpen) closeTripsSheet();
         setInfoMenuOpen(false);
       }}
+      onOpenChange={setIsAlertsOpen}
     />
 
     {/* Инфо */}
@@ -1356,7 +1358,7 @@ const closeInfoModal = () => {
 </div>
 
             {/* ✅ Пункт 2: нижняя кликабельная “полоска” (когда лист закрыт) */}
-            {!isTripsSheetOpen && tripsCount > 0 && (
+            {!isTripsSheetOpen && !isAlertsOpen && tripsCount > 0 && (
               <div className={mobileStyles.tripsBottomBar} onClick={openTripsSheet} role="button">
                 <div>
                   <div className={mobileStyles.tripsBottomBarText}>

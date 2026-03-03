@@ -576,3 +576,42 @@ overflow: visible;
     height: 20px;
   }
 }
+/* notifications button in header matches trips mobile */
+.topIconButton {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.topIconWrap {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  transition: background 0.2s ease, transform 0.1s ease, color 0.2s ease;
+}
+
+.topNavIcon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.topIconButton:active .topIconWrap {
+  transform: scale(0.96);
+  background: #f1f5f9;
+}
+
+.topIconUnread {
+  color: #ef4444;
+}

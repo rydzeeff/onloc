@@ -44,6 +44,8 @@
 .messageIcon {
   font-size: 20px;
   cursor: pointer;
+  border: none;
+  outline: none;
   color: var(--color-muted);
   padding: 8px;
   background: var(--color-bg);
@@ -824,3 +826,15 @@ flex: 1 1 0;            /* делят доступное пространств�
 .backButtonGreen:hover { filter: brightness(0.97); }
 .backButtonGreen:active { transform: translateY(1px); }
 
+
+.bellIcon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.messageIcon:focus,
+.messageIcon:focus-visible {
+  outline: none;
+  box-shadow: none;
+}

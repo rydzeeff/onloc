@@ -271,7 +271,10 @@ const q = needsTripId
           <AlertsBell
             user={user}
             count={unreadAlerts}
-            buttonClassName={mobileStyles.button}
+            buttonClassName={`${mobileStyles.topIconButton} ${unreadAlerts > 0 ? mobileStyles.topIconUnread : ''}`}
+            iconWrapClassName={mobileStyles.topIconWrap}
+            iconClassName={mobileStyles.topNavIcon}
+            mobileEdgeToEdge
           />
           <button className={mobileStyles.button} type="button">
             Информация

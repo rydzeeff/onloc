@@ -206,7 +206,8 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
           <AlertsBell
             user={user}
             count={unreadAlerts}
-            buttonClassName={pcStyles.button}
+            buttonClassName={pcStyles.notificationIconButton}
+            iconClassName={pcStyles.notificationBellIcon}
             scale={2}
           />
           <button className={pcStyles.button}>Информация</button>
