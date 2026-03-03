@@ -6,6 +6,8 @@ import Link from 'next/link';
 import FiltersMobile from '../components/FiltersMobile';
 import { notifications, useAuth } from './_app';
 import mobileStyles from '../styles/trips.mobile.module.css';
+import { useTripAlertsCount } from '../lib/useTripAlertsCount';
+import AlertsBell from '../components/AlertsBell';
 
 const YMaps = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.YMaps), { ssr: false });
 const Map = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.Map), { ssr: false });
@@ -20,6 +22,7 @@ function truncateTitle(value, max = 21) {
   if (s.length <= max) return s;
   return s.slice(0, max).trimEnd() + "…";
 }
+
 
 function MsgIconWithCount({ count = 0 }) {
   const n = Number(count || 0);
@@ -196,6 +199,7 @@ const [showLongPressHint, setShowLongPressHint] = useState(false);
 const [infoMenuOpen, setInfoMenuOpen] = useState(false);
 const [activeInfoModal, setActiveInfoModal] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   const infoButtonRef = useRef(null);
   const mobileTripsRef = useRef(null);
@@ -1143,6 +1147,17 @@ const closeInfoModal = () => {
         <MsgIconWithCount count={unreadMessages} />
       </span>
     </button>
+
+    <AlertsBell
+      user={user}
+      count={unreadAlerts}
+      buttonClassName={`${mobileStyles.topIconButton} ${unreadAlerts > 0 ? mobileStyles.topIconUnread : ""}`}
+      iconClassName={mobileStyles.topNavIcon}
+      onBeforeOpen={() => {
+        if (isTripsSheetOpen) closeTripsSheet();
+        setInfoMenuOpen(false);
+      }}
+    />
 
     {/* Инфо */}
     <div className={mobileStyles.infoWrapper} ref={infoButtonRef}>

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import FiltersPC from '../components/FiltersPC';
 import { notifications, useAuth } from './_app';
 import pcStyles from '../styles/trips.pc.module.css';
+import { useTripAlertsCount } from '../lib/useTripAlertsCount';
+import AlertsBell from '../components/AlertsBell';
 
 const YMaps = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.YMaps), { ssr: false });
 const Map = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.Map), { ssr: false });
@@ -112,6 +114,7 @@ export default function TripsPagePC({ user, geolocation }) {
   const [infoMenuOpen, setInfoMenuOpen] = useState(false);
   const [infoSection, setInfoSection] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const unreadAlerts = useTripAlertsCount(user?.id);
   const infoButtonRef = useRef(null);
   const tripsListRef = useRef(null);
 
@@ -675,6 +678,12 @@ export default function TripsPagePC({ user, geolocation }) {
             >
               <MsgIconWithCount count={unreadMessages} />
             </button>
+            <AlertsBell
+              user={user}
+              count={unreadAlerts}
+              buttonClassName={pcStyles.messageIcon}
+              scale={2}
+            />
           </div>
           <div className={pcStyles.infoWrapper} ref={infoButtonRef}>
             <button onClick={toggleInfoMenu} className={pcStyles.button}>

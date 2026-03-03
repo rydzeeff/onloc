@@ -7,11 +7,13 @@ import Link from 'next/link';
 import mobileStyles from '../styles/dashboard.mobile.module.css';
 import EditTripMobile from './trips/EditTripMobile';
 import MessagesPage from './messages';
+import AlertsBell from '../components/AlertsBell';
 import CreateTrip from './trips/create-trip';
 import TripParticipantsPage from './participants';
 import SettingsPageMobile from './SettingsPageMobile';
 import MyTripsSectionMobile from './MyTripsSectionMobile';
 import { notifications } from './_app';
+import { useTripAlertsCount } from '../lib/useTripAlertsCount';
 
 export default function DashboardMobile({
   initialSection,
@@ -214,6 +216,7 @@ const q = needsTripId
   }, []);
 
   const totalUnread = notifications.getTotalUnread();
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   // tripId и из стейта, и из URL — чтобы переживать F5
   const effectiveTripId =
@@ -258,6 +261,11 @@ const q = needsTripId
       <header className={mobileStyles.header}>
         <img src="/logo.png" alt="Onloc Logo" className={mobileStyles.logo} />
         <div className={mobileStyles.authButtons}>
+          <AlertsBell
+            user={user}
+            count={unreadAlerts}
+            buttonClassName={mobileStyles.button}
+          />
           <button className={mobileStyles.button} type="button">
             Информация
           </button>

@@ -6,6 +6,8 @@ import { useTripDetails } from '../../lib/useTripDetails';
 import { useAuth } from '../_app';
 import { supabase } from '../../lib/supabaseClient';
 import ShareButton from '../../components/ShareButton';
+import { useTripAlertsCount } from '../../lib/useTripAlertsCount';
+import AlertsBell from '../../components/AlertsBell';
 
 const FROM_MARKER_ICON = '/custom-marker.png';
 const TO_MARKER_ICON = '/marker-icon.png';
@@ -13,36 +15,6 @@ const DEFAULT_AVATAR = '/avatar-default.svg';
 
 function toBool(v) {
   return v === true || v === 1 || v === '1' || v === 'true' || v === 't' || v === 'T';
-}
-
-function MsgIconWithCount({ count = 0, className }) {
-  const n = Number(count || 0);
-  const label = n > 99 ? "99+" : String(n);
-
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M21 12c0 4.418-4.03 8-9 8a10.6 10.6 0 0 1-3.61-.62L3 21l1.78-4.12A7.62 7.62 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
-        fill={n > 0 ? "#ef4444" : "none"}
-        stroke={n > 0 ? "#ef4444" : "currentColor"}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      {n > 0 ? (
-        <text
-          x="12"
-          y="13"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontSize={label.length >= 3 ? "7" : "9"}
-          fontWeight="700"
-          fill="#ffffff"
-        >
-          {label}
-        </text>
-      ) : null}
-    </svg>
-  );
 }
 
 function InfoIcon({ className }) {
@@ -143,6 +115,8 @@ export default function TripDetailsPageMobile({ tripId }) {
     calculateAge,
     getFullName,
   } = useTripDetails({ tripId: id });
+
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   const leisureTypeMap = {
     tourism: 'Туризм',
@@ -593,10 +567,8 @@ const handleBackToTrips = () => {
   return (
     <div className={styles.container}>
 <header className={styles.header}>
-  {/* слева: лого + стильная кнопка "На карту" */}
+  {/* слева: кнопка "На карту" */}
   <div className={styles.headerLeft}>
-    <img src="/logo.png" alt="Onloc Logo" className={styles.logo} />
-
     <button
       type="button"
       onClick={() => {
@@ -649,6 +621,17 @@ const handleBackToTrips = () => {
         <MsgIconWithCount count={unreadMessages} className={styles.topNavIcon} />
       </span>
     </button>
+
+    <AlertsBell
+      user={user}
+      count={unreadAlerts}
+      buttonClassName={`${styles.topIconButton} ${unreadAlerts > 0 ? styles.topIconUnread : ""}`}
+      iconClassName={styles.topNavIcon}
+      onBeforeOpen={() => {
+        if (infoMenuOpen) toggleInfoMenu();
+        closeInfoModal();
+      }}
+    />
 
     {/* Информация */}
     <div className={styles.infoWrapper} ref={infoButtonRef}>

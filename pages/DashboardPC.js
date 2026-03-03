@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import pcStyles from '../styles/dashboard.pc.module.css';
 import MessagesPage from './messages';
+import AlertsBell from '../components/AlertsBell';
 import CreateTrip from './trips/create-trip';
 import EditTrip from './trips/edit-trip';
 import TripParticipantsPage from './participants';
 import SettingsPagePC from './SettingsPagePC';
 import MyTripsSection from './MyTripsSection';
 import { notifications } from './_app';
+import { useTripAlertsCount } from '../lib/useTripAlertsCount';
 
 export default function DashboardPC({ initialSection, user, supabase, loading, router, initialTrips = [], initialTripId = null }) {
   const [activeSection, setActiveSection] = useState(initialSection || 'myTrips');
@@ -182,6 +184,7 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
   }, [activeSection, router, selectedTripId]);
 
   const totalUnread = notifications.getTotalUnread();
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   useEffect(() => {
     console.log('DashboardPC rendered', {
@@ -200,6 +203,12 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
       <header className={pcStyles.header}>
         <img src="/logo.png" alt="Onloc Logo" className={pcStyles.logo} />
         <div className={pcStyles.authButtons}>
+          <AlertsBell
+            user={user}
+            count={unreadAlerts}
+            buttonClassName={pcStyles.button}
+            scale={2}
+          />
           <button className={pcStyles.button}>Информация</button>
           <Link href="/trips" className={`${pcStyles.button} ${pcStyles.mapButton}`}>На карту</Link>
         </div>

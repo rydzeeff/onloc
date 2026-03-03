@@ -6,6 +6,8 @@ import { useTripDetails } from '../../lib/useTripDetails';
 import { useAuth } from '../_app';
 import { supabase } from '../../lib/supabaseClient';
 import ShareButton from '../../components/ShareButton';
+import { useTripAlertsCount } from '../../lib/useTripAlertsCount';
+import AlertsBell from '../../components/AlertsBell';
 
 const FROM_MARKER_ICON = '/custom-marker.png';
 const TO_MARKER_ICON = '/marker-icon.png';
@@ -100,6 +102,8 @@ export default function TripDetailsPagePC() {
     calculateAge,
     getFullName,
   } = useTripDetails();
+
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   // --- Локальные "оверрайды": добираем поля, которых нет в RPC, и корректируем организатора ---
   const [tripExtras, setTripExtras] = useState({
@@ -400,6 +404,13 @@ export default function TripDetailsPagePC() {
   >
     <MsgIconWithCount count={unreadMessages} />
   </button>
+
+  <AlertsBell
+    user={user}
+    count={unreadAlerts}
+    buttonClassName={styles.messageIcon}
+    scale={2}
+  />
 </div>
 
 <ShareButton
