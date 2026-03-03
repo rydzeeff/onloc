@@ -421,7 +421,7 @@ export default function TripDetailsPagePC() {
     user={user}
     count={unreadAlerts}
     buttonClassName={styles.messageIcon}
-    scale={2}
+    iconClassName={styles.bellIcon}
   />
 </div>
 
