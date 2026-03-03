@@ -1070,74 +1070,91 @@ const handleBackToTrips = () => {
 
       {/* Модал «Участники» */}
       {modalOpen && (
-        <div className={styles.modalBackdrop} onClick={closeParticipantsModal}>
+        <div
+          className={styles.modalBackdrop}
+          onClick={closeParticipantsModal}
+          style={{ backdropFilter: 'blur(2px)', animation: 'fadeIn .12s ease-out' }}
+        >
           <div
-            className={`${styles.modalContent} ${styles.participantsModalSheet}`}
+            className={`${styles.modalContent} ${styles.participantsModalContent}`}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label="Список участников"
+            style={{
+              width: 'calc(100% - 24px)',
+              maxWidth: 680,
+              transformOrigin: 'bottom center',
+              animation: 'popIn .12s ease-out',
+            }}
           >
-            <div className={styles.participantsModalHandle} aria-hidden="true" />
-            <div className={styles.participantsModalHeader}>
-              <h2 className={styles.participantsModalTitle}>Участники</h2>
+            <div className={styles.descModalHeader}>
+              <h2 className={styles.modalTitle} style={{ margin: 0 }}>
+                Участники
+              </h2>
               <button
                 type="button"
-                className={styles.participantsModalCloseIcon}
+                className={styles.descModalX}
                 onClick={closeParticipantsModal}
                 aria-label="Закрыть список участников"
               >
                 ✕
               </button>
             </div>
-            {participants.length === 0 ? (
-              <div className={styles.noParticipants}>Нет участников</div>
-            ) : (
-              <div className={styles.participantsList}>
-                {participants.map((p) => (
-                  <div key={p.id} className={styles.participantCard}>
-                    <img
-                      src={p.avatar_url || DEFAULT_AVATAR}
-                      alt={`${getFullName(p)}'s avatar`}
-                      className={styles.avatar}
-                    />
-                    <div className={styles.participantInfo}>
-                      <p>
-                        <strong>ФИО:</strong> {getFullName(p)}
-                      </p>
-                      <p>
-                        <strong>Возраст:</strong> {calculateAge(p.birth_date)}
-                      </p>
-                      <p>
-                        <strong>Пол:</strong> {genderMap[p.gender?.toLowerCase()] || 'Не указан'}
-                      </p>
-                      <p>
-                        <strong>Рейтинг:</strong> {p.average_rating?.toFixed(1) || '0.0'}
-                      </p>
-                      <p>
-                        <strong>Статус:</strong>{' '}
-                        {statusMap[(p.status || '').toLowerCase()] || p.status}
-                      </p>
-                      <p>
-                        <strong>Дата:</strong>{' '}
-                        {p.joined_at
-                          ? new Date(p.joined_at).toLocaleString('ru', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : 'Не указано'}
-                      </p>
+
+            <div className={styles.participantsModalBody}>
+              {participants.length === 0 ? (
+                <div className={styles.noParticipants}>Нет участников</div>
+              ) : (
+                <div className={styles.participantsList}>
+                  {participants.map((p) => (
+                    <div key={p.id} className={styles.participantCard}>
+                      <img
+                        src={p.avatar_url || DEFAULT_AVATAR}
+                        alt={`${getFullName(p)}'s avatar`}
+                        className={styles.avatar}
+                      />
+                      <div className={styles.participantInfo}>
+                        <p>
+                          <strong>ФИО:</strong> {getFullName(p)}
+                        </p>
+                        <p>
+                          <strong>Возраст:</strong> {calculateAge(p.birth_date)}
+                        </p>
+                        <p>
+                          <strong>Пол:</strong> {genderMap[p.gender?.toLowerCase()] || 'Не указан'}
+                        </p>
+                        <p>
+                          <strong>Рейтинг:</strong> {p.average_rating?.toFixed(1) || '0.0'}
+                        </p>
+                        <p>
+                          <strong>Статус:</strong>{' '}
+                          {statusMap[(p.status || '').toLowerCase()] || p.status}
+                        </p>
+                        <p>
+                          <strong>Дата:</strong>{' '}
+                          {p.joined_at
+                            ? new Date(p.joined_at).toLocaleString('ru', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : 'Не указано'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button className={styles.closeButton} onClick={closeParticipantsModal}>
-              Закрыть
-            </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.descModalFooter}>
+              <button type="button" className={styles.descModalClose} onClick={closeParticipantsModal}>
+                Закрыть
+              </button>
+            </div>
           </div>
         </div>
       )}

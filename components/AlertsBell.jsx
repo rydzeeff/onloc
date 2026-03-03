@@ -3,12 +3,11 @@ import { supabase } from '../lib/supabaseClient';
 
 function BellIcon({ count = 0, scale = 1, className = '' }) {
   const n = Number(count || 0);
-  const label = n > 99 ? '99+' : String(n);
   return (
     <svg className={className} style={{ transform: `scale(${scale})` }} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3a5 5 0 0 0-5 5v2.4c0 .7-.2 1.4-.6 2l-1.1 1.7c-.5.8 0 1.9.9 1.9h11.6c.9 0 1.4-1.1.9-1.9l-1.1-1.7a3.7 3.7 0 0 1-.6-2V8a5 5 0 0 0-5-5Z" fill={n > 0 ? '#ef4444' : 'none'} stroke={n > 0 ? '#ef4444' : 'currentColor'} strokeWidth="2"/>
-      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      {n > 0 ? <text x="12" y="11.5" textAnchor="middle" fontSize={label.length >= 3 ? '6' : '8'} fontWeight="700" fill="#fff">{label}</text> : null}
+      <path d="M12 4a5 5 0 0 0-5 5v2.2c0 .9-.3 1.8-.8 2.6l-.7 1a1 1 0 0 0 .8 1.6h11.4a1 1 0 0 0 .8-1.6l-.7-1a4.7 4.7 0 0 1-.8-2.6V9a5 5 0 0 0-5-5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      {n > 0 ? <circle cx="18" cy="6" r="3" fill="#ef4444" /> : null}
     </svg>
   );
 }

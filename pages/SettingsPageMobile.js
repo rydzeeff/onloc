@@ -373,6 +373,8 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
   const handleRemoveCard = async (scope, cardId) => {
     try {
       if (isSyncingCards || removingId) return;
+      const confirmed = window.confirm('Удалить эту карту? Это действие нельзя отменить.');
+      if (!confirmed) return;
       setRemovingId(cardId);
       if (!supabase || !session || !user) throw new Error('Нет активной сессии');
 
