@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import pcStyles from '../styles/dashboard.pc.module.css';
 import MessagesPage from './messages';
+import AlertsPage from './AlertsPage';
 import CreateTrip from './trips/create-trip';
 import EditTrip from './trips/edit-trip';
 import TripParticipantsPage from './participants';
 import SettingsPagePC from './SettingsPagePC';
 import MyTripsSection from './MyTripsSection';
 import { notifications } from './_app';
+import { useTripAlertsCount } from '../lib/useTripAlertsCount';
 
 export default function DashboardPC({ initialSection, user, supabase, loading, router, initialTrips = [], initialTripId = null }) {
   const [activeSection, setActiveSection] = useState(initialSection || 'myTrips');
@@ -182,6 +184,7 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
   }, [activeSection, router, selectedTripId]);
 
   const totalUnread = notifications.getTotalUnread();
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   useEffect(() => {
     console.log('DashboardPC rendered', {
@@ -210,6 +213,7 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
             { id: 'myTrips', label: 'Мои поездки' },
             { id: 'create-trip', label: 'Создать' },
             { id: 'messages', label: 'Сообщения', unread: totalUnread },
+            { id: 'alerts', label: 'Оповещения', unread: unreadAlerts },
             { id: 'settings', label: 'Настройки' },
             { id: 'reviews', label: 'Отзывы' },
           ].map(item => (
@@ -236,6 +240,10 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
 
           {activeSection === 'messages' && (
             <MessagesPage user={user} triggerAnimation={triggerAnimation} />
+          )}
+
+          {activeSection === 'alerts' && (
+            <AlertsPage user={user} />
           )}
 
           {activeSection === 'settings' && (

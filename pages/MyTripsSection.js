@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/router';
 import pcStyles from '../styles/dashboard.pc.module.css';
 import { supabase } from '../lib/supabaseClient';
 
@@ -22,6 +23,7 @@ function pickTripCoverUrl(trip) {
 
 
 const MyTripsSection = ({ trips: _trips, user, onTripClick }) => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('upcoming');
 
   // Чтобы не мелькали старые данные из пропса trips — стартуем с пустого списка
@@ -86,6 +88,37 @@ const MyTripsSection = ({ trips: _trips, user, onTripClick }) => {
   const isArchiveStatus = (status) => {
     const s = (status || '').toLowerCase();
     return s === 'canceled' || s === 'archived';
+  };
+
+  const handleRepeatTrip = (event, trip) => {
+    event.stopPropagation();
+
+    const imageUrls = Array.isArray(trip?.image_urls)
+      ? trip.image_urls.filter(Boolean)
+      : [];
+
+    const repeatPayload = {
+      title: trip?.title || '',
+      description: trip?.description || '',
+      price: trip?.price ?? '',
+      difficulty: trip?.difficulty || 'easy',
+      ageFrom: trip?.age_from ?? 18,
+      ageTo: trip?.age_to ?? 60,
+      participants: trip?.participants ?? 1,
+      leisureType: trip?.leisure_type || 'tourism',
+      alcoholAllowed: Boolean(trip?.alcohol_allowed),
+      fromLocation: trip?.from_location || null,
+      toLocation: trip?.to_location || null,
+      fromAddress: trip?.from_address || '',
+      toAddress: trip?.to_address || '',
+      imageUrls,
+    };
+
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('repeatTripDraft', JSON.stringify(repeatPayload));
+    }
+
+    router.push({ pathname: '/dashboard', query: { section: 'create-trip', repeat: '1' } }, undefined, { shallow: true });
   };
 
   return (
@@ -240,6 +273,13 @@ const MyTripsSection = ({ trips: _trips, user, onTripClick }) => {
                       <p>Начало: {new Date(trip.date).toLocaleDateString('ru')}</p>
                       <p>Конец: {new Date(trip.arrival_date).toLocaleDateString('ru')}</p>
                       <p>Цена: {trip.price} ₽</p>
+                      <button
+                        type="button"
+                        className={pcStyles.repeatTripButton}
+                        onClick={(event) => handleRepeatTrip(event, trip)}
+                      >
+                        Повторить
+                      </button>
                     </div>
                   </div>
                 ))}
