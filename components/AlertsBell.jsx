@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-function BellIcon({ count = 0, scale = 1.7, className = '' }) {
+function BellIcon({ count = 0, scale = 1.7, className = '', idleStrokeWidth = '1.9' }) {
   const n = Number(count || 0);
   const label = n > 99 ? '99+' : String(n);
 
   // Визуально под иконку сообщений (без непрочитанных)
   const idleStroke = '#9ca3af';
-  // Если нужно «облегчить»/«утяжелить» контур колокольчика, меняйте только это значение
-  const idleStrokeWidth = '2';
-
-  
   return (
     <svg className={className} style={{ transform: `scale(${scale})` }} viewBox="0 0 24 24" aria-hidden="true">
       <path
@@ -44,6 +40,7 @@ export default function AlertsBell({
   buttonClassName = '',
   iconWrapClassName = '',
   iconClassName = '',
+  // Размер иконки оповещений для desktop меняется здесь (mobile остаётся стандартной)
   scale = 1.65,
   mobileEdgeToEdge = false,
   onBeforeOpen,
@@ -113,6 +110,8 @@ export default function AlertsBell({
 
   const hasMoreButton = useMemo(() => alerts.length >= limit, [alerts.length, limit]);
   const useEdgePanel = mobileEdgeToEdge && isNarrowViewport;
+  const resolvedScale = isNarrowViewport ? 1 : scale;
+  const resolvedIdleStrokeWidth = isNarrowViewport ? '1.8' : '1.9';
 
   return (
     <div ref={rootRef} style={{ position: 'relative' }}>
@@ -131,7 +130,7 @@ export default function AlertsBell({
         title="Оповещения"
       >
         <span className={iconWrapClassName}>
-          <BellIcon count={count} scale={scale} className={iconClassName} />
+          <BellIcon count={count} scale={resolvedScale} idleStrokeWidth={resolvedIdleStrokeWidth} className={iconClassName} />
         </span>
       </button>
 
