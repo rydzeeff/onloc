@@ -567,6 +567,12 @@
   padding: 0;
 }
 
+.notificationIconButton:focus,
+.notificationIconButton:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .notificationIconButton:hover {
   color: #3b82f6;
   background: #f1f5f9;

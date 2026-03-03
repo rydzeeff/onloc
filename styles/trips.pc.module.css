@@ -44,6 +44,8 @@
 .messageIcon {
   font-size: 20px;
   cursor: pointer;
+  border: none;
+  outline: none;
   color: var(--color-muted);
   padding: 8px;
   background: var(--color-bg);
@@ -438,6 +440,12 @@
 .contextButton:first-child:hover {
   background-color: #1DA851; /* немного темнее при наведении */
   border-color: #1DA851;
+}
+
+.messageIcon:focus,
+.messageIcon:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 .bellIcon {
   width: 22px;

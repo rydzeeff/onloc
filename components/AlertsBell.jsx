@@ -132,7 +132,7 @@ export default function AlertsBell({
             : { position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 360, maxWidth: '92vw', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, boxShadow: '0 10px 24px rgba(0,0,0,.14)', zIndex: 1000010, padding: 12, display: 'flex', flexDirection: 'column' }}
         >
           <div style={{ fontWeight: 700, marginBottom: 8 }}>Оповещения</div>
-          <div style={{ maxHeight: useEdgePanel ? 'calc(100vh - max(env(safe-area-inset-top, 0px), 0px) - 176px)' : 320, overflow: 'auto' }}>
+          <div style={{ maxHeight: useEdgePanel ? 'calc(100vh - max(env(safe-area-inset-top, 0px), 0px) - 176px)' : 320, overflow: 'auto', flex: useEdgePanel ? 1 : 'initial', minHeight: 0 }}>
             {!alerts.length && !loading ? <div style={{ fontSize: 14, opacity: 0.7 }}>Пока оповещений нет.</div> : null}
             {alerts.map((a) => (
               <div key={a.id} style={{ border: freshIds.has(a.id) ? '2px solid #22c55e' : '1px solid #e7e7e7', borderRadius: 12, padding: 10, marginBottom: 8, background: freshIds.has(a.id) ? '#f0fdf4' : '#fff' }}>
@@ -154,16 +154,18 @@ export default function AlertsBell({
               Показать ещё 10 оповещений
             </button>
           ) : null}
-          <button
-            type="button"
-            style={{ marginTop: 10, width: '100%', border: '1px solid #d1d5db', background: '#fff', borderRadius: 10, padding: '10px 12px', fontWeight: 600, marginBottom: useEdgePanel ? 'calc(8px + env(safe-area-inset-bottom, 0px))' : 4 }}
-            onClick={() => {
-              setOpen(false);
-              onOpenChange?.(false);
-            }}
-          >
-            Закрыть
-          </button>
+          {useEdgePanel ? (
+            <button
+              type="button"
+              style={{ marginTop: 10, width: '100%', border: '1px solid #d1d5db', background: '#fff', borderRadius: 10, padding: '10px 12px', fontWeight: 600, marginBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))' }}
+              onClick={() => {
+                setOpen(false);
+                onOpenChange?.(false);
+              }}
+            >
+              Закрыть
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>
