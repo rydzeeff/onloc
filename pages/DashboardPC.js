@@ -206,8 +206,8 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
           <AlertsBell
             user={user}
             count={unreadAlerts}
-            buttonClassName={pcStyles.button}
-            scale={2}
+            buttonClassName={pcStyles.notificationIconButton}
+            iconClassName={pcStyles.notificationBellIcon}
           />
           <button className={pcStyles.button}>Информация</button>
           <Link href="/trips" className={`${pcStyles.button} ${pcStyles.mapButton}`}>На карту</Link>
