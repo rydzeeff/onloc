@@ -17,8 +17,10 @@ export default function AlertsBell({
   user,
   count = 0,
   buttonClassName = '',
+  iconWrapClassName = '',
   iconClassName = '',
   scale = 1,
+  mobileEdgeToEdge = false,
   onBeforeOpen,
 }) {
   const [open, setOpen] = useState(false);
@@ -26,6 +28,7 @@ export default function AlertsBell({
   const [freshIds, setFreshIds] = useState(new Set());
   const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(false);
+  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
   const rootRef = useRef(null);
 
   const load = async (nextLimit = limit) => {
@@ -62,6 +65,15 @@ export default function AlertsBell({
   }, [open, user?.id, limit]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(max-width: 768px)');
+    const sync = () => setIsNarrowViewport(media.matches);
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+
+  useEffect(() => {
     if (!open) return;
     const onDown = (e) => {
       if (!rootRef.current?.contains(e.target)) setOpen(false);
@@ -71,6 +83,7 @@ export default function AlertsBell({
   }, [open]);
 
   const hasMoreButton = useMemo(() => alerts.length >= limit, [alerts.length, limit]);
+  const useEdgePanel = mobileEdgeToEdge && isNarrowViewport;
 
   return (
     <div ref={rootRef} style={{ position: 'relative' }}>
@@ -84,13 +97,33 @@ export default function AlertsBell({
         aria-label="Оповещения"
         title="Оповещения"
       >
-        <BellIcon count={count} scale={scale} className={iconClassName} />
+        <span className={iconWrapClassName}>
+          <BellIcon count={count} scale={scale} className={iconClassName} />
+        </span>
       </button>
 
       {open ? (
-        <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 360, maxWidth: '92vw', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, boxShadow: '0 10px 24px rgba(0,0,0,.14)', zIndex: 3000, padding: 12 }}>
+        <div
+          style={useEdgePanel
+            ? {
+                position: 'fixed',
+                left: 0,
+                right: 0,
+                top: 'max(env(safe-area-inset-top, 0px), 0px)',
+                bottom: 0,
+                width: '100vw',
+                maxWidth: '100vw',
+                background: '#fff',
+                border: '1px solid #e5e7eb',
+                borderRadius: 0,
+                boxShadow: '0 10px 24px rgba(0,0,0,.14)',
+                zIndex: 3000,
+                padding: 12,
+              }
+            : { position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 360, maxWidth: '92vw', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, boxShadow: '0 10px 24px rgba(0,0,0,.14)', zIndex: 3000, padding: 12 }}
+        >
           <div style={{ fontWeight: 700, marginBottom: 8 }}>Оповещения</div>
-          <div style={{ maxHeight: 360, overflow: 'auto' }}>
+          <div style={{ maxHeight: useEdgePanel ? 'calc(100vh - max(env(safe-area-inset-top, 0px), 0px) - 120px)' : 360, overflow: 'auto' }}>
             {!alerts.length && !loading ? <div style={{ fontSize: 14, opacity: 0.7 }}>Пока оповещений нет.</div> : null}
             {alerts.map((a) => (
               <div key={a.id} style={{ border: freshIds.has(a.id) ? '2px solid #22c55e' : '1px solid #e7e7e7', borderRadius: 12, padding: 10, marginBottom: 8, background: freshIds.has(a.id) ? '#f0fdf4' : '#fff' }}>

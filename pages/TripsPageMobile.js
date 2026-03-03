@@ -1156,7 +1156,9 @@ const closeInfoModal = () => {
       user={user}
       count={unreadAlerts}
       buttonClassName={`${mobileStyles.topIconButton} ${unreadAlerts > 0 ? mobileStyles.topIconUnread : ""}`}
+      iconWrapClassName={mobileStyles.topIconWrap}
       iconClassName={mobileStyles.topNavIcon}
+      mobileEdgeToEdge
       onBeforeOpen={() => {
         if (isTripsSheetOpen) closeTripsSheet();
         setInfoMenuOpen(false);

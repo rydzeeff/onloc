@@ -63,6 +63,36 @@ function KeyIcon({ className }) {
   );
 }
 
+function MsgIconWithCount({ count = 0, className }) {
+  const n = Number(count || 0);
+  const label = n > 99 ? '99+' : String(n);
+
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M21 12c0 4.418-4.03 8-9 8a10.6 10.6 0 0 1-3.61-.62L3 21l1.78-4.12A7.62 7.62 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z"
+        fill={n > 0 ? '#ef4444' : 'none'}
+        stroke={n > 0 ? '#ef4444' : '#9ca3af'}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {n > 0 ? (
+        <text
+          x="12"
+          y="13"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={label.length >= 3 ? '7' : '9'}
+          fontWeight="700"
+          fill="#ffffff"
+        >
+          {label}
+        </text>
+      ) : null}
+    </svg>
+  );
+}
+
 
 export default function TripDetailsPageMobile({ tripId }) {
   const { setProcessing } = useAuth();
@@ -626,7 +656,9 @@ const handleBackToTrips = () => {
       user={user}
       count={unreadAlerts}
       buttonClassName={`${styles.topIconButton} ${unreadAlerts > 0 ? styles.topIconUnread : ""}`}
+      iconWrapClassName={styles.topIconWrap}
       iconClassName={styles.topNavIcon}
+      mobileEdgeToEdge
       onBeforeOpen={() => {
         if (infoMenuOpen) toggleInfoMenu();
         closeInfoModal();
