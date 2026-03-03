@@ -1140,6 +1140,7 @@ ALTER TABLE ONLY public.chat_messages REPLICA IDENTITY FULL;
 
 
 --
+    tbank_tools boolean DEFAULT false NOT NULL,
 -- Name: chat_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
