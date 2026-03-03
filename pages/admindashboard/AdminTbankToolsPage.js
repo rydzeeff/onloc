@@ -4,12 +4,13 @@ import TbankCheckOrderPage from '../tbank-check-order';
 import styles from '../../styles/admin-panel.module.css';
 
 const TOOLS = [
-  { id: 'getstate', label: 'GetState' },
-  { id: 'checkorder', label: 'CheckOrder' },
+  { id: 'getstate_payment', label: 'GetState (оплатный)' },
+  { id: 'getstate_payout', label: 'GetState (выплатный E2C)' },
+  { id: 'checkorder_payment', label: 'CheckOrder (оплатный)' },
 ];
 
 export default function AdminTbankToolsPage() {
-  const [activeTool, setActiveTool] = useState('getstate');
+  const [activeTool, setActiveTool] = useState('getstate_payment');
 
   return (
     <div>
@@ -25,8 +26,9 @@ export default function AdminTbankToolsPage() {
         ))}
       </div>
 
-      {activeTool === 'getstate' && <TbankGetStatePage embedded />}
-      {activeTool === 'checkorder' && <TbankCheckOrderPage embedded />}
+      {activeTool === 'getstate_payment' && <TbankGetStatePage embedded mode="payment" />}
+      {activeTool === 'getstate_payout' && <TbankGetStatePage embedded mode="payout" />}
+      {activeTool === 'checkorder_payment' && <TbankCheckOrderPage embedded />}
     </div>
   );
 }
