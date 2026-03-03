@@ -1068,6 +1068,10 @@ const closeInfoModal = () => {
     router.push('/dashboard?section=messages');
   };
 
+  const handleAlertsClick = () => {
+    router.push('/dashboard?section=alerts');
+  };
+
   const applyFilter = (field, nextFilters) => {
   // Берём либо "новые фильтры", либо актуальные из ref (самое надёжное),
   // либо fallback на filters из стейта

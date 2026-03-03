@@ -600,6 +600,10 @@ export default function TripsPagePC({ user, geolocation }) {
     router.push('/dashboard?section=messages');
   };
 
+  const handleAlertsClick = () => {
+    router.push('/dashboard?section=alerts');
+  };
+
   const applyFilter = (field, nextFilters) => {
     console.time('applyFilter');
 

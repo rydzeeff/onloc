@@ -247,6 +247,10 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
             <MessagesPage user={user} triggerAnimation={triggerAnimation} />
           )}
 
+          {activeSection === 'alerts' && (
+            <AlertsPage user={user} />
+          )}
+
           {activeSection === 'settings' && (
             <SettingsPagePC avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} />
           )}

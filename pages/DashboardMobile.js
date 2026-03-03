@@ -243,6 +243,13 @@ const q = needsTripId
       unread: totalUnread,
     },
     {
+      id: 'alerts',
+      label: 'Оповещения',
+      icon: '/icons/nav/messages.svg',
+      iconActive: '/icons/nav/messages-active.svg',
+      unread: unreadAlerts,
+    },
+    {
       id: 'settings',
       label: 'Настройки',
       icon: '/icons/nav/settings.svg',
@@ -293,6 +300,8 @@ const q = needsTripId
               hideSidebar={hideSidebar}
             />
           )}
+
+          {activeSection === 'alerts' && <AlertsPage user={user} />}
 
           {activeSection === 'settings' && (
             <SettingsPageMobile
