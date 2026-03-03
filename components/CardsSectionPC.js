@@ -58,6 +58,9 @@ const CardsSectionPC = ({ user, supabase }) => {
 
   const handleRemoveCard = async (cardId) => {
     try {
+      const confirmed = window.confirm('Удалить эту карту? Это действие нельзя отменить.');
+      if (!confirmed) return;
+
       const response = await fetch('/api/tbank/remove-card', {
         method: 'POST',
         headers: {
