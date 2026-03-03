@@ -2674,6 +2674,107 @@ CREATE TRIGGER send_push_notification AFTER INSERT ON public.chat_messages FOR E
 
 
 --
+--
+-- Name: trip_alerts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.trip_alerts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    trip_id uuid,
+    actor_user_id uuid,
+    type text NOT NULL,
+    title text NOT NULL,
+    body text NOT NULL,
+    metadata jsonb DEFAULT '{}'::jsonb NOT NULL,
+    is_read boolean DEFAULT false NOT NULL,
+    read_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: trip_alerts trip_alerts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.trip_alerts
+    ADD CONSTRAINT trip_alerts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: trip_alerts trip_alerts_actor_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.trip_alerts
+    ADD CONSTRAINT trip_alerts_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES public.profiles(user_id) ON DELETE SET NULL;
+
+
+--
+-- Name: trip_alerts trip_alerts_trip_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.trip_alerts
+    ADD CONSTRAINT trip_alerts_trip_id_fkey FOREIGN KEY (trip_id) REFERENCES public.trips(id) ON DELETE CASCADE;
+
+
+--
+-- Name: trip_alerts trip_alerts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.trip_alerts
+    ADD CONSTRAINT trip_alerts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: trip_alerts_user_created_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX trip_alerts_user_created_idx ON public.trip_alerts USING btree (user_id, created_at DESC);
+
+
+--
+-- Name: trip_alerts_user_unread_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX trip_alerts_user_unread_idx ON public.trip_alerts USING btree (user_id, is_read);
+
+
+--
+-- Name: trip_alerts_trip_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX trip_alerts_trip_idx ON public.trip_alerts USING btree (trip_id);
+
+
+--
+-- Name: trip_alerts; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.trip_alerts ENABLE ROW LEVEL SECURITY;
+
+
+--
+-- Name: trip_alerts trip_alerts_insert_authenticated; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY trip_alerts_insert_authenticated ON public.trip_alerts FOR INSERT WITH CHECK ((auth.uid() IS NOT NULL));
+
+
+--
+-- Name: trip_alerts trip_alerts_select_own; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY trip_alerts_select_own ON public.trip_alerts FOR SELECT USING ((auth.uid() = user_id));
+
+
+--
+-- Name: trip_alerts trip_alerts_update_own; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY trip_alerts_update_own ON public.trip_alerts FOR UPDATE USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id));
+
+
+
 -- Name: chat_message_reads trg_chat_message_reads_fill_chat_id; Type: TRIGGER; Schema: public; Owner: -
 --
 

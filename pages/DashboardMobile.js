@@ -7,11 +7,13 @@ import Link from 'next/link';
 import mobileStyles from '../styles/dashboard.mobile.module.css';
 import EditTripMobile from './trips/EditTripMobile';
 import MessagesPage from './messages';
+import AlertsPage from './AlertsPage';
 import CreateTrip from './trips/create-trip';
 import TripParticipantsPage from './participants';
 import SettingsPageMobile from './SettingsPageMobile';
 import MyTripsSectionMobile from './MyTripsSectionMobile';
 import { notifications } from './_app';
+import { useTripAlertsCount } from '../lib/useTripAlertsCount';
 
 export default function DashboardMobile({
   initialSection,
@@ -214,6 +216,7 @@ const q = needsTripId
   }, []);
 
   const totalUnread = notifications.getTotalUnread();
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   // tripId и из стейта, и из URL — чтобы переживать F5
   const effectiveTripId =
@@ -238,6 +241,13 @@ const q = needsTripId
       icon: '/icons/nav/messages.svg',
       iconActive: '/icons/nav/messages-active.svg',
       unread: totalUnread,
+    },
+    {
+      id: 'alerts',
+      label: 'Оповещения',
+      icon: '/icons/nav/messages.svg',
+      iconActive: '/icons/nav/messages-active.svg',
+      unread: unreadAlerts,
     },
     {
       id: 'settings',
@@ -285,6 +295,8 @@ const q = needsTripId
               hideSidebar={hideSidebar}
             />
           )}
+
+          {activeSection === 'alerts' && <AlertsPage user={user} />}
 
           {activeSection === 'settings' && (
             <SettingsPageMobile

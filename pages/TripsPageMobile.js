@@ -6,6 +6,7 @@ import Link from 'next/link';
 import FiltersMobile from '../components/FiltersMobile';
 import { notifications, useAuth } from './_app';
 import mobileStyles from '../styles/trips.mobile.module.css';
+import { useTripAlertsCount } from '../lib/useTripAlertsCount';
 
 const YMaps = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.YMaps), { ssr: false });
 const Map = dynamic(() => import('@pbe/react-yandex-maps').then(mod => mod.Map), { ssr: false });
@@ -19,6 +20,43 @@ function truncateTitle(value, max = 21) {
   const s = String(value ?? "");
   if (s.length <= max) return s;
   return s.slice(0, max).trimEnd() + "…";
+}
+
+
+function AlertIconWithCount({ count = 0 }) {
+  const n = Number(count || 0);
+  const label = n > 99 ? "99+" : String(n);
+
+  return (
+    <svg className={mobileStyles.topNavIcon} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 3a5 5 0 0 0-5 5v2.4c0 .7-.2 1.4-.6 2l-1.1 1.7c-.5.8 0 1.9.9 1.9h11.6c.9 0 1.4-1.1.9-1.9l-1.1-1.7a3.7 3.7 0 0 1-.6-2V8a5 5 0 0 0-5-5Z"
+        fill={n > 0 ? "#ef4444" : "none"}
+        stroke={n > 0 ? "#ef4444" : "#9ca3af"}
+        strokeWidth="2"
+      />
+      <path
+        d="M9.5 18a2.5 2.5 0 0 0 5 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {n > 0 ? (
+        <text
+          x="12"
+          y="11.5"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={label.length >= 3 ? "6" : "8"}
+          fontWeight="700"
+          fill="#ffffff"
+        >
+          {label}
+        </text>
+      ) : null}
+    </svg>
+  );
 }
 
 function MsgIconWithCount({ count = 0 }) {
@@ -196,6 +234,7 @@ const [showLongPressHint, setShowLongPressHint] = useState(false);
 const [infoMenuOpen, setInfoMenuOpen] = useState(false);
 const [activeInfoModal, setActiveInfoModal] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const unreadAlerts = useTripAlertsCount(user?.id);
 
   const infoButtonRef = useRef(null);
   const mobileTripsRef = useRef(null);
@@ -1064,6 +1103,10 @@ const closeInfoModal = () => {
     router.push('/dashboard?section=messages');
   };
 
+  const handleAlertsClick = () => {
+    router.push('/dashboard?section=alerts');
+  };
+
   const applyFilter = (field, nextFilters) => {
   // Берём либо "новые фильтры", либо актуальные из ref (самое надёжное),
   // либо fallback на filters из стейта
@@ -1141,6 +1184,22 @@ const closeInfoModal = () => {
     >
       <span className={mobileStyles.topIconWrap}>
         <MsgIconWithCount count={unreadMessages} />
+      </span>
+    </button>
+
+    <button
+      type="button"
+      onClick={() => {
+        if (isTripsSheetOpen) closeTripsSheet();
+        setInfoMenuOpen(false);
+        handleAlertsClick();
+      }}
+      className={`${mobileStyles.topIconButton} ${unreadAlerts > 0 ? mobileStyles.topIconUnread : ""}`}
+      aria-label="Оповещения"
+      title="Оповещения"
+    >
+      <span className={mobileStyles.topIconWrap}>
+        <AlertIconWithCount count={unreadAlerts} />
       </span>
     </button>
 

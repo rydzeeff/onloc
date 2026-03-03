@@ -23,6 +23,7 @@
 - `chat_message_reads`
 - `chat_message_files`
 - `messages` (legacy/direct messaging-style table) / `messages` (legacy-таблица для прямых сообщений)
+- `trip_alerts` (system trip notifications) / `trip_alerts` (системные оповещения поездок)
 
 ### Disputes/reviews/company / Споры, отзывы, компании
 - `disputes`
@@ -56,6 +57,7 @@
 - `reviews.trip_id -> trips.id`
 - `company_reviews.trip_id -> trips.id`
 - `chats.trip_id -> trips.id`
+- `trip_alerts.trip_id -> trips.id`
 
 ### User/profile-centered / Связи вокруг профилей пользователей
 - `trips.creator_id -> profiles.user_id`
@@ -66,6 +68,7 @@
 - `chat_messages.user_id -> profiles.user_id`
 - `chat_message_reads.user_id -> profiles.user_id`
 - `chat_participants.user_id -> profiles.user_id`
+- `trip_alerts.user_id/actor_user_id -> profiles.user_id`
 - `disputes.initiator_id/respondent_id -> profiles.user_id`
 - `company_reviews.organizer_id/reviewer_id -> profiles.user_id`
 - `reviews.organizer_id/reviewer_id -> profiles.user_id`
@@ -89,7 +92,7 @@
 ## 4) Probable table usage by runtime layer / Вероятное использование таблиц по слоям
 
 ### Frontend (pages/lib/features) / Фронтенд
-- Core reads/writes around: `profiles`, `trips`, `trip_participants`, `chats`, `chat_messages`, `disputes`, `reviews`, `company_reviews`, `payments`, `user_cards`. / Основные чтения/записи: `profiles`, `trips`, `trip_participants`, `chats`, `chat_messages`, `disputes`, `reviews`, `company_reviews`, `payments`, `user_cards`.
+- Core reads/writes around: `profiles`, `trips`, `trip_participants`, `chats`, `chat_messages`, `trip_alerts`, `disputes`, `reviews`, `company_reviews`, `payments`, `user_cards`. / Основные чтения/записи: `profiles`, `trips`, `trip_participants`, `chats`, `chat_messages`, `trip_alerts`, `disputes`, `reviews`, `company_reviews`, `payments`, `user_cards`.
 
 ### API routes (`pages/api/*`) / API-маршруты
 - Heavy payment impact: `payments`, `payment_refunds`, `payout_attempts`, `payout_logs`, `trip_cancellations`, `trip_participants`, `trips`, `user_cards`. / Наиболее критичные платежные таблицы: `payments`, `payment_refunds`, `payout_attempts`, `payout_logs`, `trip_cancellations`, `trip_participants`, `trips`, `user_cards`.
