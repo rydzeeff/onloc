@@ -399,9 +399,8 @@ if (S === 'CONFIRMED' && Success) {
     }
   }
 
-  // === НОВОЕ: отправляем ЛС организатору, что участник оплатил поездку ===
+  // === Оповещения: участнику и организатору о подтверждённой оплате ===
   try {
-    // 1) читаем поездку, чтобы узнать организатора и название
     const { data: tripInfo, error: tripInfoErr } = await supabase
       .from('trips')
       .select('creator_id, title')
@@ -410,86 +409,52 @@ if (S === 'CONFIRMED' && Success) {
 
     if (tripInfoErr) {
       console.error('[payment-notification] read tripInfo error:', tripInfoErr.message);
-    } else if (tripInfo?.creator_id) {
-      const organizerId = tripInfo.creator_id;
-      const title = tripInfo.title || '';
+    } else {
+      const tripTitle = tripInfo?.title || '';
+      const organizerId = tripInfo?.creator_id || null;
 
-      // 2) профиль участника, чтобы красиво показать имя
-      const { data: participantProfile, error: profErr } = await supabase
+      const { data: participantProfile } = await supabase
         .from('profiles')
         .select('full_name, first_name, last_name')
         .eq('user_id', participantId)
-        .single();
+        .maybeSingle();
 
-      if (profErr) {
-        console.error('[payment-notification] read participant profile error:', profErr.message);
+      const participantName =
+        participantProfile?.full_name ||
+        [participantProfile?.last_name, participantProfile?.first_name].filter(Boolean).join(' ') ||
+        'Пользователь';
+
+      const payloads = [
+        {
+          user_id: participantId,
+          trip_id: tripId,
+          actor_user_id: participantId,
+          type: 'trip_payment_paid',
+          title: 'Оплата подтверждена',
+          body: `Вы оплатили поездку «${tripTitle}».`,
+          metadata: { tripTitle },
+        },
+      ];
+
+      if (organizerId) {
+        payloads.push({
+          user_id: organizerId,
+          trip_id: tripId,
+          actor_user_id: participantId,
+          type: 'trip_payment_paid_by_participant',
+          title: 'Участник оплатил поездку',
+          body: `Пользователь «${participantName}» оплатил поездку «${tripTitle}».`,
+          metadata: { tripTitle, participantName },
+        });
       }
 
-      let fromName =
-        participantProfile?.full_name ||
-        [participantProfile?.first_name, participantProfile?.last_name].filter(Boolean).join(' ') ||
-        null;
-
-      // 3) ищем trip_private-чаты по этой поездке
-      const { data: tripChats, error: chatsErr } = await supabase
-        .from('chats')
-        .select('id')
-        .eq('trip_id', tripId)
-        .eq('chat_type', 'trip_private');
-
-      if (chatsErr) {
-        console.error('[payment-notification] read chats error:', chatsErr.message);
-      } else if (tripChats && tripChats.length > 0) {
-        const chatIds = tripChats.map((c) => c.id);
-
-        const { data: membersRows, error: membersErr } = await supabase
-          .from('chat_participants')
-          .select('chat_id, user_id')
-          .in('chat_id', chatIds);
-
-        if (membersErr) {
-          console.error('[payment-notification] read chat_participants error:', membersErr.message);
-        } else {
-          // Собираем по chat_id множество юзеров
-          const byChat = {};
-          for (const row of (membersRows || [])) {
-            if (!byChat[row.chat_id]) byChat[row.chat_id] = new Set();
-            byChat[row.chat_id].add(row.user_id);
-          }
-
-          // Находим чат, где есть и организатор, и участник
-          const dmChatId = Object.entries(byChat).find(([, set]) =>
-            set.has(organizerId) && set.has(participantId)
-          )?.[0];
-
-          if (dmChatId) {
-            const text =
-              `Я оплатил(а) поездку «${title}».` +
-              (fromName ? ` (участник: ${fromName})` : '');
-
-            const { error: msgErr } = await supabase
-              .from('chat_messages')
-              .insert({
-                chat_id: dmChatId,
-                user_id: participantId, // как будто пишет сам участник
-                content: text,
-              });
-
-            if (msgErr) {
-              console.error('[payment-notification] insert chat_message error:', msgErr.message);
-            } else {
-              console.log('[payment-notification] DM об оплате отправлен организатору');
-            }
-          } else {
-            console.log('[payment-notification] ЛС-чат организатор-участник не найден, сообщение не отправлено');
-          }
-        }
-      } else {
-        console.log('[payment-notification] нет trip_private чатов для этой поездки, ЛС не отправляем');
+      const { error: alertErr } = await supabase.from('trip_alerts').insert(payloads);
+      if (alertErr) {
+        console.error('[payment-notification] insert trip_alerts error:', alertErr.message);
       }
     }
   } catch (e) {
-    console.error('[payment-notification] Ошибка в блоке отправки ЛС об оплате:', e);
+    console.error('[payment-notification] Ошибка в блоке создания оповещений об оплате:', e);
   }
 
   console.log('Платёж CONFIRMED сохранён:', {
