@@ -439,3 +439,8 @@
   background-color: #1DA851; /* немного темнее при наведении */
   border-color: #1DA851;
 }
+.bellIcon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}

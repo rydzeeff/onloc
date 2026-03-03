@@ -34,12 +34,15 @@ export default async function handler(req, res) {
 
     const { data: access, error: accErr } = await adminClient
       .from('user_admin_access')
-      .select('is_admin')
+      .select('is_admin, news')
       .eq('user_id', userId)
       .maybeSingle();
 
     if (accErr) return res.status(500).json({ error: accErr.message });
-    if (!access?.is_admin) return res.status(403).json({ error: 'Forbidden' });
+    const canBroadcast = !!(access?.is_admin || access?.news);
+    if (!canBroadcast) {
+      return res.status(403).json({ error: 'Forbidden: news permission required' });
+    }
 
     const title = String(req.body?.title || '').trim();
     const body = String(req.body?.body || '').trim();

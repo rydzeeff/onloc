@@ -7,7 +7,7 @@ import Link from 'next/link';
 import mobileStyles from '../styles/dashboard.mobile.module.css';
 import EditTripMobile from './trips/EditTripMobile';
 import MessagesPage from './messages';
-import AlertsPage from './AlertsPage';
+import AlertsBell from '../components/AlertsBell';
 import CreateTrip from './trips/create-trip';
 import TripParticipantsPage from './participants';
 import SettingsPageMobile from './SettingsPageMobile';
@@ -268,6 +268,14 @@ const q = needsTripId
       <header className={mobileStyles.header}>
         <img src="/logo.png" alt="Onloc Logo" className={mobileStyles.logo} />
         <div className={mobileStyles.authButtons}>
+          <AlertsBell
+            user={user}
+            count={unreadAlerts}
+            buttonClassName={`${mobileStyles.topIconButton} ${unreadAlerts > 0 ? mobileStyles.topIconUnread : ''}`}
+            iconWrapClassName={mobileStyles.topIconWrap}
+            iconClassName={mobileStyles.topNavIcon}
+            mobileEdgeToEdge
+          />
           <button className={mobileStyles.button} type="button">
             Информация
           </button>
