@@ -8,7 +8,7 @@ function BellIcon({ count = 0, scale = 1.7, className = '' }) {
   // Визуально под иконку сообщений (без непрочитанных)
   const idleStroke = '#9ca3af';
   // Если нужно «облегчить»/«утяжелить» контур колокольчика, меняйте только это значение
-  const idleStrokeWidth = '1.6';
+  const idleStrokeWidth = '2';
 
   
   return (
