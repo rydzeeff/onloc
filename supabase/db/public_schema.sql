@@ -36,15 +36,24 @@ COMMENT ON SCHEMA public IS 'standard public schema';
 
 CREATE FUNCTION public.chat_message_reads_fill_chat_id() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-begin
-  if new.chat_id is null then
-    select chat_id into new.chat_id
-    from public.chat_messages
-    where id = new.message_id;
-  end if;
-  return new;
-end;
+    AS $$
+
+begin
+
+  if new.chat_id is null then
+
+    select chat_id into new.chat_id
+
+    from public.chat_messages
+
+    where id = new.message_id;
+
+  end if;
+
+  return new;
+
+end;
+
 $$;
 
 
@@ -54,53 +63,100 @@ $$;
 
 CREATE FUNCTION public.compute_open_count_after_refund(p_trip_id uuid, p_payment_db_id uuid, p_refund_amount_rub numeric) RETURNS integer
     LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-declare
-  v_eps numeric := 0.005;
-  v_count int := 0;
-begin
-  if coalesce(p_refund_amount_rub,0) < 0 then
-    return null;
-  end if;
-
-  perform pg_advisory_xact_lock(hashtext(p_trip_id::text));
-
-  with confirmed as (
-    select p.id, p.amount::numeric as gross_paid
-    from public.payments p
-    where p.trip_id = p_trip_id
-      and p.payment_type = 'participant_payment'
-      and p.status = 'confirmed'
-  ),
-  refunds as (
-    select payment_id, coalesce(sum(amount),0)::numeric as refunded
-    from public.payment_refunds
-    where status = 'confirmed'
-    group by payment_id
-  ),
-  paidouts as (
-    select source_payment_id, coalesce(sum(amount_gross_equiv_rub),0)::numeric as paid_out_gross
-    from public.payout_attempts
-    where status in ('pending','completed')
-    group by source_payment_id
-  ),
-  left_after as (
-    select c.id,
-           c.gross_paid
-         - coalesce(r.refunded,0)
-         - coalesce(po.paid_out_gross,0)
-         - case when c.id = p_payment_db_id then p_refund_amount_rub else 0 end
-           as gross_left
-    from confirmed c
-    left join refunds r on r.payment_id = c.id
-    left join paidouts po on po.source_payment_id = c.id
-  )
-  select count(*) into v_count
-  from left_after
-  where gross_left > v_eps;
-
-  return v_count;
-end
+    AS $$
+
+declare
+
+  v_eps numeric := 0.005;
+
+  v_count int := 0;
+
+begin
+
+  if coalesce(p_refund_amount_rub,0) < 0 then
+
+    return null;
+
+  end if;
+
+
+
+  perform pg_advisory_xact_lock(hashtext(p_trip_id::text));
+
+
+
+  with confirmed as (
+
+    select p.id, p.amount::numeric as gross_paid
+
+    from public.payments p
+
+    where p.trip_id = p_trip_id
+
+      and p.payment_type = 'participant_payment'
+
+      and p.status = 'confirmed'
+
+  ),
+
+  refunds as (
+
+    select payment_id, coalesce(sum(amount),0)::numeric as refunded
+
+    from public.payment_refunds
+
+    where status = 'confirmed'
+
+    group by payment_id
+
+  ),
+
+  paidouts as (
+
+    select source_payment_id, coalesce(sum(amount_gross_equiv_rub),0)::numeric as paid_out_gross
+
+    from public.payout_attempts
+
+    where status in ('pending','completed')
+
+    group by source_payment_id
+
+  ),
+
+  left_after as (
+
+    select c.id,
+
+           c.gross_paid
+
+         - coalesce(r.refunded,0)
+
+         - coalesce(po.paid_out_gross,0)
+
+         - case when c.id = p_payment_db_id then p_refund_amount_rub else 0 end
+
+           as gross_left
+
+    from confirmed c
+
+    left join refunds r on r.payment_id = c.id
+
+    left join paidouts po on po.source_payment_id = c.id
+
+  )
+
+  select count(*) into v_count
+
+  from left_after
+
+  where gross_left > v_eps;
+
+
+
+  return v_count;
+
+end
+
 $$;
 
 
@@ -110,487 +166,14 @@ $$;
 
 CREATE FUNCTION public.compute_open_count_now(p_trip_id uuid) RETURNS integer
     LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-declare
-  v_eps numeric := 0.005;
-  v_count int := 0;
-begin
-  perform pg_advisory_xact_lock(hashtext(p_trip_id::text));
-
-  with confirmed as (
-    select p.id, p.amount::numeric as gross_paid
-    from public.payments p
-    where p.trip_id = p_trip_id
-      and p.payment_type = 'participant_payment'
-      and p.status = 'confirmed'
-  ),
-  refunds as (
-    select payment_id, coalesce(sum(amount),0)::numeric as refunded
-    from public.payment_refunds
-    where status = 'confirmed'
-    group by payment_id
-  ),
-  paidouts as (
-    select source_payment_id, coalesce(sum(amount_gross_equiv_rub),0)::numeric as paid_out_gross
-    from public.payout_attempts
-    where status in ('pending','completed')
-    group by source_payment_id
-  ),
-  left_now as (
-    select c.id,
-           c.gross_paid
-         - coalesce(r.refunded,0)
-         - coalesce(po.paid_out_gross,0) as gross_left
-    from confirmed c
-    left join refunds r on r.payment_id = c.id
-    left join paidouts po on po.source_payment_id = c.id
-  )
-  select count(*) into v_count
-  from left_now
-  where gross_left > v_eps;
-
-  return v_count;
-end
-$$;
-
-
---
--- Name: confirm_email_after_otp_verification(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.confirm_email_after_otp_verification() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  -- Обновляем статус email_confirmed_at для пользователя в auth.users
-  UPDATE auth.users
-  SET email_confirmed_at = NOW()
-  WHERE phone = OLD.phone
-    AND email_confirmed_at IS NULL; -- Обновляем только если email еще не подтвержден
-
-  RETURN OLD;
-END;
-$$;
-
-
---
--- Name: confirm_email_on_create(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.confirm_email_on_create() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-BEGIN
-  NEW.email_confirmed_at = NOW();
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: count_alive_confirmed(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.count_alive_confirmed(trip_id uuid) RETURNS integer
-    LANGUAGE plpgsql STABLE
-    AS $_$
-declare
-  v_cnt int := 0;
-begin
-  with pp as (
-    select id, amount
-    from public.payments
-    where trip_id = $1
-      and payment_type = 'participant_payment'
-      and status = 'confirmed'
-  ),
-  refunded as (
-    select r.payment_id, coalesce(sum(r.amount),0) as refunded_sum
-    from public.payment_refunds r
-    where r.status = 'confirmed'
-    group by r.payment_id
-  )
-  select count(*)
-    into v_cnt
-  from pp
-  left join refunded r on r.payment_id = pp.id
-  where coalesce(r.refunded_sum,0) < pp.amount - 0.000001;
-
-  return v_cnt;
-end $_$;
-
-
---
--- Name: count_alive_confirmed_conservative(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.count_alive_confirmed_conservative(p_trip_id uuid) RETURNS integer
-    LANGUAGE plpgsql STABLE
-    AS $$
-declare
-  v_cnt int := 0;
-begin
-  with pp as (
-    select id, amount
-    from public.payments
-    where trip_id = p_trip_id
-      and payment_type='participant_payment'
-      and status='confirmed'
-  ),
-  conf as (
-    select payment_id, sum(amount) as refunded
-    from public.payment_refunds
-    where status='confirmed'
-    group by payment_id
-  ),
-  pend_close as (
-    -- pending-возвраты, которые по prepare_refund_atomic помечены как "закрывающие" платёж
-    select distinct payment_id
-    from public.payment_refunds
-    where status='pending' and will_close_payment=true
-  )
-  select count(*)
-    into v_cnt
-  from pp
-  left join conf c on c.payment_id=pp.id
-  left join pend_close pc on pc.payment_id=pp.id
-  where coalesce(c.refunded,0) < pp.amount - 0.000001
-    and pc.payment_id is null;  -- если есть pending закрывающий, считаем НЕ живым
-
-  return v_cnt;
-end $$;
-
-
---
--- Name: count_unread_messages(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.count_unread_messages(p_chat_id uuid, p_user_id uuid) RETURNS integer
-    LANGUAGE sql STABLE
     AS $$
-  select count(*)::int
-  from public.chat_messages m
-  where m.chat_id = p_chat_id
-    and m.user_id <> p_user_id
-    and not exists (
-      select 1
-      from public.chat_message_reads r
-      where r.message_id = m.id
-        and r.user_id = p_user_id
-    );
-$$;
 
-
---
--- Name: find_user_by_phone(text); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.find_user_by_phone(p_phone text) RETURNS TABLE(id uuid, email text, phone text, email_confirmed_at timestamp with time zone, phone_confirmed_at timestamp with time zone)
-    LANGUAGE sql SECURITY DEFINER
-    SET search_path TO 'public', 'auth'
-    AS $$
-  select id, email, phone, email_confirmed_at, phone_confirmed_at
-  from auth.users
-  where phone = p_phone
-  limit 1;
-$$;
-
-
---
--- Name: get_active_trips_geojson(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.get_active_trips_geojson() RETURNS TABLE(id uuid, title text, description text, date date, "time" text, arrival_date date, arrival_time text, price numeric, difficulty text, age_from numeric, age_to numeric, from_location json, to_location json, image_urls jsonb, participants integer, leisure_type text, status text, creator_id uuid)
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    t.id,
-    t.title,
-    t.description,
-    t.date,
-    t.time,
-    t.arrival_date,
-    t.arrival_time,
-    t.price,
-    t.difficulty,
-    t.age_from,
-    t.age_to,
-    ST_AsGeoJSON(t.from_location)::json AS from_location, -- Оставляем как json
-    ST_AsGeoJSON(t.to_location)::json AS to_location,     -- Оставляем как json
-    t.image_urls, -- Уже jsonb, приведение не требуется
-    t.participants,
-    t.leisure_type,
-    t.status,
-    t.creator_id
-  FROM trips t
-  WHERE t.status = 'active';
-END;
-$$;
-
-
---
--- Name: get_trip_details_geojson(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.get_trip_details_geojson(trip_id uuid) RETURNS TABLE(id uuid, title text, description text, date date, "time" text, arrival_date date, arrival_time text, price numeric, difficulty text, age_from numeric, age_to numeric, from_location json, to_location json, image_urls jsonb, participants integer, leisure_type text, status text, creator_id uuid, from_address text, to_address text)
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    t.id,
-    t.title,
-    t.description,
-    t.date::date,
-    t.time,
-    t.arrival_date::date,
-    t.arrival_time,
-    t.price::numeric,
-    t.difficulty,
-    t.age_from::numeric,
-    t.age_to::numeric,
-    ST_AsGeoJSON(t.from_location)::json AS from_location,
-    ST_AsGeoJSON(t.to_location)::json   AS to_location,
-    t.image_urls,
-    t.participants,
-    t.leisure_type,
-    t.status,
-    t.creator_id,
-    t.from_address,
-    t.to_address
-  FROM public.trips t
-  WHERE t.id = trip_id;   -- ✅ убрали ограничение по статусу
-END;
-$$;
-
-
---
--- Name: get_trip_participants_with_details(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.get_trip_participants_with_details(trip_uuid uuid) RETURNS TABLE(id uuid, user_id uuid, status text, joined_at timestamp with time zone, avatar_url text, birth_date date, last_name text, first_name text, patronymic text, gender text, average_rating numeric, confirmed_start boolean, approved_trip boolean)
-    LANGUAGE sql STABLE
-    AS $$
-  select
-    tp.id,
-    tp.user_id,
-    tp.status,
-    tp.joined_at,
-    p.avatar_url,
-    p.birth_date,
-    p.last_name,
-    p.first_name,
-    p.patronymic,
-    p.gender,
-    coalesce((
-      select avg(r.rating)::numeric(3,1)
-      from reviews r
-      where r.reviewer_id = tp.user_id
-    ), 0) as average_rating,
-    coalesce(tp.confirmed_start, false) as confirmed_start,
-    tp.approved_trip
-  from public.trip_participants tp
-  left join public.profiles p on p.user_id = tp.user_id
-  where tp.trip_id = trip_uuid
-  order by tp.joined_at asc, tp.id asc;
-$$;
-
-
---
--- Name: get_unread_counts_for_chats(uuid[], uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.get_unread_counts_for_chats(p_chat_ids uuid[], p_user_id uuid) RETURNS TABLE(chat_id uuid, unread_count bigint)
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-begin
-  if auth.uid() is null then
-    raise exception 'not authenticated';
-  end if;
-
-  -- защита от чтения чужих данных
-  if p_user_id is null or p_user_id <> auth.uid() then
-    raise exception 'forbidden';
-  end if;
-
-  return query
-  select
-    m.chat_id,
-    count(*)::bigint as unread_count
-  from public.chat_messages m
-  where
-    m.chat_id = any(p_chat_ids)
-    and m.user_id <> p_user_id
-    -- защита от "угадывания" чужих chat_id
-    and exists (
-      select 1
-      from public.chat_participants cp
-      where cp.chat_id = m.chat_id
-        and cp.user_id = p_user_id
-    )
-    -- непрочитано = нет квитанции прочтения конкретного юзера
-    and not exists (
-      select 1
-      from public.chat_message_reads r
-      where r.message_id = m.id
-        and r.user_id = p_user_id
-    )
-  group by m.chat_id;
-end;
-$$;
-
-
---
--- Name: get_user_trips(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.get_user_trips(user_uuid uuid) RETURNS TABLE(id uuid, title text, description text, date date, "time" text, arrival_date date, arrival_time text, price numeric, difficulty text, age_from numeric, age_to numeric, from_location public.geography, to_location public.geography, image_urls jsonb, participants integer, leisure_type text, status text, creator_id uuid, participant_status text, participant_user_id uuid)
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  RETURN QUERY
-  SELECT DISTINCT ON (t.id)
-         t.id,
-         t.title,
-         t.description,
-         t.date,
-         t.time,
-         t.arrival_date,
-         t.arrival_time,
-         t.price,
-         t.difficulty,
-         t.age_from,
-         t.age_to,
-         t.from_location,
-         t.to_location,
-         t.image_urls,
-         t.participants,
-         t.leisure_type,
-         t.status,
-         t.creator_id,
-         tp.status AS participant_status,
-         tp.user_id AS participant_user_id -- Добавляем user_id
-  FROM trips t
-  LEFT JOIN trip_participants tp ON t.id = tp.trip_id
-  WHERE t.creator_id = user_uuid
-     OR tp.user_id = user_uuid;
-END;
-$$;
-
-
---
--- Name: inc_trip_cancel_progress(uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.inc_trip_cancel_progress(batch_id uuid) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-begin
-  update trip_cancellations
-  set refund_progress = coalesce(refund_progress,0) + 1,
-      updated_at = now()
-  where id = batch_id;
-end;
-$$;
-
-
---
--- Name: is_user_admin(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.is_user_admin() RETURNS boolean
-    LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-BEGIN
-  RETURN (
-    SELECT is_admin
-    FROM profiles
-    WHERE user_id = auth.uid()
-    LIMIT 1
-  );
-END;
-$$;
-
-
---
--- Name: mark_chat_read(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.mark_chat_read(p_chat_id uuid, p_user_id uuid) RETURNS void
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-begin
-  -- 1) совместимость: read=true
-  update public.chat_messages m
-    set read = true
-  where m.chat_id = p_chat_id
-    and m.user_id <> p_user_id
-    and (m.read is null or m.read = false);
-
-  -- 2) главное: квитанции всем сообщениям, где их нет
-  insert into public.chat_message_reads (message_id, user_id, read_at)
-  select m.id, p_user_id, now()
-  from public.chat_messages m
-  where m.chat_id = p_chat_id
-    and m.user_id <> p_user_id
-    and not exists (
-      select 1
-      from public.chat_message_reads r
-      where r.message_id = m.id
-        and r.user_id = p_user_id
-    )
-  on conflict (message_id, user_id)
-  do update set read_at = excluded.read_at;
-end;
-$$;
-
-
---
--- Name: mark_leaver_msgs_read_for_organizer(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.mark_leaver_msgs_read_for_organizer(p_trip_id uuid, p_leaver_id uuid) RETURNS void
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
 declare
-  v_org uuid;
-begin
-  select creator_id into v_org
-  from trips
-  where id = p_trip_id;
 
-  if v_org is null then
-    return;
-  end if;
+  v_eps numeric := 0.005;
 
-  insert into chat_message_reads (message_id, user_id, chat_id, read_at)
-  select m.id, v_org, m.chat_id, now()
-  from chat_messages m
-  join chats c on c.id = m.chat_id
-  where c.trip_id = p_trip_id
-    and c.is_group = false
-    and c.chat_type in ('trip_private', 'archived')
-    and m.user_id = p_leaver_id
-  on conflict (message_id, user_id) do update
-    set read_at = excluded.read_at,
-        chat_id = coalesce(excluded.chat_id, chat_message_reads.chat_id);
-end;
-$$;
+  v_count int := 0;
 
-
---
--- Name: mark_trip_msgs_read_for_user(uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.mark_trip_msgs_read_for_user(p_trip_id uuid, p_user_id uuid) RETURNS void
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
 begin
   insert into public.chat_message_reads (message_id, user_id, chat_id, read_at)
   select
@@ -616,139 +199,273 @@ $$;
 
 CREATE FUNCTION public.prepare_payout_atomic(p_trip_id uuid, p_source_payment_id uuid, p_amount_net_rub numeric, p_fee_platform_pct numeric, p_fee_tbank_pct numeric, p_participant_id uuid DEFAULT NULL::uuid, p_hint_is_final boolean DEFAULT NULL::boolean) RETURNS TABLE(order_id text, amount_kop integer, computed_is_final boolean, alive_payments integer)
     LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-declare
-  v_pay_amount_rub            numeric := 0;
-  v_refunded_rub              numeric := 0;
-  v_paid_out_gross_equiv_rub  numeric := 0;
-  v_gross_available_rub       numeric := 0;
-  v_total_pct                 numeric := 0;
-  v_gross_equiv_for_request   numeric := 0;
-  v_alive_after               int := 0;
-  -- v_eps оставляем для совместимости в прежних местах, если где-то ещё используется
-  v_eps                       numeric := 0.005;
-
-  -- НОВОЕ: допуск сравнения в копейках (1 = 0.01 ₽)
-  v_tolerance_kop             integer := 100;
-begin
-  if coalesce(p_amount_net_rub,0) <= 0 then
-    raise exception 'PAYOUT_AMOUNT_INVALID';
-  end if;
-
-  -- общий замок по поездке (серилизация конкурирующих выплат)
-  perform pg_advisory_xact_lock(hashtext(p_trip_id::text));
-
-  -- проверяем исходный платёж
-  select amount::numeric
-    into v_pay_amount_rub
-  from public.payments
-  where id = p_source_payment_id
-    and trip_id = p_trip_id
-    and payment_type = 'participant_payment'
-    and status = 'confirmed'
-  limit 1;
-
-  if coalesce(v_pay_amount_rub,0) <= 0 then
-    raise exception 'SOURCE_PAYMENT_NOT_FOUND';
-  end if;
-
-  -- подтверждённые возвраты по этому платёжному чеку
-  select coalesce(sum(amount),0)::numeric
-    into v_refunded_rub
-  from public.payment_refunds
-  where payment_id = p_source_payment_id
-    and status = 'confirmed';
-
-  -- уже забронированные/проведённые выплаты по этому чеку (их GROSS-эквивалент)
-  select coalesce(sum(amount_gross_equiv_rub),0)::numeric
-    into v_paid_out_gross_equiv_rub
-  from public.payout_attempts
-  where source_payment_id = p_source_payment_id
-    and status in ('pending','completed');
-
-  v_gross_available_rub := greatest(v_pay_amount_rub - v_refunded_rub - v_paid_out_gross_equiv_rub, 0);
-
-  -- переводим NET запроса в GROSS-эквивалент по снапшоту комиссий (строго вниз по копейке)
-  v_total_pct := coalesce(p_fee_platform_pct,0) + coalesce(p_fee_tbank_pct,0);
-  if v_total_pct >= 100 then
-    raise exception 'PAYOUT_FEE_INVALID';
-  end if;
-
-  v_gross_equiv_for_request := trunc( (p_amount_net_rub / (1 - v_total_pct/100))::numeric, 2 );
-
-  -- НОВОЕ: сравнение в копейках с допуском (избежать проблемы 1999.99 vs 2000.00)
-  if trunc(v_gross_equiv_for_request * 100)::int
-       > trunc(v_gross_available_rub * 100)::int + v_tolerance_kop then
-    raise exception 'PAYOUT_EXCEEDS_AVAILABLE';
-  end if;
-
-  -- ↓↓↓ НОВЫЙ блок подсчёта "живых" платежей ПОСЛЕ этой брони — в копейках с допуском
-  with confirmed as (
-    select p.id, p.amount::numeric as gross_paid
-    from public.payments p
-    where p.trip_id = p_trip_id
-      and p.payment_type = 'participant_payment'
-      and p.status = 'confirmed'
-  ),
-  refunds as (
-    select payment_id, coalesce(sum(amount),0)::numeric as refunded
-    from public.payment_refunds
-    where status = 'confirmed'
-    group by payment_id
-  ),
-  paidouts as (
-    select source_payment_id, coalesce(sum(amount_gross_equiv_rub),0)::numeric as paid_out_gross
-    from public.payout_attempts
-    where status in ('pending','completed')
-    group by source_payment_id
-  ),
-  left_after as (
-    select
-      c.id,
-      -- остаток в КОПЕЙКАХ, округлённый до ближайшей копейки
-      round((
-        c.gross_paid
-        - coalesce(r.refunded,0)
-        - coalesce(po.paid_out_gross,0)        - case when c.id = p_source_payment_id then v_gross_equiv_for_request else 0 end
-      ) * 100)::int as gross_left_kop
-    from confirmed c
-    left join refunds r on r.payment_id = c.id
-    left join paidouts po on po.source_payment_id = c.id
-  )
-  select count(*) into v_alive_after
-  from left_after
-  -- считаем «живым» только если остаток строго больше допуска (например, > 1 коп.)
-  where gross_left_kop > v_tolerance_kop;
-
-  -- финальность: если после этой выплаты «живых» не осталось
-  computed_is_final := coalesce(p_hint_is_final, v_alive_after = 0);
-
-  -- готовим банковскую сумму (копейки) из NET (вниз)
-  order_id := 'pout-' || p_trip_id || '-' || extract(epoch from clock_timestamp())::bigint;
-  amount_kop := trunc(p_amount_net_rub * 100)::int;
-  alive_payments := v_alive_after;
-
-  -- бронь
-  insert into public.payout_attempts (
-    trip_id, participant_id, source_payment_id,
-    status, attempt_count, last_attempt_at,
-    amount,                 -- копейки в банк (NET)
-    amount_net_rub,         -- NET, руб.
-    amount_gross_equiv_rub, -- GROSS-эквивалент (для лимитов/аналитики)
-    fee_platform_pct, fee_tbank_pct,
-    order_id, computed_is_final
-  ) values (
-    p_trip_id, p_participant_id, p_source_payment_id,
-    'pending', 1, now(),
-    amount_kop,
-    p_amount_net_rub,
-    v_gross_equiv_for_request,
-    p_fee_platform_pct, p_fee_tbank_pct,
-    order_id, computed_is_final
-  );
-
-  return next;
-end
+    AS $$
+
+declare
+
+  v_pay_amount_rub            numeric := 0;
+
+  v_refunded_rub              numeric := 0;
+
+  v_paid_out_gross_equiv_rub  numeric := 0;
+
+  v_gross_available_rub       numeric := 0;
+
+  v_total_pct                 numeric := 0;
+
+  v_gross_equiv_for_request   numeric := 0;
+
+  v_alive_after               int := 0;
+
+  -- v_eps оставляем для совместимости в прежних местах, если где-то ещё используется
+
+  v_eps                       numeric := 0.005;
+
+
+
+  -- НОВОЕ: допуск сравнения в копейках (1 = 0.01 ₽)
+
+  v_tolerance_kop             integer := 100;
+
+begin
+
+  if coalesce(p_amount_net_rub,0) <= 0 then
+
+    raise exception 'PAYOUT_AMOUNT_INVALID';
+
+  end if;
+
+
+
+  -- общий замок по поездке (серилизация конкурирующих выплат)
+
+  perform pg_advisory_xact_lock(hashtext(p_trip_id::text));
+
+
+
+  -- проверяем исходный платёж
+
+  select amount::numeric
+
+    into v_pay_amount_rub
+
+  from public.payments
+
+  where id = p_source_payment_id
+
+    and trip_id = p_trip_id
+
+    and payment_type = 'participant_payment'
+
+    and status = 'confirmed'
+
+  limit 1;
+
+
+
+  if coalesce(v_pay_amount_rub,0) <= 0 then
+
+    raise exception 'SOURCE_PAYMENT_NOT_FOUND';
+
+  end if;
+
+
+
+  -- подтверждённые возвраты по этому платёжному чеку
+
+  select coalesce(sum(amount),0)::numeric
+
+    into v_refunded_rub
+
+  from public.payment_refunds
+
+  where payment_id = p_source_payment_id
+
+    and status = 'confirmed';
+
+
+
+  -- уже забронированные/проведённые выплаты по этому чеку (их GROSS-эквивалент)
+
+  select coalesce(sum(amount_gross_equiv_rub),0)::numeric
+
+    into v_paid_out_gross_equiv_rub
+
+  from public.payout_attempts
+
+  where source_payment_id = p_source_payment_id
+
+    and status in ('pending','completed');
+
+
+
+  v_gross_available_rub := greatest(v_pay_amount_rub - v_refunded_rub - v_paid_out_gross_equiv_rub, 0);
+
+
+
+  -- переводим NET запроса в GROSS-эквивалент по снапшоту комиссий (строго вниз по копейке)
+
+  v_total_pct := coalesce(p_fee_platform_pct,0) + coalesce(p_fee_tbank_pct,0);
+
+  if v_total_pct >= 100 then
+
+    raise exception 'PAYOUT_FEE_INVALID';
+
+  end if;
+
+
+
+  v_gross_equiv_for_request := trunc( (p_amount_net_rub / (1 - v_total_pct/100))::numeric, 2 );
+
+
+
+  -- НОВОЕ: сравнение в копейках с допуском (избежать проблемы 1999.99 vs 2000.00)
+
+  if trunc(v_gross_equiv_for_request * 100)::int
+
+       > trunc(v_gross_available_rub * 100)::int + v_tolerance_kop then
+
+    raise exception 'PAYOUT_EXCEEDS_AVAILABLE';
+
+  end if;
+
+
+
+  -- ↓↓↓ НОВЫЙ блок подсчёта "живых" платежей ПОСЛЕ этой брони — в копейках с допуском
+
+  with confirmed as (
+
+    select p.id, p.amount::numeric as gross_paid
+
+    from public.payments p
+
+    where p.trip_id = p_trip_id
+
+      and p.payment_type = 'participant_payment'
+
+      and p.status = 'confirmed'
+
+  ),
+
+  refunds as (
+
+    select payment_id, coalesce(sum(amount),0)::numeric as refunded
+
+    from public.payment_refunds
+
+    where status = 'confirmed'
+
+    group by payment_id
+
+  ),
+
+  paidouts as (
+
+    select source_payment_id, coalesce(sum(amount_gross_equiv_rub),0)::numeric as paid_out_gross
+
+    from public.payout_attempts
+
+    where status in ('pending','completed')
+
+    group by source_payment_id
+
+  ),
+
+  left_after as (
+
+    select
+
+      c.id,
+
+      -- остаток в КОПЕЙКАХ, округлённый до ближайшей копейки
+
+      round((
+
+        c.gross_paid
+
+        - coalesce(r.refunded,0)
+
+        - coalesce(po.paid_out_gross,0)
+        - case when c.id = p_source_payment_id then v_gross_equiv_for_request else 0 end
+
+      ) * 100)::int as gross_left_kop
+
+    from confirmed c
+
+    left join refunds r on r.payment_id = c.id
+
+    left join paidouts po on po.source_payment_id = c.id
+
+  )
+
+  select count(*) into v_alive_after
+
+  from left_after
+
+  -- считаем «живым» только если остаток строго больше допуска (например, > 1 коп.)
+
+  where gross_left_kop > v_tolerance_kop;
+
+
+
+  -- финальность: если после этой выплаты «живых» не осталось
+
+  computed_is_final := coalesce(p_hint_is_final, v_alive_after = 0);
+
+
+
+  -- готовим банковскую сумму (копейки) из NET (вниз)
+
+  order_id := 'pout-' || p_trip_id || '-' || extract(epoch from clock_timestamp())::bigint;
+
+  amount_kop := trunc(p_amount_net_rub * 100)::int;
+
+  alive_payments := v_alive_after;
+
+
+
+  -- бронь
+
+  insert into public.payout_attempts (
+
+    trip_id, participant_id, source_payment_id,
+
+    status, attempt_count, last_attempt_at,
+
+    amount,                 -- копейки в банк (NET)
+
+    amount_net_rub,         -- NET, руб.
+
+    amount_gross_equiv_rub, -- GROSS-эквивалент (для лимитов/аналитики)
+
+    fee_platform_pct, fee_tbank_pct,
+
+    order_id, computed_is_final
+
+  ) values (
+
+    p_trip_id, p_participant_id, p_source_payment_id,
+
+    'pending', 1, now(),
+
+    amount_kop,
+
+    p_amount_net_rub,
+
+    v_gross_equiv_for_request,
+
+    p_fee_platform_pct, p_fee_tbank_pct,
+
+    order_id, computed_is_final
+
+  );
+
+
+
+  return next;
+
+end
+
 $$;
 
 
@@ -758,65 +475,124 @@ $$;
 
 CREATE FUNCTION public.prepare_refund_atomic(p_payment_id uuid, p_trip_id uuid, p_participant_id uuid, p_amount_rub numeric, p_external_request_id text, p_reason text, p_created_by uuid) RETURNS TABLE(refund_row_id uuid, will_close boolean)
     LANGUAGE plpgsql
-    AS $$
-DECLARE
-  v_payment_amount_rub numeric;  -- сумма исходного платежа участника (₽)
-  v_reserved_rub numeric;        -- уже зарезервировано (₽) pending+confirmed
-  v_row_id uuid;
-BEGIN
-  -- транзакционная блокировка по поездке
-  PERFORM pg_advisory_xact_lock(hashtext(p_trip_id::text));
-
-  -- подтверждённый платёж участника в этой поездке
-  SELECT amount
-  INTO v_payment_amount_rub
-  FROM public.payments
-  WHERE id = p_payment_id
-    AND trip_id = p_trip_id
-    AND participant_id = p_participant_id
-    AND payment_type = 'participant_payment'
-    AND status = 'confirmed'
-  FOR UPDATE;
-
-  IF v_payment_amount_rub IS NULL THEN
-    RAISE EXCEPTION 'PAYMENT_NOT_FOUND';
-  END IF;
-
-  IF COALESCE(p_amount_rub, 0) <= 0 THEN
-    RAISE EXCEPTION 'INVALID_AMOUNT';
-  END IF;
-
-  -- уже зарезервировано (₽) по этому платежу
-  SELECT COALESCE(SUM(amount), 0)
-  INTO v_reserved_rub
-  FROM public.payment_refunds
-  WHERE payment_id = p_payment_id
-    AND status IN ('pending','confirmed');
-
-  IF v_reserved_rub + p_amount_rub > v_payment_amount_rub THEN
-    RAISE EXCEPTION 'REFUND_EXCEEDS_AVAILABLE';
-  END IF;
-
-  -- ИДЕМПОТЕНТНО: создаём/обновляем бронь возврата по (trip_id, external_request_id)
-  INSERT INTO public.payment_refunds (
-    trip_id, participant_id, payment_id,
-    amount, status, external_request_id, reason, created_by
-  )
-  VALUES (
-    p_trip_id, p_participant_id, p_payment_id,
-    p_amount_rub, 'pending', p_external_request_id, p_reason, p_created_by
-  )
-  ON CONFLICT (trip_id, external_request_id)
-  DO UPDATE SET
-    amount      = EXCLUDED.amount,
-    reason      = EXCLUDED.reason,
-    status      = 'pending',
-    updated_at  = NOW()
-  RETURNING id INTO v_row_id;
-
-  -- Для Cancel не считаем автозакрытие — вернём false
-  RETURN QUERY SELECT v_row_id, FALSE::boolean;
-END;
+    AS $$
+
+DECLARE
+
+  v_payment_amount_rub numeric;  -- сумма исходного платежа участника (₽)
+
+  v_reserved_rub numeric;        -- уже зарезервировано (₽) pending+confirmed
+
+  v_row_id uuid;
+
+BEGIN
+
+  -- транзакционная блокировка по поездке
+
+  PERFORM pg_advisory_xact_lock(hashtext(p_trip_id::text));
+
+
+
+  -- подтверждённый платёж участника в этой поездке
+
+  SELECT amount
+
+  INTO v_payment_amount_rub
+
+  FROM public.payments
+
+  WHERE id = p_payment_id
+
+    AND trip_id = p_trip_id
+
+    AND participant_id = p_participant_id
+
+    AND payment_type = 'participant_payment'
+
+    AND status = 'confirmed'
+
+  FOR UPDATE;
+
+
+
+  IF v_payment_amount_rub IS NULL THEN
+
+    RAISE EXCEPTION 'PAYMENT_NOT_FOUND';
+
+  END IF;
+
+
+
+  IF COALESCE(p_amount_rub, 0) <= 0 THEN
+
+    RAISE EXCEPTION 'INVALID_AMOUNT';
+
+  END IF;
+
+
+
+  -- уже зарезервировано (₽) по этому платежу
+
+  SELECT COALESCE(SUM(amount), 0)
+
+  INTO v_reserved_rub
+
+  FROM public.payment_refunds
+
+  WHERE payment_id = p_payment_id
+
+    AND status IN ('pending','confirmed');
+
+
+
+  IF v_reserved_rub + p_amount_rub > v_payment_amount_rub THEN
+
+    RAISE EXCEPTION 'REFUND_EXCEEDS_AVAILABLE';
+
+  END IF;
+
+
+
+  -- ИДЕМПОТЕНТНО: создаём/обновляем бронь возврата по (trip_id, external_request_id)
+
+  INSERT INTO public.payment_refunds (
+
+    trip_id, participant_id, payment_id,
+
+    amount, status, external_request_id, reason, created_by
+
+  )
+
+  VALUES (
+
+    p_trip_id, p_participant_id, p_payment_id,
+
+    p_amount_rub, 'pending', p_external_request_id, p_reason, p_created_by
+
+  )
+
+  ON CONFLICT (trip_id, external_request_id)
+
+  DO UPDATE SET
+
+    amount      = EXCLUDED.amount,
+
+    reason      = EXCLUDED.reason,
+
+    status      = 'pending',
+
+    updated_at  = NOW()
+
+  RETURNING id INTO v_row_id;
+
+
+
+  -- Для Cancel не считаем автозакрытие — вернём false
+
+  RETURN QUERY SELECT v_row_id, FALSE::boolean;
+
+END;
+
 $$;
 
 
@@ -826,31 +602,56 @@ $$;
 
 CREATE FUNCTION public.send_push_notification() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-DECLARE
-  recipient_id uuid;
-BEGIN
-  SELECT CASE
-    WHEN NEW.user_id = user_id_1 THEN user_id_2
-    ELSE user_id_1
-  END INTO recipient_id
-  FROM chats
-  WHERE id = NEW.chat_id
-  LIMIT 1;
-
-  PERFORM net.http_post(
-    'https://newtest.onloc.ru/api/push',
-    jsonb_build_object(
-      'userId', recipient_id,
-      'title', 'Новое сообщение',
-      'body', NEW.content
-    ),
-    '{"Content-Type":"application/json"}'::jsonb,
-    '{}'::jsonb,
-    5000
-  );
-  RETURN NEW;
-END;
+    AS $$
+
+DECLARE
+
+  recipient_id uuid;
+
+BEGIN
+
+  SELECT CASE
+
+    WHEN NEW.user_id = user_id_1 THEN user_id_2
+
+    ELSE user_id_1
+
+  END INTO recipient_id
+
+  FROM chats
+
+  WHERE id = NEW.chat_id
+
+  LIMIT 1;
+
+
+
+  PERFORM net.http_post(
+
+    'https://newtest.onloc.ru/api/push',
+
+    jsonb_build_object(
+
+      'userId', recipient_id,
+
+      'title', 'Новое сообщение',
+
+      'body', NEW.content
+
+    ),
+
+    '{"Content-Type":"application/json"}'::jsonb,
+
+    '{}'::jsonb,
+
+    5000
+
+  );
+
+  RETURN NEW;
+
+END;
+
 $$;
 
 
@@ -869,52 +670,98 @@ CREATE FUNCTION public.set_updated_at() RETURNS trigger
 
 CREATE FUNCTION public.trg_payment_refunds_after_change() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-declare
-  v_payment_amount numeric := 0;
-  v_total_refunded numeric := 0;
-begin
-  -- интересуют только строки, ставшие confirmed
-  if tg_op = 'INSERT' then
-    if new.status <> 'confirmed' then
-      return new;
-    end if;
-  else
-    if not (new.status = 'confirmed' and (old.status is distinct from new.status)) then
-      if new.status <> 'confirmed' then
-        return new;
-      end if;
-    end if;
-  end if;
-
-  select amount into v_payment_amount
-  from public.payments
-  where id = new.payment_id
-  limit 1;
-
-  if v_payment_amount is null then
-    raise exception 'PAYMENT_NOT_FOUND for payment_id=%', new.payment_id;
-  end if;
-
-  select coalesce(sum(amount), 0) into v_total_refunded
-  from public.payment_refunds
-  where payment_id = new.payment_id
-    and status = 'confirmed';
-
-  if v_total_refunded > v_payment_amount + 0.000001 then
-    raise exception 'REFUND_SUM_EXCEEDS_PAYMENT (refunded=%, payment=%)', v_total_refunded, v_payment_amount;
-  end if;
-
-  if v_total_refunded >= v_payment_amount - 0.000001 then
-    update public.payments
-       set status = 'refunded',
-           is_refunded = true,
-           refunded_at = now(),
-           updated_at = now()
-     where id = new.payment_id;
-  end if;
-
-  return new;
+    AS $$
+
+declare
+
+  v_payment_amount numeric := 0;
+
+  v_total_refunded numeric := 0;
+
+begin
+
+  -- интересуют только строки, ставшие confirmed
+
+  if tg_op = 'INSERT' then
+
+    if new.status <> 'confirmed' then
+
+      return new;
+
+    end if;
+
+  else
+
+    if not (new.status = 'confirmed' and (old.status is distinct from new.status)) then
+
+      if new.status <> 'confirmed' then
+
+        return new;
+
+      end if;
+
+    end if;
+
+  end if;
+
+
+
+  select amount into v_payment_amount
+
+  from public.payments
+
+  where id = new.payment_id
+
+  limit 1;
+
+
+
+  if v_payment_amount is null then
+
+    raise exception 'PAYMENT_NOT_FOUND for payment_id=%', new.payment_id;
+
+  end if;
+
+
+
+  select coalesce(sum(amount), 0) into v_total_refunded
+
+  from public.payment_refunds
+
+  where payment_id = new.payment_id
+
+    and status = 'confirmed';
+
+
+
+  if v_total_refunded > v_payment_amount + 0.000001 then
+
+    raise exception 'REFUND_SUM_EXCEEDS_PAYMENT (refunded=%, payment=%)', v_total_refunded, v_payment_amount;
+
+  end if;
+
+
+
+  if v_total_refunded >= v_payment_amount - 0.000001 then
+
+    update public.payments
+
+       set status = 'refunded',
+
+           is_refunded = true,
+
+           refunded_at = now(),
+
+           updated_at = now()
+
+     where id = new.payment_id;
+
+  end if;
+
+
+
+  return new;
+
 end $$;
 
 
@@ -924,10 +771,14 @@ end $$;
 
 CREATE FUNCTION public.trg_payment_refunds_set_updated_at() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-begin
-  new.updated_at = now();
-  return new;
+    AS $$
+
+begin
+
+  new.updated_at = now();
+
+  return new;
+
 end $$;
 
 
@@ -937,13 +788,20 @@ end $$;
 
 CREATE FUNCTION public.update_email_verified() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-BEGIN
-  UPDATE auth.users
-  SET email_verified = true
-  WHERE email = 'user_' || NEW.phone || '@example.com';
-  RETURN NEW;
-END;
+    AS $$
+
+BEGIN
+
+  UPDATE auth.users
+
+  SET email_verified = true
+
+  WHERE email = 'user_' || NEW.phone || '@example.com';
+
+  RETURN NEW;
+
+END;
+
 $$;
 
 
@@ -953,19 +811,32 @@ $$;
 
 CREATE PROCEDURE public.update_expired_trips_status()
     LANGUAGE plpgsql
-    AS $$
-BEGIN
-  UPDATE trips t
-  SET status = 'canceled'
-  WHERE t.status = 'active'
-    AND NOT EXISTS (
-      SELECT 1
-      FROM trip_participants tp
-      WHERE tp.trip_id = t.id
-        AND tp.status IN ('waiting', 'confirmed')
-    )
-    AND (t.date + (t.time || ':00')::time) < NOW();
-END;
+    AS $$
+
+BEGIN
+
+  UPDATE trips t
+
+  SET status = 'canceled'
+
+  WHERE t.status = 'active'
+
+    AND NOT EXISTS (
+
+      SELECT 1
+
+      FROM trip_participants tp
+
+      WHERE tp.trip_id = t.id
+
+        AND tp.status IN ('waiting', 'confirmed')
+
+    )
+
+    AND (t.date + (t.time || ':00')::time) < NOW();
+
+END;
+
 $$;
 
 
@@ -975,13 +846,20 @@ $$;
 
 CREATE FUNCTION public.update_trip_status() RETURNS void
     LANGUAGE plpgsql
-    AS $$
-BEGIN
-  UPDATE trips
-  SET status = 'started'
-  WHERE status = 'active'
-    AND start_date <= NOW();
-END;
+    AS $$
+
+BEGIN
+
+  UPDATE trips
+
+  SET status = 'started'
+
+  WHERE status = 'active'
+
+    AND start_date <= NOW();
+
+END;
+
 $$;
 
 
@@ -991,11 +869,16 @@ $$;
 
 CREATE FUNCTION public.update_updated_at() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-BEGIN
-  NEW.updated_at = CURRENT_TIMESTAMP;
-  RETURN NEW;
-END;
+    AS $$
+
+BEGIN
+
+  NEW.updated_at = CURRENT_TIMESTAMP;
+
+  RETURN NEW;
+
+END;
+
 $$;
 
 
@@ -1005,11 +888,16 @@ $$;
 
 CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-BEGIN
-  NEW.updated_at = CURRENT_TIMESTAMP;
-  RETURN NEW;
-END;
+    AS $$
+
+BEGIN
+
+  NEW.updated_at = CURRENT_TIMESTAMP;
+
+  RETURN NEW;
+
+END;
+
 $$;
 
 
@@ -1019,34 +907,62 @@ $$;
 
 CREATE FUNCTION public.verify_phone_otp(phone_number text, input_otp text) RETURNS json
     LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-DECLARE
-  temp_otp_record record;
-  user_record record;
-BEGIN
-  -- Проверяем, есть ли пользователь с таким номером телефона
-  SELECT * INTO user_record
-  FROM auth.users
-  WHERE phone = phone_number;
-
-  IF NOT FOUND THEN
-    RETURN json_build_object('success', false, 'error', 'User not found');
-  END IF;
-
-  -- Проверяем OTP
-  SELECT * INTO temp_otp_record
-  FROM temp_otps
-  WHERE phone = phone_number AND otp = input_otp AND expires_at > NOW();
-
-  IF NOT FOUND THEN
-    RETURN json_build_object('success', false, 'error', 'Invalid or expired OTP');
-  END IF;
-
-  -- Удаляем OTP после успешной верификации (это вызовет триггер)
-  DELETE FROM temp_otps WHERE phone = phone_number;
-
-  RETURN json_build_object('success', true);
-END;
+    AS $$
+
+DECLARE
+
+  temp_otp_record record;
+
+  user_record record;
+
+BEGIN
+
+  -- Проверяем, есть ли пользователь с таким номером телефона
+
+  SELECT * INTO user_record
+
+  FROM auth.users
+
+  WHERE phone = phone_number;
+
+
+
+  IF NOT FOUND THEN
+
+    RETURN json_build_object('success', false, 'error', 'User not found');
+
+  END IF;
+
+
+
+  -- Проверяем OTP
+
+  SELECT * INTO temp_otp_record
+
+  FROM temp_otps
+
+  WHERE phone = phone_number AND otp = input_otp AND expires_at > NOW();
+
+
+
+  IF NOT FOUND THEN
+
+    RETURN json_build_object('success', false, 'error', 'Invalid or expired OTP');
+
+  END IF;
+
+
+
+  -- Удаляем OTP после успешной верификации (это вызовет триггер)
+
+  DELETE FROM temp_otps WHERE phone = phone_number;
+
+
+
+  RETURN json_build_object('success', true);
+
+END;
+
 $$;
 
 
@@ -1058,16 +974,42 @@ CREATE FUNCTION public.verify_user_email() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public', 'auth', 'pg_catalog'
     AS $$
-BEGIN
-  IF NEW.verified = TRUE AND OLD.verified = FALSE AND NEW.is_registration = TRUE THEN
-    UPDATE auth.users
-    SET email_confirmed_at = NOW()
-    WHERE phone = NEW.phone;
 
-    RAISE NOTICE 'Email verified for phone: % (registration)', NEW.phone;
-  END IF;
+BEGIN
+
+  -- Обновляем статус email_confirmed_at для пользователя в auth.users
+
+  UPDATE auth.users
+
+  SET email_confirmed_at = NOW()
+
+  WHERE phone = OLD.phone
+
+    AND email_confirmed_at IS NULL; -- Обновляем только если email еще не подтвержден
+
+
+
+  RETURN OLD;
+
+END;
+
+$$;
+
+
+--
+-- Name: confirm_email_on_create(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.confirm_email_on_create() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+
+BEGIN
+
+  NEW.email_confirmed_at = NOW();
 
   RETURN NEW;
+
 END;
 $$;
 
