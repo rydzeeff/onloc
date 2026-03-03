@@ -1,13 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-function BellIcon({ count = 0, scale = 1, className = '' }) {
+function BellIcon({ count = 0, scale = 1.7, className = '' }) {
   const n = Number(count || 0);
+  const label = n > 99 ? '99+' : String(n);
+
   return (
     <svg className={className} style={{ transform: `scale(${scale})` }} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 4a5 5 0 0 0-5 5v2.2c0 .9-.3 1.8-.8 2.6l-.7 1a1 1 0 0 0 .8 1.6h11.4a1 1 0 0 0 .8-1.6l-.7-1a4.7 4.7 0 0 1-.8-2.6V9a5 5 0 0 0-5-5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
-      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-      {n > 0 ? <circle cx="18" cy="6" r="3" fill="#ef4444" /> : null}
+      <path
+        d="M12 4a5 5 0 0 0-5 5v2.2c0 .9-.3 1.8-.8 2.6l-.7 1a1 1 0 0 0 .8 1.6h11.4a1 1 0 0 0 .8-1.6l-.7-1a4.7 4.7 0 0 1-.8-2.6V9a5 5 0 0 0-5-5Z"
+        fill={n > 0 ? '#ef4444' : 'none'}
+        stroke={n > 0 ? '#ef4444' : 'currentColor'}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M9.5 18a2.5 2.5 0 0 0 5 0" fill="none" stroke={n > 0 ? '#ef4444' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round"/>
+      {n > 0 ? (
+        <text
+          x="12"
+          y="10.8"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={label.length >= 3 ? '5.2' : '6.8'}
+          fontWeight="700"
+          fill="#ffffff"
+        >
+          {label}
+        </text>
+      ) : null}
     </svg>
   );
 }

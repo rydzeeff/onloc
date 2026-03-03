@@ -687,7 +687,6 @@ export default function TripsPagePC({ user, geolocation }) {
               count={unreadAlerts}
               buttonClassName={pcStyles.messageIcon}
               iconClassName={pcStyles.bellIcon}
-              scale={2}
             />
           </div>
           <div className={pcStyles.infoWrapper} ref={infoButtonRef}>
