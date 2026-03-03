@@ -1038,9 +1038,26 @@ const handleBackToTrips = () => {
 
       {/* Модал «Участники» */}
       {modalOpen && (
-        <div className={styles.modalBackdrop}>
-          <div className={styles.modalContent}>
-            <h2>Участники</h2>
+        <div className={styles.modalBackdrop} onClick={closeParticipantsModal}>
+          <div
+            className={`${styles.modalContent} ${styles.participantsModalSheet}`}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Список участников"
+          >
+            <div className={styles.participantsModalHandle} aria-hidden="true" />
+            <div className={styles.participantsModalHeader}>
+              <h2 className={styles.participantsModalTitle}>Участники</h2>
+              <button
+                type="button"
+                className={styles.participantsModalCloseIcon}
+                onClick={closeParticipantsModal}
+                aria-label="Закрыть список участников"
+              >
+                ✕
+              </button>
+            </div>
             {participants.length === 0 ? (
               <div className={styles.noParticipants}>Нет участников</div>
             ) : (
