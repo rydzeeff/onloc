@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 export default function AlertsPage({ user }) {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [freshIds, setFreshIds] = useState(new Set());
 
   useEffect(() => {
     if (!user?.id) return;
@@ -24,7 +25,9 @@ export default function AlertsPage({ user }) {
         console.error('[AlertsPage] load failed:', error.message);
         setAlerts([]);
       } else {
+        const unread = new Set((data || []).filter((a) => !a.is_read).map((a) => a.id));
         setAlerts(data || []);
+        setFreshIds((prev) => new Set([...prev, ...unread]));
       }
       setLoading(false);
 
@@ -55,8 +58,11 @@ export default function AlertsPage({ user }) {
       <h2 style={{ marginBottom: 12 }}>Оповещения</h2>
       {!alerts.length && <p>Новых оповещений пока нет.</p>}
       {alerts.map((a) => (
-        <div key={a.id} style={{ border: '1px solid #e7e7e7', borderRadius: 12, padding: 12, marginBottom: 10, background: a.is_read ? '#fff' : '#f7fbff' }}>
-          <div style={{ fontWeight: 600 }}>{a.title}</div>
+        <div key={a.id} style={{ border: freshIds.has(a.id) ? '2px solid #22c55e' : '1px solid #e7e7e7', borderRadius: 12, padding: 12, marginBottom: 10, background: freshIds.has(a.id) ? '#f0fdf4' : (a.is_read ? '#fff' : '#f7fbff') }}>
+          <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>{a.title}</span>
+            {freshIds.has(a.id) ? <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 700 }}>НОВОЕ</span> : null}
+          </div>
           <div style={{ marginTop: 4 }}>{a.body}</div>
           <div style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>{new Date(a.created_at).toLocaleString('ru-RU')}</div>
         </div>
