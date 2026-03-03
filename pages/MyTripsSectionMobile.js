@@ -96,6 +96,10 @@ const MyTripsSectionMobile = ({ trips: _trips, user, onTripClick }) => {
   const handleRepeatTrip = (event, trip) => {
     event.stopPropagation();
 
+    const imageUrls = Array.isArray(trip?.image_urls)
+      ? trip.image_urls.filter(Boolean)
+      : [];
+
     const repeatPayload = {
       title: trip?.title || '',
       description: trip?.description || '',
@@ -110,6 +114,7 @@ const MyTripsSectionMobile = ({ trips: _trips, user, onTripClick }) => {
       toLocation: trip?.to_location || null,
       fromAddress: trip?.from_address || '',
       toAddress: trip?.to_address || '',
+      imageUrls,
     };
 
     if (typeof window !== 'undefined') {
