@@ -94,20 +94,25 @@ const MyTripsSection = ({ trips: _trips, user, onTripClick }) => {
     event.stopPropagation();
 
     let tripForRepeat = trip;
-    const hasLocationData = Boolean(
-      trip?.from_location || trip?.to_location || trip?.from_address || trip?.to_address
-    );
-
-    if (!hasLocationData && trip?.id) {
+    if (trip?.id) {
       try {
-        const { data: fullTrip } = await supabase
-          .from('trips')
-          .select('from_location, to_location, from_address, to_address')
-          .eq('id', trip.id)
-          .single();
+        const { data: geoRows } = await supabase.rpc('get_trip_details_geojson', {
+          trip_id: trip.id,
+        });
+
+        const fullTrip = Array.isArray(geoRows) ? geoRows[0] : geoRows;
 
         if (fullTrip) {
           tripForRepeat = { ...trip, ...fullTrip };
+          console.log('[repeatTrip][pc] rpc geo loaded', {
+            tripId: trip.id,
+            from_location_type: typeof fullTrip?.from_location,
+            to_location_type: typeof fullTrip?.to_location,
+            from_address: fullTrip?.from_address || '',
+            to_address: fullTrip?.to_address || '',
+          });
+        } else {
+          console.warn('[repeatTrip][pc] rpc returned empty payload', { tripId: trip.id });
         }
       } catch (error) {
         console.error('Ошибка загрузки геоданных поездки для повтора:', error);
@@ -137,6 +142,13 @@ const MyTripsSection = ({ trips: _trips, user, onTripClick }) => {
 
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem('repeatTripDraft', JSON.stringify(repeatPayload));
+      console.log('[repeatTrip][pc] draft saved', {
+        tripId: trip?.id,
+        hasFromLocation: Boolean(repeatPayload.fromLocation),
+        hasToLocation: Boolean(repeatPayload.toLocation),
+        fromAddress: repeatPayload.fromAddress,
+        toAddress: repeatPayload.toAddress,
+      });
     }
 
     router.push({ pathname: '/dashboard', query: { section: 'create-trip', repeat: '1' } }, undefined, { shallow: true });
