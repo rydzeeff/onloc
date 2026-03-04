@@ -360,7 +360,6 @@ export default function FiltersPC({
               inline
               locale="ru"
               minDate={today}
-              maxDate={twoWeeksLater}
             />
             <div className={styles.dateButtons}>
               <button onClick={applyDateFilter} className={styles.applyButton}>Применить</button>
