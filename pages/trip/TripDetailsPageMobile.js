@@ -97,6 +97,7 @@ function MsgIconWithCount({ count = 0, className }) {
 export default function TripDetailsPageMobile({ tripId }) {
   const { setProcessing } = useAuth();
   const router = useRouter();
+  const mapContainerRef = useRef(null);
   const { id = tripId, from: fromParamRaw } = router.query || {};
   const openedFromParticipants = String(fromParamRaw || '').toLowerCase().includes('participant');
 
@@ -144,7 +145,7 @@ export default function TripDetailsPageMobile({ tripId }) {
     handleMessagesClick,
     calculateAge,
     getFullName,
-  } = useTripDetails({ tripId: id });
+  } = useTripDetails({ tripId: id, mapContainerRef });
 
   const unreadAlerts = useTripAlertsCount(user?.id);
 
@@ -938,7 +939,7 @@ const handleBackToTrips = () => {
             </div>
           </div>
 
-          <div id="map" className={styles.mapContainer}></div>
+          <div ref={mapContainerRef} className={styles.mapContainer}></div>
 
           <div className={styles.infoRow}>
             <div className={styles.infoTile}>
@@ -1350,9 +1351,11 @@ const handleBackToTrips = () => {
               <p className={styles.noReviews}>Нет отзывов об этом организаторе.</p>
             )}
 
-            <button className={styles.closeButton} onClick={closeOrganizerModal}>
-              Закрыть
-            </button>
+            <div className={styles.descModalFooter}>
+              <button type="button" className={styles.descModalClose} onClick={closeOrganizerModal}>
+                Закрыть
+              </button>
+            </div>
           </div>
         </div>
       )}
