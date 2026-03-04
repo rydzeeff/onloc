@@ -739,7 +739,9 @@ export default function TripDetailsPagePC() {
                 </tbody>
               </table>
             )}
-            <button className={styles.closeButton} onClick={closeParticipantsModal}>Закрыть</button>
+            <div className={styles.modalActions} style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+              <button className={styles.button} onClick={closeParticipantsModal}>Закрыть</button>
+            </div>
           </div>
         </div>
       )}
@@ -838,7 +840,9 @@ export default function TripDetailsPagePC() {
               <p className={styles.noReviews}>Нет отзывов об этом организаторе.</p>
             )}
 
-            <button className={styles.closeButton} onClick={closeOrganizerModal}>Закрыть</button>
+            <div className={styles.modalActions} style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+              <button className={styles.button} onClick={closeOrganizerModal}>Закрыть</button>
+            </div>
           </div>
         </div>
       )}
