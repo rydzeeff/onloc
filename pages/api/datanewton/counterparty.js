@@ -64,12 +64,17 @@ export default async function handler(req, res) {
     }
 
     if (!r.ok) {
-      return res.status(r.status).json({ error: json?.error || `DataNewton ${r.status}`, payload: json || null });
+      return res.status(200).json({
+        ok: false,
+        status: r.status,
+        error: json?.error || `DataNewton ${r.status}`,
+        payload: json || null,
+      });
     }
 
     return res.status(200).json({ ok: true, source: 'datanewton', payload: json });
   } catch (e) {
     console.error('[DATANEWTON][counterparty] unexpected error:', e);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(200).json({ ok: false, status: 500, error: 'Internal Server Error' });
   }
 }

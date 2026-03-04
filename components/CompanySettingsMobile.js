@@ -470,20 +470,23 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
         });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j?.error || `HTTP ${r.status}`);
+        if (j?.ok === false) throw new Error(j?.error || `TBank ${j?.status || "lookup failed"}`);
+
+        const src = j?.data || j;
 
         const mapped = {
           company_id: "",
-          name: j?.name || j?.full_name || "",
+          name: src?.name || src?.full_name || "",
           inn: innVal,
-          kpp: j?.kpp || "",
-          ogrn: j?.ogrn || j?.ogrnip || "",
-          legalAddress: j?.address || j?.legal_address || "",
-          phone: j?.phone || (await getPhoneForCompany()) || "",
-          ceo_first_name: j?.ceo_first_name || "",
-          ceo_last_name: j?.ceo_last_name || "",
-          ceo_middle_name: j?.ceo_middle_name || "",
-          okveds: safeParseArray(j?.okveds || j?.okved || []),
-          status: j?.status || "acting",
+          kpp: src?.kpp || "",
+          ogrn: src?.ogrn || src?.ogrnip || "",
+          legalAddress: src?.address || src?.legal_address || src?.legalAddress || "",
+          phone: src?.phone || (await getPhoneForCompany()) || "",
+          ceo_first_name: src?.ceo_first_name || src?.ceo?.firstName || "",
+          ceo_last_name: src?.ceo_last_name || src?.ceo?.lastName || "",
+          ceo_middle_name: src?.ceo_middle_name || src?.ceo?.middleName || "",
+          okveds: safeParseArray(src?.okveds || src?.okved || []),
+          status: src?.status || "acting",
           tbank_registered: false,
           tbank_shop_code: "",
           tbank_code: "",
@@ -507,6 +510,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
       });
       const dnJson = await dn.json().catch(() => ({}));
       if (!dn.ok) throw new Error(dnJson?.error || `HTTP ${dn.status}`);
+      if (dnJson?.ok === false) throw new Error(dnJson?.error || `DataNewton ${dnJson?.status || "lookup failed"}`);
 
       const mapped2 = await mapDataNewtonToCompanyData(dnJson);
       setCompanyData(mapped2);
