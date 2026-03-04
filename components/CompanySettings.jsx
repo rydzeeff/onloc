@@ -170,6 +170,9 @@ const CompanySettings = ({ user, supabase, profilePhone }) => {
   const [companyAvatarUrl, setCompanyAvatarUrl] = useState("/avatar-default.svg");
   const [isSaved, setIsSaved] = useState(false);
   const [showInnInput, setShowInnInput] = useState(true);
+  const [lookupFailCount, setLookupFailCount] = useState(0);
+  const [manualMode, setManualMode] = useState(false);
+  const [companyType, setCompanyType] = useState("ooo");
 
   // для первичного заполнения (до первой регистрации)
   const [paymentData, setPaymentData] = useState({
@@ -326,7 +329,9 @@ if (hasUnsavedDraft) return;
         .select("*")
         .eq("user_id", user.id)
         .eq("is_active", true)
-        .single();
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (!error && data) {
         const normalized = normalizeDBCompany(data);
@@ -388,11 +393,14 @@ setIsSaved(false);
   const checkInnExists = async (innVal) => {
     const { data, error } = await supabase
       .from("mycompany")
-      .select("inn")
+      .select("inn, user_id")
       .eq("inn", innVal)
-      .single();
-    return { exists: !!data, error };
+      .maybeSingle();
+    return { exists: !!data, data, error };
   };
+
+  const getInnExistsMessage = () =>
+    'Организация с таким ИНН уже зарегистрирована на площадке «Онлок». Если это ваша компания, напишите в поддержку: Сообщения → Поддержка → Создать чат с поддержкой.';
 
   // ===== fallback DataNewton mapper
   const mapDataNewtonToCompanyData = async (dnJson) => {
@@ -488,13 +496,13 @@ setIsSaved(false);
     }
 
     const { exists, error } = await checkInnExists(inn);
-    if (error && error.code !== "PGRST116") {
+    if (error) {
       setMessage("Ошибка проверки ИНН");
       setTimeout(() => setMessage(null), 3000);
       return;
     }
     if (exists) {
-      setMessage("ИНН уже зарегистрирован. Обратитесь к поддержке.");
+      setMessage(getInnExistsMessage());
       setTimeout(() => setMessage(null), 5000);
       return;
     }
@@ -504,8 +512,10 @@ setIsSaved(false);
         method: "GET",
         headers: { Accept: "application/json" },
       });
+      const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(`TBank ${response.status}`);
-      const data = await response.json();
+      if (payload?.ok === false) throw new Error(payload?.error || `TBank ${payload?.status || "lookup failed"}`);
+      const data = payload?.data || payload;
 
       let phone = profilePhone;
       if (!phone) {
@@ -534,6 +544,8 @@ setIsSaved(false);
       };
       setCompanyData(filled);
       setShowInnInput(false);
+      setManualMode(false);
+      setLookupFailCount(0);
 
 // ✅ мгновенно сохраняем черновик (без ожидания debounce)
 if (typeof window !== "undefined" && draftKey) {
@@ -566,15 +578,16 @@ restoredDraftRef.current = true;
           method: "GET",
           headers: { Accept: "application/json" },
         });
-        if (!dnRes.ok) {
-          const err = await dnRes.json().catch(() => ({}));
-          throw new Error(err?.error || `DataNewton ${dnRes.status}`);
-        }
-        const dnJson = await dnRes.json();
+        const dnPayload = await dnRes.json().catch(() => ({}));
+        if (!dnRes.ok) throw new Error(dnPayload?.error || `DataNewton ${dnRes.status}`);
+        if (dnPayload?.ok === false) throw new Error(dnPayload?.error || `DataNewton ${dnPayload?.status || "lookup failed"}`);
+        const dnJson = dnPayload?.payload ? dnPayload : dnPayload?.data || dnPayload;
         const mapped = await mapDataNewtonToCompanyData(dnJson);
 
         setCompanyData(mapped);
         setShowInnInput(false);
+        setManualMode(false);
+        setLookupFailCount(0);
 
 // ✅ мгновенно сохраняем черновик (fallback)
 if (typeof window !== "undefined" && draftKey) {
@@ -604,9 +617,15 @@ restoredDraftRef.current = true;
           payment_details: "",
         };
       } catch (fallbackErr) {
-        console.error("[company lookup fallback failed]", fallbackErr);
-        setMessage("Ошибка получения данных из обоих источников");
-        setTimeout(() => setMessage(null), 3000);
+        const nextFailCount = lookupFailCount + 1;
+        setLookupFailCount(nextFailCount);
+        if (nextFailCount === 1) {
+          setMessage("Не удалось получить данные. Проверьте, правильно ли введён ИНН, и попробуйте ещё раз.");
+        } else {
+          setMessage("Компания не найдена в базе. Вы можете ввести данные вручную.");
+          setManualMode(true);
+        }
+        setTimeout(() => setMessage(null), 5000);
       }
     }
   };
@@ -638,6 +657,9 @@ const handleResetInn = () => {
   setCompanyData(null);
   setIsSaved(false);
   setShowInnInput(true);
+  setLookupFailCount(0);
+  setManualMode(false);
+  setCompanyType("ooo");
 
   // очистить ошибки/сообщения
   setSubmitError("");
@@ -678,6 +700,16 @@ const handleSaveCompany = async () => {
   setSubmitError("");
 
   const isCompany = /^\d{10}$/.test((c.inn || "").trim());
+
+  const innCheck = await checkInnExists((c.inn || "").trim());
+  if (innCheck?.error) {
+    setSubmitError("Не удалось проверить ИНН в базе. Попробуйте позже.");
+    return;
+  }
+  if (innCheck?.exists && innCheck?.data?.user_id !== user.id) {
+    setSubmitError(getInnExistsMessage());
+    return;
+  }
 
   // ✅ (3.2) если не заполнены обязательные поля — показываем ошибку у кнопки (не toast)
   if (
@@ -776,7 +808,7 @@ if (!response.ok) {
 
       await supabase
         .from("profiles")
-        .update({ is_legal_entity: true, company_id: companyId, phone: profilePhone })
+        .update({ phone: profilePhone })
         .eq("user_id", user.id);
 
       const saved = normalizeDBCompany(up.data);
@@ -880,10 +912,33 @@ restoredDraftRef.current = false;
   }
 
   // ===== UI helpers
-  const isCompanyEntity = useMemo(
-    () => /^\d{10}$/.test((companyData?.inn || inn || "").trim()),
-    [companyData?.inn, inn]
-  );
+  const isCompanyEntity = useMemo(() => {
+    const currentInn = (companyData?.inn || inn || "").trim();
+    if (/^\d{10}$/.test(currentInn)) return true;
+    if (/^\d{12}$/.test(currentInn)) return false;
+    return companyType === "ooo";
+  }, [companyData?.inn, inn, companyType]);
+
+  const startManualInput = () => {
+    setCompanyData({
+      company_id: "",
+      name: "",
+      inn: inn || "",
+      kpp: "",
+      ceo_first_name: "",
+      ceo_last_name: "",
+      ceo_middle_name: "",
+      legalAddress: "",
+      phone: profilePhone || "",
+      ogrn: "",
+      okveds: [],
+      status: "acting",
+      tbank_registered: false,
+      site_url: process.env.NEXT_PUBLIC_BASE_URL,
+    });
+    setShowInnInput(false);
+    setIsSaved(false);
+  };
 
   return (
     <div className={styles.companyTab}>
@@ -942,13 +997,23 @@ restoredDraftRef.current = false;
           <input
             type="text"
             value={inn}
-            onChange={(e) => setInn(e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "");
+              setInn(value);
+              if (value.length === 10) setCompanyType("ooo");
+              if (value.length === 12) setCompanyType("ip");
+            }}
             maxLength={12}
             placeholder="10 цифр для ООО, 12 для ИП"
           />
           <button className={styles.actionButton} onClick={fetchCompanyDataFromTBank}>
             Получить данные
           </button>
+          {manualMode && (
+            <button className={styles.retryButton} type="button" onClick={startManualInput}>
+              Ввести данные вручную
+            </button>
+          )}
         </div>
       )}
 
@@ -958,6 +1023,20 @@ restoredDraftRef.current = false;
         <div>
           <div className={styles.companySection}>
             <h3 className={styles.sectionTitle}>Данные организации</h3>
+
+            {manualMode && !isSaved && (
+              <div className={styles.inputGroup}>
+                <label>Тип организации</label>
+                <select
+                  className={styles.input}
+                  value={companyType}
+                  onChange={(e) => setCompanyType(e.target.value)}
+                >
+                  <option value="ooo">ООО</option>
+                  <option value="ip">ИП</option>
+                </select>
+              </div>
+            )}
 
             {/* Название */}
             <div className={styles.inputGroup}>
@@ -1251,10 +1330,10 @@ className={`${styles.input} ${
               )}
             </div>
           )}
-
-          {message && <div className={styles.toast}>{message}</div>}
         </div>
       )}
+
+      {message && <div className={styles.toast}>{message}</div>}
 
       {/* Диалог: подтверждение создания чата (без «перейти в сообщения») */}
       {askChangeOpen && (

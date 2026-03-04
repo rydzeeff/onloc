@@ -65,16 +65,23 @@ export default async function handler(req, res) {
     dlog('OPENAPI ← body:', JSON.stringify(response.data, null, 2));
 
     if (response.status < 200 || response.status >= 300) {
-      throw Object.assign(new Error(`OpenAPI failed: ${response.status}`), { response });
+      return res.status(200).json({
+        ok: false,
+        status: response.status,
+        error: `TBank lookup failed (${response.status})`,
+        details: response.data || null,
+      });
     }
 
     const normalized = normalizeTbankExcerpt(response.data);
-    return res.status(200).json(normalized);
+    return res.status(200).json({ ok: true, data: normalized });
   } catch (error) {
     const status = error?.response?.status || 500;
     dlog('ERROR status:', status);
     dlog('ERROR body:', JSON.stringify(error?.response?.data || {}, null, 2));
-    return res.status(status).json({
+    return res.status(200).json({
+      ok: false,
+      status,
       error: 'Ошибка сервера Т-Банка',
       details: error?.response?.data || error.message,
     });
