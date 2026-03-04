@@ -19,11 +19,15 @@ export default function ChatHeader({
   const avatarSrc = useMemo(() => {
     if (!currentChat) return "/avatar-default.svg";
 
+    const isArchivedSupportLike =
+      currentChat.chat_type === "archived" && !currentChat.is_group && !currentChat.trip_id;
+
     // поддержка / редактирование компании / диспут — фикс-обложка
     if (
       currentChat.chat_type === "support" ||
       currentChat.chat_type === "company_edit" ||
-      currentChat.chat_type === "dispute"
+      currentChat.chat_type === "dispute" ||
+      isArchivedSupportLike
     ) {
       return "/default-travel-image.png";
     }
@@ -42,7 +46,9 @@ export default function ChatHeader({
   }, [currentChat, tripsMap, profilesMap, myUserId]);
 
   const subtitle =
-    currentChat?.chat_type === "support" || currentChat?.chat_type === "company_edit"
+    currentChat?.chat_type === "support" ||
+    currentChat?.chat_type === "company_edit" ||
+    (currentChat?.chat_type === "archived" && !currentChat?.is_group && !currentChat?.trip_id)
       ? "Чат с поддержкой"
       : currentChat?.chat_type === "dispute"
       ? "Диспут по поездке"

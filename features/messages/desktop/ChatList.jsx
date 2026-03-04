@@ -81,6 +81,7 @@ const effectiveType =
 
 const isSupport = effectiveType === "support" || effectiveType === "company_edit";
 const isDispute = effectiveType === "dispute";
+const isArchivedSupportLike = chat.chat_type === "archived" && !chat.is_group && !chat.trip_id;
 
           let thumb = "/default-travel-image.png";
           if (isGroup && trip.image_urls?.[0]) {
@@ -135,8 +136,8 @@ const isDispute = effectiveType === "dispute";
                     </div>
 
                     <div className={styles.chatUserInfo}>
-                      {isSupport
-                        ? "Служба поддержки"
+                      {isSupport || isArchivedSupportLike
+                        ? "Чат поддержки"
                         : isDispute
                         ? "Диспут"
                         : `Участников: ${chat.participantsUserIds?.length || 0}`}

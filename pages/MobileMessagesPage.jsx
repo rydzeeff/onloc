@@ -124,6 +124,18 @@ const groupChatIdByTrip = useMemo(() => {
 }, [chats]);
 
 
+
+const supportIdsKey = useMemo(
+  () =>
+    (chats || [])
+      .filter((c) => c.chat_type === "support" || c.chat_type === "dispute" || c.chat_type === "company_edit")
+      .map((c) => c.id)
+      .filter(Boolean)
+      .sort()
+      .join(","),
+  [chats]
+);
+
 // ✅ Первичный пересчёт непрочитанных для вкладки "Поддержка"
 // (чтобы бейджи появились сразу, а не только после realtime)
 useEffect(() => {
@@ -160,7 +172,36 @@ useEffect(() => {
       return next;
     });
   })();
-}, [user?.id, isChatsLoaded, chats, setUnreadCount, notifications]);
+}, [user?.id, isChatsLoaded, supportIdsKey, setUnreadCount]);
+
+// ✅ realtime-индикация: новые сообщения в чатах поддержки поднимают бейдж вкладки
+useEffect(() => {
+  if (!user?.id) return;
+
+  const supportIds = supportIdsKey ? supportIdsKey.split(",").filter(Boolean) : [];
+  if (!supportIds.length) return;
+
+  const channel = supabase
+    .channel(`support_unread_mobile_${user.id}`)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+      const chatId = payload.new?.chat_id;
+      if (!chatId || !supportIds.includes(chatId)) return;
+      if (payload.new.user_id === user.id) return;
+      if (currentChat?.id === chatId) return;
+
+      setUnreadCount((prev) => {
+        const next = { ...(prev || {}) };
+        next[chatId] = (next[chatId] || 0) + 1;
+        notifications?.setUnreadCount?.(chatId, next[chatId]);
+        return next;
+      });
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [user?.id, supportIdsKey, currentChat?.id, setUnreadCount]);
 
 
   // ======= Realtime по составу участников (как на PC) =======
@@ -927,15 +968,28 @@ const TabButton = ({ id, label, count, unread = 0 }) => {
                       </div>
 
                       <div className={mobileStyles.chatUserInfo}>
-                        {chat.is_group
-                          ? `Участников: ${(chat.participantsUserIds || []).length}`
-                          : chat.chat_type === "support"
-                          ? "Поддержка"
-                          : chat.chat_type === "dispute"
-                          ? "Диспут"
-                          : chat.chat_type === "company_edit"
-                          ? "Редактирование компании"
-                          : "Диалог"}
+                        {(() => {
+                          const titleLower = String(chat._titleString || chat.title || "").toLowerCase();
+                          const effectiveType =
+                            chat.chat_type !== "archived"
+                              ? chat.chat_type
+                              : chat.moderator_id || titleLower.includes("диспут")
+                              ? "dispute"
+                              : chat.support_close_requested_at ||
+                                chat.support_close_confirmed ||
+                                titleLower.includes("поддерж")
+                              ? "support"
+                              : titleLower.includes("реквиз") || titleLower.includes("компани")
+                              ? "company_edit"
+                              : "archived";
+
+                          const isArchivedSupportLike = chat.chat_type === "archived" && !chat.is_group && !chat.trip_id;
+
+                          if (chat.is_group) return `Участников: ${(chat.participantsUserIds || []).length}`;
+                          if (effectiveType === "support" || effectiveType === "dispute" || isArchivedSupportLike) return "Чат поддержки";
+                          if (effectiveType === "company_edit") return "Редактирование компании";
+                          return "Чат поддержки";
+                        })()}
                       </div>
                     </div>
 
