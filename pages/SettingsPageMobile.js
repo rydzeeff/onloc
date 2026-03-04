@@ -33,6 +33,12 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!nativeInfo.isNative && (view === 'permissions' || view === 'notifications')) {
+      setView('menu');
+    }
+  }, [nativeInfo.isNative, view]);
+
   // ===== профиль =====
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -623,7 +629,9 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
               <div className={mobileStyles.menuChevron} aria-hidden="true">›</div>
             </button>
 
-            <NativeSettingsMenuRows nativeInfo={nativeInfo} setView={setView} />
+            {nativeInfo.isNative && (
+              <NativeSettingsMenuRows nativeInfo={nativeInfo} setView={setView} />
+            )}
 
             <button
               type="button"
@@ -874,7 +882,7 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
           </div>
         )}
 
-        {view === 'permissions' && (
+        {nativeInfo.isNative && view === 'permissions' && (
           <PermissionsView
             nativeInfo={nativeInfo}
             setView={setView}
@@ -882,7 +890,7 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
           />
         )}
 
-        {view === 'notifications' && (
+        {nativeInfo.isNative && view === 'notifications' && (
           <NotificationsView
             nativeInfo={nativeInfo}
             setView={setView}
