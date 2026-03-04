@@ -145,3 +145,52 @@
   justify-content: flex-end;
   gap: 8px;
 }
+
+.chatBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.chatBtnActive {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
+.chatIcon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.unreadBadge {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.chatStatus {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.chatMine {
+  color: #047857;
+}
+
+.chatForeign {
+  color: #b45309;
+}

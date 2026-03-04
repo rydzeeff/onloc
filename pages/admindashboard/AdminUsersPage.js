@@ -43,6 +43,8 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [creatingChatFor, setCreatingChatFor] = useState('');
+  const [chatMetaByUser, setChatMetaByUser] = useState({});
 
   const [banModalUser, setBanModalUser] = useState(null);
   const [selectedReason, setSelectedReason] = useState(BAN_REASONS[0].value);
@@ -93,6 +95,120 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
     const t = setTimeout(() => setToast(''), 2800);
     return () => clearTimeout(t);
   }, [toast]);
+
+  const fetchChatMeta = useCallback(async (usersRows = rows) => {
+    if (!canModerate || !user || !usersRows.length) {
+      setChatMetaByUser({});
+      return;
+    }
+
+    try {
+      const userIds = usersRows.map((r) => r.user_id).filter(Boolean);
+      if (!userIds.length) {
+        setChatMetaByUser({});
+        return;
+      }
+
+      const { data: adminRows } = await supabase
+        .from('user_admin_access')
+        .select('user_id, is_admin, chats, users');
+      const adminSet = new Set(
+        (adminRows || [])
+          .filter((r) => r.is_admin || r.chats || r.users)
+          .map((r) => r.user_id)
+      );
+
+      const { data: participants, error: partsErr } = await supabase
+        .from('chat_participants')
+        .select('chat_id, user_id')
+        .in('user_id', userIds);
+      if (partsErr) throw partsErr;
+
+      const chatIds = Array.from(new Set((participants || []).map((p) => p.chat_id).filter(Boolean)));
+      if (!chatIds.length) {
+        setChatMetaByUser({});
+        return;
+      }
+
+      const { data: supportChats, error: chatsErr } = await supabase
+        .from('chats')
+        .select('id, moderator_id, created_at, chat_type, support_close_confirmed')
+        .in('id', chatIds)
+        .eq('chat_type', 'support')
+        .or('support_close_confirmed.is.null,support_close_confirmed.eq.false');
+      if (chatsErr) throw chatsErr;
+
+      const supportById = (supportChats || []).reduce((acc, c) => {
+        acc[c.id] = c;
+        return acc;
+      }, {});
+
+      const selectedByUser = {};
+      (participants || []).forEach((p) => {
+        const chat = supportById[p.chat_id];
+        if (!chat) return;
+        const prev = selectedByUser[p.user_id];
+        const prevTime = prev?.created_at ? new Date(prev.created_at).getTime() : 0;
+        const nextTime = chat.created_at ? new Date(chat.created_at).getTime() : 0;
+        if (!prev || nextTime > prevTime) {
+          selectedByUser[p.user_id] = chat;
+        }
+      });
+
+      const selectedChatIds = Array.from(new Set(Object.values(selectedByUser).map((c) => c.id)));
+      let unreadByChat = {};
+      if (selectedChatIds.length) {
+        const { data: unreadRows, error: unreadErr } = await supabase
+          .from('chat_messages')
+          .select('chat_id, user_id, read')
+          .in('chat_id', selectedChatIds)
+          .or('read.is.null,read.eq.false');
+        if (unreadErr) throw unreadErr;
+
+        unreadByChat = (unreadRows || []).reduce((acc, m) => {
+          if (adminSet.has(m.user_id)) return acc;
+          acc[m.chat_id] = (acc[m.chat_id] || 0) + 1;
+          return acc;
+        }, {});
+      }
+
+      const nextMeta = {};
+      Object.entries(selectedByUser).forEach(([uid, chat]) => {
+        nextMeta[uid] = {
+          chatId: chat.id,
+          moderatorId: chat.moderator_id,
+          isMine: chat.moderator_id === user.id,
+          unreadCount: unreadByChat[chat.id] || 0,
+        };
+      });
+      setChatMetaByUser(nextMeta);
+    } catch (e) {
+      console.error('AdminUsers chat meta load failed:', e);
+    }
+  }, [canModerate, rows, user]);
+
+  useEffect(() => {
+    fetchChatMeta(rows);
+  }, [fetchChatMeta, rows]);
+
+  useEffect(() => {
+    if (!canModerate || !user) return undefined;
+
+    const channel = supabase
+      .channel(`admin_users_support_rt_${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+        fetchChatMeta();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_participants' }, () => {
+        fetchChatMeta();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chats' }, () => {
+        fetchChatMeta();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [canModerate, fetchChatMeta, user]);
 
   const pageNumbers = useMemo(() => {
     const out = [];
@@ -172,6 +288,44 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
     await updateBan(row.user_id, false, '');
   };
 
+  const handleCreateSupportChat = async (targetUserId) => {
+    if (!targetUserId || !user) return;
+    setCreatingChatFor(targetUserId);
+    setError('');
+
+    try {
+      const { data: inserted, error: insErr } = await supabase
+        .from('chats')
+        .insert([{ chat_type: 'support', is_group: false, title: null, moderator_id: user.id }])
+        .select('id, created_at')
+        .single();
+      if (insErr || !inserted?.id) throw insErr || new Error('Не удалось создать чат');
+
+      const { error: partsErr } = await supabase
+        .from('chat_participants')
+        .insert([{ chat_id: inserted.id, user_id: targetUserId }]);
+      if (partsErr) throw partsErr;
+
+      const { error: msgErr } = await supabase
+        .from('chat_messages')
+        .insert({
+          chat_id: inserted.id,
+          user_id: user.id,
+          content: 'Здравствуйте! Открыл чат поддержки для решения вашего вопроса.',
+          created_at: inserted.created_at,
+          read: false,
+        });
+      if (msgErr) throw msgErr;
+
+      setToast('Чат с пользователем создан и назначен на вас');
+      fetchChatMeta();
+    } catch (e) {
+      setError(e?.message || 'Не удалось создать чат поддержки');
+    } finally {
+      setCreatingChatFor('');
+    }
+  };
+
   if (!canModerate) return <div className={styles.empty}>Нет доступа к вкладке пользователей.</div>;
 
   return (
@@ -204,11 +358,18 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
                 <th>Возраст</th>
                 <th>Описание</th>
                 <th>Гендер</th>
+                <th>Чат</th>
                 <th>Забанить</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
+                (() => {
+                  const chatMeta = chatMetaByUser[r.user_id];
+                  const hasActiveSupport = !!chatMeta?.chatId;
+                  const isMine = !!chatMeta?.isMine;
+                  const unreadCount = chatMeta?.unreadCount || 0;
+                  return (
                 <tr key={r.user_id}>
                   <td className={styles.idCell}>{r.user_id}</td>
                   <td>
@@ -223,6 +384,28 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
                   <td className={styles.aboutCell}>{r.about || '—'}</td>
                   <td>{r.gender || '—'}</td>
                   <td>
+                    <button
+                      type="button"
+                      className={`${styles.chatBtn} ${hasActiveSupport ? styles.chatBtnActive : ''}`}
+                      onClick={() => handleCreateSupportChat(r.user_id)}
+                      disabled={creatingChatFor === r.user_id || r.user_id === user?.id}
+                      title={hasActiveSupport
+                        ? `Есть активный чат ${isMine ? '(назначен на вас)' : '(назначен на другого админа)'}`
+                        : 'Создать чат поддержки'}
+                    >
+                      <span className={styles.chatIcon} aria-hidden>💬</span>
+                      <span>{creatingChatFor === r.user_id ? 'Создаём...' : 'Чат'}</span>
+                      {unreadCount > 0 ? <span className={styles.unreadBadge}>{unreadCount}</span> : null}
+                    </button>
+                    {hasActiveSupport ? (
+                      <div className={`${styles.chatStatus} ${isMine ? styles.chatMine : styles.chatForeign}`}>
+                        {isMine ? 'В работе у вас' : 'В работе у другого админа'}
+                      </div>
+                    ) : (
+                      <div className={styles.chatStatus}>Нет активного чата</div>
+                    )}
+                  </td>
+                  <td>
                     <label className={styles.banToggle}>
                       <input
                         type="checkbox"
@@ -235,6 +418,8 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
                     {r.ban_reason ? <div className={styles.reason}>{r.ban_reason}</div> : null}
                   </td>
                 </tr>
+                  );
+                })()
               ))}
             </tbody>
           </table>
