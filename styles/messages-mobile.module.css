@@ -2,7 +2,7 @@
 .container {
   position: fixed;
   top: 56px; /* Высота хедера */
-  bottom: 0; /* Полное пространство до низа экрана */
+  bottom: calc(68px + env(safe-area-inset-bottom)); /* Учитываем нижний тулбар */
   left: 0;
   right: 0;
   display: flex;
@@ -118,7 +118,7 @@
 .chatList {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-3) var(--space-4) 0;
+  padding: var(--space-3) var(--space-4) calc(12px + env(safe-area-inset-bottom));
   width: 100%;
   -webkit-overflow-scrolling: touch;
 }
