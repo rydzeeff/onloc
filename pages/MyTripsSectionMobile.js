@@ -103,11 +103,11 @@ const MyTripsSectionMobile = ({ trips: _trips, user, onTripClick }) => {
 
     if (!hasLocationData && trip?.id) {
       try {
-        const { data: fullTrip } = await supabase
-          .from('trips')
-          .select('from_location, to_location, from_address, to_address')
-          .eq('id', trip.id)
-          .single();
+        const { data: geoRows } = await supabase.rpc('get_trip_details_geojson', {
+          trip_id: trip.id,
+        });
+
+        const fullTrip = Array.isArray(geoRows) ? geoRows[0] : geoRows;
 
         if (fullTrip) {
           tripForRepeat = { ...trip, ...fullTrip };
