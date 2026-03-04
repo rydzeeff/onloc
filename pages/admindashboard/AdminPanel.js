@@ -6,13 +6,14 @@ import AdminChatsPage from './AdminChatsPage';
 import AdminCompaniesPage from './AdminCompaniesPage';
 import AdminTbankToolsPage from './AdminTbankToolsPage';
 import AdminNewsPage from './AdminNewsPage';
+import AdminUsersPage from './AdminUsersPage';
 import styles from '../../styles/admin-panel.module.css';
 
 /**
  * user_admin_access:
  *  - user_id
  *  - is_admin
- *  - disputes, chats, trips, profiles, reviews, companies, tbank_tools, news
+ *  - disputes, chats, trips, profiles, reviews, companies, tbank_tools, news, users
  */
 const ALL_TABS = [
   { id: 'disputes',  label: 'Диспуты'  },
@@ -23,6 +24,7 @@ const ALL_TABS = [
   { id: 'companies', label: 'Компании' },
   { id: 'tbank_tools', label: 'Т-Банк' },
   { id: 'news', label: 'Новости' },
+  { id: 'users', label: 'Пользователи' },
 ];
 
 export default function AdminPanel() {
@@ -47,7 +49,7 @@ export default function AdminPanel() {
 
       const { data } = await supabase
         .from('user_admin_access')
-        .select('user_id, is_admin, disputes, chats, trips, profiles, reviews, companies, tbank_tools, news')
+        .select('user_id, is_admin, disputes, chats, trips, profiles, reviews, companies, tbank_tools, news, users')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -281,6 +283,7 @@ export default function AdminPanel() {
         {activeTab === 'companies' && <AdminCompaniesPage permissions={childPermissions} />}
         {activeTab === 'tbank_tools' && <AdminTbankToolsPage />}
         {activeTab === 'news' && <AdminNewsPage />}
+        {activeTab === 'users' && <AdminUsersPage permissions={childPermissions} />}
       </div>
 
       <audio ref={audioRef} src="/sounds/notification.mp3" preload="auto" style={{ display: 'none' }} />

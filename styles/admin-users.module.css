@@ -1,0 +1,147 @@
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.input {
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  min-width: 280px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.table th {
+  background: #f8fafc;
+}
+
+.idCell {
+  max-width: 180px;
+  word-break: break-all;
+}
+
+.aboutCell {
+  min-width: 220px;
+  white-space: pre-wrap;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 999px;
+}
+
+.banToggle {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.reason {
+  margin-top: 6px;
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.pagination {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pageButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.pageSize {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pageSize select {
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.empty {
+  color: #64748b;
+  padding: 10px 0;
+}
+
+.error {
+  color: #b91c1c;
+  margin-top: 10px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1e293b;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+}
+
+.modal {
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

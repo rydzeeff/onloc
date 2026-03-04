@@ -77,6 +77,7 @@ function MyApp({ Component, pageProps }) {
   const [geolocationLoading, setGeolocationLoading] = useState(true);
   const [profileChecked, setProfileChecked] = useState(false);
   const [hasProfile, setHasProfile] = useState(null); // null = неизвестно, true/false = подтверждено
+  const [banInfo, setBanInfo] = useState({ checked: false, isBanned: false, reason: '' });
   const [isLocalStorageAvailable, setIsLocalStorageAvailable] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isProcessing, setProcessing] = useState(false);
@@ -668,6 +669,7 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
     if (!u) { 
       setProfileChecked(true); 
       setHasProfile(null); 
+      setBanInfo({ checked: true, isBanned: false, reason: '' });
       console.log('[checkUserProfile] No user, skipping');
       console.timeEnd('checkUserProfile');
       return; 
@@ -688,7 +690,7 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
 
     try {
       let data, error;
-      let query = supabase.from('profiles').select('user_id').eq('user_id', u.id);
+      let query = supabase.from('profiles').select('user_id, is_banned, ban_reason').eq('user_id', u.id);
       if (typeof query.maybeSingle === 'function') {
         ({ data, error } = await query.maybeSingle());
       } else {
@@ -698,6 +700,11 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
       if (!error) {
         const exists = !!data;
         setHasProfile(exists);
+        setBanInfo({
+          checked: true,
+          isBanned: !!data?.is_banned,
+          reason: data?.ban_reason || '',
+        });
         if (isLocalStorageAvailable) localStorage.setItem('hasProfile', exists.toString());
         setCookieHasProfile(exists);
         setProfileChecked(true);
@@ -708,6 +715,7 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
           setHasProfile(null);
           // SPEED: не блокируем UI ожиданием профиля
           setProfileChecked(true);
+          setBanInfo((prev) => ({ ...prev, checked: true }));
         }
       }
     } catch (err) {
@@ -715,6 +723,7 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
       if (!cachedPositive) {
         setHasProfile(null);
         setProfileChecked(true);
+        setBanInfo((prev) => ({ ...prev, checked: true }));
       }
     }
     console.timeEnd('checkUserProfile');
@@ -729,7 +738,12 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
 
   // проверка профиля
   useEffect(() => {
-    if (!user) { setProfileChecked(true); setHasProfile(null); return; }
+    if (!user) {
+      setProfileChecked(true);
+      setHasProfile(null);
+      setBanInfo({ checked: true, isBanned: false, reason: '' });
+      return;
+    }
     checkUserProfile(user);
   }, [router.pathname, user]);
 
@@ -754,6 +768,7 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
     updateProfileStatus,
     isProcessing,
     setProcessing,
+    banInfo,
   };
 
   /* ---------------- рендер/роутинг ---------------- */
@@ -786,6 +801,14 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
     return null;
   }
 
+  if (banInfo.checked && banInfo.isBanned) {
+    if (router.pathname !== '/banned' && !isRedirecting) {
+      setIsRedirecting(true);
+      router.push('/banned');
+      return null;
+    }
+  }
+
   // Строгая логика допуска — редиректим когда профиль известен
   if (profileChecked) {
     if (authRoutes.includes(router.pathname)) {
@@ -801,6 +824,11 @@ if (!activeChatId || activeChatId !== newMessage.chat_id) {
       return null;
     }
     if (hasProfile === true && router.pathname === '/profile/setup' && !isRedirecting) {
+      setIsRedirecting(true);
+      router.push('/trips');
+      return null;
+    }
+    if (!banInfo.isBanned && router.pathname === '/banned' && !isRedirecting) {
       setIsRedirecting(true);
       router.push('/trips');
       return null;
