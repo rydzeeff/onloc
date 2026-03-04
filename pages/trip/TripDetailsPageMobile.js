@@ -1350,9 +1350,11 @@ const handleBackToTrips = () => {
               <p className={styles.noReviews}>Нет отзывов об этом организаторе.</p>
             )}
 
-            <button className={styles.closeButton} onClick={closeOrganizerModal}>
-              Закрыть
-            </button>
+            <div className={styles.descModalFooter}>
+              <button type="button" className={styles.descModalClose} onClick={closeOrganizerModal}>
+                Закрыть
+              </button>
+            </div>
           </div>
         </div>
       )}
