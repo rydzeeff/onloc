@@ -531,6 +531,23 @@ const schedulePostOpenActions = useCallback(
 
 
   async function openChat(chatOrIntent) {
+    const openChatIfChanged = (chatToOpen, { updateSelected = true } = {}) => {
+      if (!chatToOpen?.id) return false;
+
+      const isSameChat = currentChat?.id === chatToOpen.id;
+
+      if (updateSelected && chatToOpen.chat_type !== "trip_private") {
+        setSelectedListChatId(chatToOpen.id);
+      }
+
+      if (isSameChat) return false;
+
+      resetPagination();
+      setCurrentChat(chatToOpen);
+      schedulePostOpenActions(chatToOpen);
+      return true;
+    };
+
     // ===== из «Состава»: открыть/создать ЛС
     if (chatOrIntent?.__openDm) {
       const { tripId, userId: otherUserId, groupChatId } = chatOrIntent.__openDm;
@@ -569,9 +586,7 @@ const schedulePostOpenActions = useCallback(
       if (existingCommon) {
         const found = chats.find((c) => c.id === existingCommon);
         if (found) {
-          setCurrentChat(found);
-          resetPagination();
-          schedulePostOpenActions(found);
+          openChatIfChanged(found, { updateSelected: false });
           return;
         }
 
@@ -590,9 +605,7 @@ const schedulePostOpenActions = useCallback(
 
           const merged = { ...c, participantsUserIds: (parts || []).map((p) => p.user_id) };
           setChats((prev) => (prev.some((x) => x.id === merged.id) ? prev : [merged, ...prev]));
-          setCurrentChat(merged);
-          resetPagination();
-          schedulePostOpenActions(merged);
+          openChatIfChanged(merged, { updateSelected: false });
         }
         return;
       }
@@ -691,13 +704,7 @@ const schedulePostOpenActions = useCallback(
     // ===== обычное открытие чата из левого списка
     const chat = chatOrIntent;
 
-    if (chat?.chat_type !== "trip_private") {
-      setSelectedListChatId(chat.id);
-    }
-
-    resetPagination();
-    setCurrentChat(chat);
-    schedulePostOpenActions(chat);
+    openChatIfChanged(chat);
   }
 
   // Сплэш "Загрузка..." показываем только при первичном получении чатов.
