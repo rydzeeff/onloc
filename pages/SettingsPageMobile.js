@@ -296,7 +296,6 @@ const SettingsPageMobile = ({ avatarUrl, setAvatarUrl }) => {
         }),
       ]);
       await refreshBothScopes();
-      toast('Карты обновлены', 1500);
     } catch (e) {
       console.error('Синхронизация карт упала:', e);
       await refreshBothScopes();
