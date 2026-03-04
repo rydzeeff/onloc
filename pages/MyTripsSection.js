@@ -90,27 +90,48 @@ const MyTripsSection = ({ trips: _trips, user, onTripClick }) => {
     return s === 'canceled' || s === 'archived';
   };
 
-  const handleRepeatTrip = (event, trip) => {
+  const handleRepeatTrip = async (event, trip) => {
     event.stopPropagation();
 
-    const imageUrls = Array.isArray(trip?.image_urls)
-      ? trip.image_urls.filter(Boolean)
+    let tripForRepeat = trip;
+    const hasLocationData = Boolean(
+      trip?.from_location || trip?.to_location || trip?.from_address || trip?.to_address
+    );
+
+    if (!hasLocationData && trip?.id) {
+      try {
+        const { data: fullTrip } = await supabase
+          .from('trips')
+          .select('from_location, to_location, from_address, to_address')
+          .eq('id', trip.id)
+          .single();
+
+        if (fullTrip) {
+          tripForRepeat = { ...trip, ...fullTrip };
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки геоданных поездки для повтора:', error);
+      }
+    }
+
+    const imageUrls = Array.isArray(tripForRepeat?.image_urls)
+      ? tripForRepeat.image_urls.filter(Boolean)
       : [];
 
     const repeatPayload = {
-      title: trip?.title || '',
-      description: trip?.description || '',
-      price: trip?.price ?? '',
-      difficulty: trip?.difficulty || 'easy',
-      ageFrom: trip?.age_from ?? 18,
-      ageTo: trip?.age_to ?? 60,
-      participants: trip?.participants ?? 1,
-      leisureType: trip?.leisure_type || 'tourism',
-      alcoholAllowed: Boolean(trip?.alcohol_allowed),
-      fromLocation: trip?.from_location || null,
-      toLocation: trip?.to_location || null,
-      fromAddress: trip?.from_address || '',
-      toAddress: trip?.to_address || '',
+      title: tripForRepeat?.title || '',
+      description: tripForRepeat?.description || '',
+      price: tripForRepeat?.price ?? '',
+      difficulty: tripForRepeat?.difficulty || 'easy',
+      ageFrom: tripForRepeat?.age_from ?? 18,
+      ageTo: tripForRepeat?.age_to ?? 60,
+      participants: tripForRepeat?.participants ?? 1,
+      leisureType: tripForRepeat?.leisure_type || 'tourism',
+      alcoholAllowed: Boolean(tripForRepeat?.alcohol_allowed),
+      fromLocation: tripForRepeat?.from_location || null,
+      toLocation: tripForRepeat?.to_location || null,
+      fromAddress: tripForRepeat?.from_address || '',
+      toAddress: tripForRepeat?.to_address || '',
       imageUrls,
     };
 
