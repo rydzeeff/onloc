@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../_app';
 import AdminDisputesPage from './AdminDisputesPage';
@@ -38,6 +38,7 @@ export default function AdminPanel() {
 
   const [unreadChatsCount, setUnreadChatsCount] = useState(0);
   const [unreadDisputesCount, setUnreadDisputesCount] = useState(0);
+  const [requestedSupportChatId, setRequestedSupportChatId] = useState(null);
 
   const audioRef = useRef(null);
 
@@ -221,6 +222,12 @@ export default function AdminPanel() {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id, activeTab]);
 
+  const openSupportChatFromUsers = useCallback((chatId) => {
+    if (!chatId) return;
+    setRequestedSupportChatId(chatId);
+    setActiveTab('chats');
+  }, []);
+
   const childPermissions = useMemo(() => {
     return {
       is_admin: !!perms?.is_admin,
@@ -261,7 +268,13 @@ export default function AdminPanel() {
 
       <div className={styles.tabBody}>
         {activeTab === 'disputes' && <AdminDisputesPage permissions={childPermissions} />}
-        {activeTab === 'chats' && <AdminChatsPage permissions={childPermissions} />}
+        {activeTab === 'chats' && (
+          <AdminChatsPage
+            permissions={childPermissions}
+            openChatId={requestedSupportChatId}
+            onOpenChatHandled={() => setRequestedSupportChatId(null)}
+          />
+        )}
         {activeTab === 'trips' && (
           <div className={styles.placeholder}>
             <h3>Поездки</h3>
@@ -283,7 +296,12 @@ export default function AdminPanel() {
         {activeTab === 'companies' && <AdminCompaniesPage permissions={childPermissions} />}
         {activeTab === 'tbank_tools' && <AdminTbankToolsPage />}
         {activeTab === 'news' && <AdminNewsPage />}
-        {activeTab === 'users' && <AdminUsersPage permissions={childPermissions} />}
+        {activeTab === 'users' && (
+          <AdminUsersPage
+            permissions={childPermissions}
+            onOpenSupportChat={openSupportChatFromUsers}
+          />
+        )}
       </div>
 
       <audio ref={audioRef} src="/sounds/notification.mp3" preload="auto" style={{ display: 'none' }} />

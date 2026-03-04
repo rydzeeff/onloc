@@ -29,7 +29,10 @@ function calcAge(birthDate) {
   return age >= 0 ? age : '—';
 }
 
-export default function AdminUsersPage({ permissions = { is_admin: false, can_tab: false } }) {
+export default function AdminUsersPage({
+  permissions = { is_admin: false, can_tab: false },
+  onOpenSupportChat,
+}) {
   const { user } = useAuth();
   const canModerate = !!(permissions.is_admin || permissions.can_tab);
 
@@ -290,6 +293,13 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
 
   const handleCreateSupportChat = async (targetUserId) => {
     if (!targetUserId || !user) return;
+
+    const existingChatId = chatMetaByUser[targetUserId]?.chatId;
+    if (existingChatId) {
+      onOpenSupportChat?.(existingChatId);
+      return;
+    }
+
     setCreatingChatFor(targetUserId);
     setError('');
 
@@ -306,6 +316,19 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
         .insert([{ chat_id: inserted.id, user_id: targetUserId }]);
       if (partsErr) throw partsErr;
 
+      const { data: adminPart } = await supabase
+        .from('chat_participants')
+        .select('chat_id, user_id')
+        .eq('chat_id', inserted.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!adminPart) {
+        const { error: adminPartErr } = await supabase
+          .from('chat_participants')
+          .insert([{ chat_id: inserted.id, user_id: user.id }]);
+        if (adminPartErr) throw adminPartErr;
+      }
+
       const { error: msgErr } = await supabase
         .from('chat_messages')
         .insert({
@@ -318,7 +341,8 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
       if (msgErr) throw msgErr;
 
       setToast('Чат с пользователем создан и назначен на вас');
-      fetchChatMeta();
+      await fetchChatMeta();
+      onOpenSupportChat?.(inserted.id);
     } catch (e) {
       setError(e?.message || 'Не удалось создать чат поддержки');
     } finally {
@@ -394,7 +418,7 @@ export default function AdminUsersPage({ permissions = { is_admin: false, can_ta
                         : 'Создать чат поддержки'}
                     >
                       <span className={styles.chatIcon} aria-hidden>💬</span>
-                      <span>{creatingChatFor === r.user_id ? 'Создаём...' : 'Чат'}</span>
+                      <span>{creatingChatFor === r.user_id ? 'Создаём...' : (hasActiveSupport ? 'Открыть' : 'Создать')}</span>
                       {unreadCount > 0 ? <span className={styles.unreadBadge}>{unreadCount}</span> : null}
                     </button>
                     {hasActiveSupport ? (
