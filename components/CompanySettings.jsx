@@ -1006,11 +1006,6 @@ restoredDraftRef.current = false;
             maxLength={12}
             placeholder="10 цифр для ООО, 12 для ИП"
           />
-          <label>Тип организации:</label>
-          <select className={styles.input} value={companyType} onChange={(e) => setCompanyType(e.target.value)}>
-            <option value="ooo">ООО</option>
-            <option value="ip">ИП</option>
-          </select>
           <button className={styles.actionButton} onClick={fetchCompanyDataFromTBank}>
             Получить данные
           </button>
@@ -1028,6 +1023,20 @@ restoredDraftRef.current = false;
         <div>
           <div className={styles.companySection}>
             <h3 className={styles.sectionTitle}>Данные организации</h3>
+
+            {manualMode && !isSaved && (
+              <div className={styles.inputGroup}>
+                <label>Тип организации</label>
+                <select
+                  className={styles.input}
+                  value={companyType}
+                  onChange={(e) => setCompanyType(e.target.value)}
+                >
+                  <option value="ooo">ООО</option>
+                  <option value="ip">ИП</option>
+                </select>
+              </div>
+            )}
 
             {/* Название */}
             <div className={styles.inputGroup}>
@@ -1321,10 +1330,10 @@ className={`${styles.input} ${
               )}
             </div>
           )}
-
-          {message && <div className={styles.toast}>{message}</div>}
         </div>
       )}
+
+      {message && <div className={styles.toast}>{message}</div>}
 
       {/* Диалог: подтверждение создания чата (без «перейти в сообщения») */}
       {askChangeOpen && (
