@@ -16,6 +16,8 @@ import { useMessagesRealtime } from "../../features/messages/hooks/useMessagesRe
 
 export default function AdminChatsPage({
   permissions = { is_admin: false, can_tab: false },
+  openChatId = null,
+  onOpenChatHandled = null,
 }) {
   const { user } = useAuth();
   const canModerate = !!(permissions.is_admin || permissions.can_tab);
@@ -447,9 +449,6 @@ export default function AdminChatsPage({
 
   const activeList = useMemo(() => list.filter((row) => row.chat.chat_type === "support"), [list]);
 
-  if (!canModerate) return <div className={styles.error}>Доступ запрещен</div>;
-  if (loading) return <div className={styles.container}>Загрузка…</div>;
-
   async function openChatViewer(row) {
     const chatObj = {
       id: row.chat.id,
@@ -469,6 +468,25 @@ export default function AdminChatsPage({
       prev.map((r) => (r.chat.id === chatObj.id ? { ...r, unreadCount: 0 } : r))
     );
   }
+
+  useEffect(() => {
+    if (!openChatId || loading) return;
+    const row = activeList.find((item) => item.chat.id === openChatId);
+    if (!row) {
+      onOpenChatHandled?.();
+      return;
+    }
+
+    openChatViewer(row)
+      .catch(() => {})
+      .finally(() => {
+        onOpenChatHandled?.();
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openChatId, loading, activeList, onOpenChatHandled]);
+
+  if (!canModerate) return <div className={styles.error}>Доступ запрещен</div>;
+  if (loading) return <div className={styles.container}>Загрузка…</div>;
 
   return (
     <div className={styles.container}>
