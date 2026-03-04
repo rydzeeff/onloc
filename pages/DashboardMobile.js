@@ -268,6 +268,7 @@ const q = needsTripId
             iconWrapClassName={mobileStyles.topIconWrap}
             iconClassName={mobileStyles.topNavIcon}
             mobileEdgeToEdge
+            showCloseButton
           />
           <button className={mobileStyles.button} type="button">
             Информация

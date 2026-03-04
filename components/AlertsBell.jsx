@@ -43,6 +43,7 @@ export default function AlertsBell({
   // Размер иконки оповещений для desktop меняется здесь (mobile остаётся стандартной)
   scale = 1.65,
   mobileEdgeToEdge = false,
+  showCloseButton = false,
   onBeforeOpen,
   onOpenChange,
 }) {
@@ -179,7 +180,7 @@ export default function AlertsBell({
               Показать ещё 10 оповещений
             </button>
           ) : null}
-          {useEdgePanel ? (
+          {(useEdgePanel || showCloseButton) ? (
             <button
               type="button"
               style={{ marginTop: 10, width: '100%', border: '1px solid #d1d5db', background: '#fff', borderRadius: 10, padding: '10px 12px', fontWeight: 600, marginBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))' }}
