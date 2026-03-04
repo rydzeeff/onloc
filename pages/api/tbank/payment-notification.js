@@ -1,5 +1,5 @@
 // /api/tbank/payment-notification.js
-import { supabase } from '../../../lib/supabaseClient';
+import { supabase, getSupabaseAdmin } from './supabaseClient';
 import crypto from 'crypto';
 import { getTbankConfig } from './_config';
 
@@ -448,7 +448,8 @@ if (S === 'CONFIRMED' && Success) {
         });
       }
 
-      const { error: alertErr } = await supabase.from('trip_alerts').insert(payloads);
+      const supabaseAdmin = getSupabaseAdmin();
+      const { error: alertErr } = await supabaseAdmin.from('trip_alerts').insert(payloads);
       if (alertErr) {
         console.error('[payment-notification] insert trip_alerts error:', alertErr.message);
       }
