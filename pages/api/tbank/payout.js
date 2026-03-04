@@ -661,77 +661,34 @@ try {
   } catch (finErr) {
     logErr(reqId, 'Finalization (archive) error:', finErr?.message || finErr);
   }
-  // 7) 🔔 ЛС организатору: участник одобрил поездку, выплата проведена
+  // 7) 🔔 Оповещение организатору: участник одобрил поездку, выплата проведена
   try {
     const organizerId = trip?.creator_id;
     const participantUserId = part?.user_id;
 
     if (organizerId && participantUserId) {
-      // Ищем ЛИЧНЫЕ чаты (is_group = false) по этой поездке,
-      // независимо от chat_type (trip_private / archived)
-      const { data: tripChats, error: chatsErr } = await supabase
-        .from('chats')
-        .select('id, is_group, chat_type')
-        .eq('trip_id', tripId)
-        .eq('is_group', false);
+      const { error: alertErr } = await supabase
+        .from('trip_alerts')
+        .insert({
+          user_id: organizerId,
+          trip_id: tripId,
+          actor_user_id: participantUserId,
+          type: 'trip_payout_completed_after_participant_approval',
+          title: 'Выплата организатору выполнена',
+          body: `Участник одобрил поездку «${trip?.title || ''}». Выплата выполнена.`,
+          metadata: { tripTitle: trip?.title || null },
+        });
 
-      if (chatsErr) {
-        logErr(reqId, 'DM payout: read chats error:', chatsErr.message);
-      } else if (tripChats && tripChats.length > 0) {
-        const chatIds = tripChats.map((c) => c.id);
-
-        const { data: membersRows, error: membersErr } = await supabase
-          .from('chat_participants')
-          .select('chat_id, user_id')
-          .in('chat_id', chatIds);
-
-        if (membersErr) {
-          logErr(reqId, 'DM payout: read chat_participants error:', membersErr.message);
-        } else if (membersRows && membersRows.length > 0) {
-          // собираем по chat_id множества участников
-          const byChat = {};
-          for (const row of membersRows) {
-            if (!byChat[row.chat_id]) byChat[row.chat_id] = new Set();
-            byChat[row.chat_id].add(row.user_id);
-          }
-
-          // ищем ЛС, где есть и организатор, и участник
-          const dmChatEntry = Object.entries(byChat).find(([, set]) =>
-            set.has(organizerId) && set.has(participantUserId)
-          );
-          const dmChatId = dmChatEntry?.[0];
-
-          if (dmChatId) {
-            const title = trip?.title || '';
-            const text = `Я одобрил(а) поездку «${title}». Выплата за поездку произведена.`;
-
-            const { error: msgErr } = await supabase
-              .from('chat_messages')
-              .insert({
-                chat_id: dmChatId,
-                user_id: participantUserId, // как будто пишет сам участник
-                content: text,
-              });
-
-            if (msgErr) {
-              logErr(reqId, 'DM payout: insert chat_message error:', msgErr.message);
-            } else {
-              log(reqId, 'DM payout: сообщение об одобрении и выплате отправлено организатору');
-            }
-          } else {
-            log(reqId, 'DM payout: подходящий DM-чат (is_group=false) не найден');
-          }
-        } else {
-          log(reqId, 'DM payout: нет участников в DM-чатах для этой поездки');
-        }
+      if (alertErr) {
+        logErr(reqId, 'trip_alerts payout insert error:', alertErr.message);
       } else {
-        log(reqId, 'DM payout: нет DM-чатов (is_group=false) для этой поездки');
+        log(reqId, 'trip_alerts: отправлено оповещение о выплате организатору');
       }
     }
   } catch (notifyErr) {
     logErr(
       reqId,
-      'DM payout: ошибка при отправке ЛС об одобрении и выплате:',
+      'trip_alerts payout notify error:',
       notifyErr?.message || notifyErr
     );
   }
