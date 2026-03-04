@@ -243,13 +243,6 @@ const q = needsTripId
       unread: totalUnread,
     },
     {
-      id: 'alerts',
-      label: 'Оповещения',
-      icon: '/icons/nav/messages.svg',
-      iconActive: '/icons/nav/messages-active.svg',
-      unread: unreadAlerts,
-    },
-    {
       id: 'settings',
       label: 'Настройки',
       icon: '/icons/nav/settings.svg',
