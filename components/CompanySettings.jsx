@@ -7,7 +7,7 @@ import AvatarEditor from "./AvatarEditor";
  * - Если нет NEXT_PUBLIC_DADATA_TOKEN — отдаём обычный <input>.
  * - Иначе: debounce 250мс, навигация ↑/↓/Enter, выбор кликом, закрытие по blur/ESC.
  */
-function AddressSuggestInput({ value, onChange, placeholder = "Начните вводить адрес", disabled = false }) {
+function AddressSuggestInput({ value, onChange, placeholder = "Начните вводить адрес", disabled = false, hasError = false }) {
   const token = process.env.NEXT_PUBLIC_DADATA_TOKEN;
   const [query, setQuery] = useState(value || "");
   const [items, setItems] = useState([]);
@@ -102,7 +102,7 @@ function AddressSuggestInput({ value, onChange, placeholder = "Начните в
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={styles.input}
+        className={`${styles.input} ${hasError ? styles.errorInput : ""}`}
       />
     );
   }
@@ -116,7 +116,7 @@ function AddressSuggestInput({ value, onChange, placeholder = "Начните в
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         disabled={disabled}
-        className={styles.input}
+        className={`${styles.input} ${hasError ? styles.errorInput : ""}`}
         autoComplete="off"
       />
       {open && items.length > 0 && (
@@ -165,6 +165,7 @@ const CompanySettings = ({ user, supabase, profilePhone }) => {
   const [inn, setInn] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
+  const messageTimerRef = useRef(null);
   const [submitError, setSubmitError] = useState("");
   const [avatarHint, setAvatarHint] = useState("");
   const [companyAvatarUrl, setCompanyAvatarUrl] = useState("/avatar-default.svg");
@@ -185,6 +186,35 @@ const CompanySettings = ({ user, supabase, profilePhone }) => {
 
 // ошибки по полям (покажем под инпутом)
 const [fieldErrors, setFieldErrors] = useState({});
+const [requiredFieldErrors, setRequiredFieldErrors] = useState({});
+const clearRequiredFieldError = (key) => {
+  setRequiredFieldErrors((prev) => ({ ...prev, [key]: undefined }));
+};
+
+const closeMessage = useCallback(() => {
+  if (messageTimerRef.current) {
+    clearTimeout(messageTimerRef.current);
+    messageTimerRef.current = null;
+  }
+  setMessage(null);
+}, []);
+
+const showToast = useCallback((text, ms = 10000) => {
+  if (messageTimerRef.current) clearTimeout(messageTimerRef.current);
+  setMessage(text);
+  if (!text) return;
+  messageTimerRef.current = setTimeout(() => {
+    setMessage(null);
+    messageTimerRef.current = null;
+  }, Math.max(ms, 10000));
+}, []);
+
+useEffect(() => {
+  if (!message) return;
+  const onMouseDown = () => closeMessage();
+  document.addEventListener("mousedown", onMouseDown, true);
+  return () => document.removeEventListener("mousedown", onMouseDown, true);
+}, [message, closeMessage]);
 
 // только цифры
 const onlyDigits = (v) => String(v ?? "").replace(/\D/g, "");
@@ -200,6 +230,7 @@ const setPaymentField = (key, raw) => {
   setPaymentData((prev) => ({ ...prev, [key]: v }));
   // как только пользователь правит поле — убираем ошибку этого поля
   setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
+  clearRequiredFieldError(key);
 };
 
 // валидация реквизитов перед submit
@@ -364,8 +395,7 @@ if (hasUnsavedDraft) return;
               { method: "GET", headers: { Accept: "application/json" } }
             );
             if (r.ok) {
-              setMessage("Точка подтверждена в Т-Банке");
-              setTimeout(() => setMessage(null), 2500);
+              showToast("Точка подтверждена в Т-Банке");
             } else {
               const err = await r.json().catch(() => ({}));
               console.warn("[sync shop][fail]", r.status, err);
@@ -490,20 +520,17 @@ setIsSaved(false);
   // ===== префилл: T-банк → DataNewton
   const fetchCompanyDataFromTBank = async () => {
     if (!validateInn(inn)) {
-      setMessage("ИНН некорректен (10 цифр для ООО, 12 для ИП)");
-      setTimeout(() => setMessage(null), 3000);
+      showToast("ИНН некорректен (10 цифр для ООО, 12 для ИП)");
       return;
     }
 
     const { exists, error } = await checkInnExists(inn);
     if (error) {
-      setMessage("Ошибка проверки ИНН");
-      setTimeout(() => setMessage(null), 3000);
+      showToast("Ошибка проверки ИНН");
       return;
     }
     if (exists) {
-      setMessage(getInnExistsMessage());
-      setTimeout(() => setMessage(null), 5000);
+      showToast(getInnExistsMessage());
       return;
     }
 
@@ -605,8 +632,7 @@ if (typeof window !== "undefined" && draftKey) {
 }
 restoredDraftRef.current = true;
 
-        setMessage("Данные получены через резервный источник (DataNewton)");
-        setTimeout(() => setMessage(null), 3000);
+        showToast("Данные получены через резервный источник (DataNewton)");
 
         originalCompanyRef.current = mapped;
         originalPaymentRef.current = {
@@ -620,12 +646,12 @@ restoredDraftRef.current = true;
         const nextFailCount = lookupFailCount + 1;
         setLookupFailCount(nextFailCount);
         if (nextFailCount === 1) {
-          setMessage("Не удалось получить данные. Проверьте, правильно ли введён ИНН, и попробуйте ещё раз.");
+          showToast("Не удалось получить данные. Проверьте, правильно ли введён ИНН, и попробуйте ещё раз.");
         } else {
-          setMessage("Компания не найдена в базе. Вы можете ввести данные вручную.");
+          showToast("Компания не найдена в базе. Вы можете ввести данные вручную.");
           setManualMode(true);
         }
-        setTimeout(() => setMessage(null), 5000);
+        
       }
     }
   };
@@ -669,7 +695,7 @@ setCompanyAvatarUrl("/avatar-default.svg");
 
   setFieldErrors({});
   // toast успеха можно убрать
-  setMessage(null);
+  closeMessage();
 
   // сбросить платежные (чтобы не тащить реквизиты от другой компании)
   setPaymentData({
@@ -698,6 +724,7 @@ const handleSaveCompany = async () => {
 
   // ✅ (3.1) СРАЗУ чистим старую ошибку у кнопки
   setSubmitError("");
+  setRequiredFieldErrors({});
 
   const isCompany = /^\d{10}$/.test((c.inn || "").trim());
 
@@ -712,13 +739,25 @@ const handleSaveCompany = async () => {
   }
 
   // ✅ (3.2) если не заполнены обязательные поля — показываем ошибку у кнопки (не toast)
-  if (
-    !c.name || !c.inn || !c.ogrn || !c.legalAddress || !c.phone ||
-    !c.ceo_first_name || !c.ceo_last_name || !c.ceo_middle_name ||
-    (isCompany && !c.kpp) ||
-    !p.account || !p.bik || !p.corrAccount || !p.bankName || !p.payment_details
-  ) {
-    setSubmitError("Пожалуйста, заполните все обязательные поля");
+  const requiredErrors = {
+    ...(c.name ? {} : { name: "Заполните данные анкеты" }),
+    ...(c.inn ? {} : { inn: "Заполните данные анкеты" }),
+    ...(c.ogrn ? {} : { ogrn: "Заполните данные анкеты" }),
+    ...(c.legalAddress ? {} : { legalAddress: "Заполните данные анкеты" }),
+    ...(c.phone ? {} : { phone: "Заполните данные анкеты" }),
+    ...(c.ceo_first_name ? {} : { ceo_first_name: "Заполните данные анкеты" }),
+    ...(c.ceo_last_name ? {} : { ceo_last_name: "Заполните данные анкеты" }),
+    ...(c.ceo_middle_name ? {} : { ceo_middle_name: "Заполните данные анкеты" }),
+    ...(!isCompany || c.kpp ? {} : { kpp: "Заполните данные анкеты" }),
+    ...(p.account ? {} : { account: "Заполните данные анкеты" }),
+    ...(p.bik ? {} : { bik: "Заполните данные анкеты" }),
+    ...(p.corrAccount ? {} : { corrAccount: "Заполните данные анкеты" }),
+    ...(p.bankName ? {} : { bankName: "Заполните данные анкеты" }),
+    ...(p.payment_details ? {} : { payment_details: "Заполните данные анкеты" }),
+  };
+  if (Object.keys(requiredErrors).length > 0) {
+    setRequiredFieldErrors(requiredErrors);
+    setSubmitError("Заполните обязательные поля");
     return;
   }
 
@@ -822,8 +861,7 @@ sessionStorage.removeItem(draftKey);
 }
 restoredDraftRef.current = false;
 
-      setMessage("Компания зарегистрирована и сохранена");
-      setTimeout(() => setMessage(null), 2500);
+      showToast("Компания зарегистрирована и сохранена");
 
       // финальная валидация точки
       if (saved.tbank_shop_code) {
@@ -1046,11 +1084,17 @@ restoredDraftRef.current = false;
                   {companyData.name || "Нужно заполнить"}
                 </span>
               ) : (
-                <input
-                  value={companyData.name || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, name: e.target.value })}
-                  className={`${styles.input} ${!companyData.name ? styles.errorInput : ""}`}
-                />
+                <>
+                  <input
+                    value={companyData.name || ""}
+                    onChange={(e) => {
+                      setCompanyData({ ...companyData, name: e.target.value });
+                      clearRequiredFieldError("name");
+                    }}
+                    className={`${styles.input} ${requiredFieldErrors.name ? styles.errorInput : ""}`}
+                  />
+                  {requiredFieldErrors.name && <div className={styles.errorText}>{requiredFieldErrors.name}</div>}
+                </>
               )}
             </div>
 
@@ -1068,6 +1112,7 @@ restoredDraftRef.current = false;
                   {companyData.ogrn || "Нужно заполнить"}
                 </span>
               ) : (
+                <>
                 <input
                   value={companyData.ogrn || ""}
                   onChange={(e) =>
@@ -1076,10 +1121,13 @@ setCompanyData({
 ogrn: e.target.value.replace(/\D/g, "").slice(0, 15),
 })
 }
+                  onBlur={() => clearRequiredFieldError("ogrn")}
 inputMode="numeric"
 pattern="\\d*"
-                  className={`${styles.input} ${!companyData.ogrn ? styles.errorInput : ""}`}
+                  className={`${styles.input} ${requiredFieldErrors.ogrn ? styles.errorInput : ""}`}
                 />
+                {requiredFieldErrors.ogrn && <div className={styles.errorText}>{requiredFieldErrors.ogrn}</div>}
+                </>
               )}
             </div>
 
@@ -1092,6 +1140,7 @@ pattern="\\d*"
                     {companyData.kpp || "Нужно заполнить"}
                   </span>
                 ) : (
+                  <>
                   <input
                     value={companyData.kpp || ""}
                     onChange={(e) =>
@@ -1100,10 +1149,13 @@ setCompanyData({
 kpp: e.target.value.replace(/\D/g, "").slice(0, 9),
 })
 }
+                    onBlur={() => clearRequiredFieldError("kpp")}
 inputMode="numeric"
 pattern="\\d*"
-                    className={`${styles.input} ${!companyData.kpp ? styles.errorInput : ""}`}
+                    className={`${styles.input} ${requiredFieldErrors.kpp ? styles.errorInput : ""}`}
                   />
+                  {requiredFieldErrors.kpp && <div className={styles.errorText}>{requiredFieldErrors.kpp}</div>}
+                  </>
                 )
               ) : (
                 <span>Не требуется для ИП</span>
@@ -1123,11 +1175,17 @@ pattern="\\d*"
                     {companyData[key] || "Нужно заполнить"}
                   </span>
                 ) : (
-                  <input
-                    value={companyData[key] || ""}
-                    onChange={(e) => setCompanyData({ ...companyData, [key]: e.target.value })}
-                    className={`${styles.input} ${!companyData[key] ? styles.errorInput : ""}`}
-                  />
+                  <>
+                    <input
+                      value={companyData[key] || ""}
+                      onChange={(e) => {
+                        setCompanyData({ ...companyData, [key]: e.target.value });
+                        clearRequiredFieldError(key);
+                      }}
+                      className={`${styles.input} ${requiredFieldErrors[key] ? styles.errorInput : ""}`}
+                    />
+                    {requiredFieldErrors[key] && <div className={styles.errorText}>{requiredFieldErrors[key]}</div>}
+                  </>
                 )}
               </div>
             ))}
@@ -1140,12 +1198,19 @@ pattern="\\d*"
                   {companyData.legalAddress || "Нужно заполнить"}
                 </span>
               ) : (
-                <AddressSuggestInput
-                  value={companyData.legalAddress || ""}
-                  onChange={(val) => setCompanyData({ ...companyData, legalAddress: val })}
-                  placeholder="Начните вводить адрес (DaData)"
-                  disabled={false}
-                />
+                <>
+                  <AddressSuggestInput
+                    value={companyData.legalAddress || ""}
+                    onChange={(val) => {
+                      setCompanyData({ ...companyData, legalAddress: val });
+                      clearRequiredFieldError("legalAddress");
+                    }}
+                    placeholder="Начните вводить адрес (DaData)"
+                    disabled={false}
+                    hasError={!!requiredFieldErrors.legalAddress}
+                  />
+                  {requiredFieldErrors.legalAddress && <div className={styles.errorText}>{requiredFieldErrors.legalAddress}</div>}
+                </>
               )}
             </div>
 
@@ -1157,12 +1222,18 @@ pattern="\\d*"
                   {companyData.phone || "Нужно заполнить"}
                 </span>
               ) : (
-                <input
-                  value={companyData.phone || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
-                  placeholder="+79991234567"
-                  className={`${styles.input} ${!companyData.phone ? styles.errorInput : ""}`}
-                />
+                <>
+                  <input
+                    value={companyData.phone || ""}
+                    onChange={(e) => {
+                      setCompanyData({ ...companyData, phone: e.target.value });
+                      clearRequiredFieldError("phone");
+                    }}
+                    placeholder="+79991234567"
+                    className={`${styles.input} ${requiredFieldErrors.phone ? styles.errorInput : ""}`}
+                  />
+                  {requiredFieldErrors.phone && <div className={styles.errorText}>{requiredFieldErrors.phone}</div>}
+                </>
               )}
             </div>
 
@@ -1245,6 +1316,7 @@ setPaymentField(key, v);
 } else {
 setPaymentData((prev) => ({ ...prev, [key]: v }));
 setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
+clearRequiredFieldError(key);
 }
 }}
 inputMode={
@@ -1258,7 +1330,7 @@ key === "account" || key === "bik" || key === "corrAccount"
 : undefined
 }
 className={`${styles.input} ${
-(!paymentData[key] ? styles.errorInput : "")
+(requiredFieldErrors[key] ? styles.errorInput : "")
 } ${fieldErrors[key] ? styles.errorInput : ""}`}
 />
 
@@ -1267,6 +1339,11 @@ className={`${styles.input} ${
 {fieldErrors[key] && (
 <div className={styles.errorText} style={{ marginTop: 6 }}>
 {fieldErrors[key]}
+</div>
+)}
+{requiredFieldErrors[key] && !fieldErrors[key] && (
+<div className={styles.errorText} style={{ marginTop: 6 }}>
+{requiredFieldErrors[key]}
 </div>
 )}
 </>
@@ -1376,13 +1453,11 @@ className={`${styles.input} ${
                   setAskChangeOpen(false);
                   const chatId = await ensureSupportChatForChange();
                   if (!chatId) {
-                    setMessage("Не удалось создать чат поддержки");
-                    setTimeout(() => setMessage(null), 3000);
+                    showToast("Не удалось создать чат поддержки");
                     return;
                   }
                   // Без доп. сообщений и редиректов
-                  setMessage("Запрос отправлен в поддержку");
-                  setTimeout(() => setMessage(null), 2500);
+                  showToast("Запрос отправлен в поддержку");
                 }}
                 className={styles.actionButton}
               >

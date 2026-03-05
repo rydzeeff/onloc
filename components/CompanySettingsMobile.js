@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import mobileStyles from "../styles/company-settings.mobile.module.css";
 import AvatarEditorMobile from "./AvatarEditorMobile";
 
@@ -35,6 +35,8 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
   const [existingChangeChatId, setExistingChangeChatId] = useState(null);
 
   const [message, setMessage] = useState(null);
+  const toastTimerRef = useRef(null);
+  const [requiredErrors, setRequiredErrors] = useState({});
   const [companyAvatarUrl, setCompanyAvatarUrl] = useState("/avatar-default.svg");
   const [addressSuggestions, setAddressSuggestions] = useState([]);
 
@@ -47,9 +49,30 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
   const tourismOkveds = ["55.10", "55.20", "79.11", "79.12", "79.90", "93.19", "49.39"];
 
   const toast = (text, ms = 3000) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setMessage(text);
-    if (text) setTimeout(() => setMessage(null), ms);
+    if (text) {
+      toastTimerRef.current = setTimeout(() => {
+        setMessage(null);
+        toastTimerRef.current = null;
+      }, Math.max(ms, 10000));
+    }
   };
+
+  const closeToast = () => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
+    setMessage(null);
+  };
+
+  useEffect(() => {
+    if (!message) return;
+    const onMouseDown = () => closeToast();
+    document.addEventListener("mousedown", onMouseDown, true);
+    return () => document.removeEventListener("mousedown", onMouseDown, true);
+  }, [message]);
 
   const safeUUID = () => {
     try {
@@ -553,12 +576,14 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
   const handleAddressChange = (e) => {
     const value = e.target.value;
     setCompanyData((prev) => ({ ...(prev || {}), legalAddress: value }));
+    setRequiredErrors((prev) => ({ ...prev, legalAddress: undefined }));
     fetchAddressSuggestions(value);
   };
 
   const handleAddressSelect = (s) => {
     const value = s?.value || "";
     setCompanyData((prev) => ({ ...(prev || {}), legalAddress: value }));
+    setRequiredErrors((prev) => ({ ...prev, legalAddress: undefined }));
     setAddressSuggestions([]);
   };
 
@@ -586,7 +611,23 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
 
   const handleSaveCompany = async () => {
     if (!companyData) return;
-    if (isSaveDisabled()) {
+    const nextRequiredErrors = {
+      ...(companyData.name ? {} : { name: "Заполните данные анкеты" }),
+      ...(companyData.ogrn ? {} : { ogrn: "Заполните данные анкеты" }),
+      ...(companyData.legalAddress ? {} : { legalAddress: "Заполните данные анкеты" }),
+      ...(companyData.phone ? {} : { phone: "Заполните данные анкеты" }),
+      ...(companyData.ceo_last_name ? {} : { ceo_last_name: "Заполните данные анкеты" }),
+      ...(companyData.ceo_first_name ? {} : { ceo_first_name: "Заполните данные анкеты" }),
+      ...(companyData.ceo_middle_name ? {} : { ceo_middle_name: "Заполните данные анкеты" }),
+      ...(!isCompanyEntity || companyData.kpp ? {} : { kpp: "Заполните данные анкеты" }),
+      ...(paymentData.account ? {} : { account: "Заполните данные анкеты" }),
+      ...(paymentData.bik ? {} : { bik: "Заполните данные анкеты" }),
+      ...(paymentData.corrAccount ? {} : { corrAccount: "Заполните данные анкеты" }),
+      ...(paymentData.bankName ? {} : { bankName: "Заполните данные анкеты" }),
+      ...(paymentData.payment_details ? {} : { payment_details: "Заполните данные анкеты" }),
+    };
+    setRequiredErrors(nextRequiredErrors);
+    if (Object.keys(nextRequiredErrors).length > 0 || isSaveDisabled()) {
       toast("Заполните все обязательные поля");
       return;
     }
@@ -816,17 +857,21 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
               {isEditing ? (
                 <input
                   value={companyData.name || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, name: e.target.value })}
-                  className={`${mobileStyles.input} ${!companyData.name ? mobileStyles.errorInput : ""}`}
+                  onChange={(e) => {
+                    setCompanyData({ ...companyData, name: e.target.value });
+                    setRequiredErrors((prev) => ({ ...prev, name: undefined }));
+                  }}
+                  className={`${mobileStyles.input} ${requiredErrors.name ? mobileStyles.errorInput : ""}`}
                 />
               ) : (
                 <input
                   value={companyData.name || ""}
                   readOnly
-                  className={`${mobileStyles.input} ${!companyData.name ? mobileStyles.errorInput : ""}`}
+                  className={`${mobileStyles.input} ${requiredErrors.name ? mobileStyles.errorInput : ""}`}
                   style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a" }}
                 />
               )}
+              {requiredErrors.name && <div className={mobileStyles.errorText}>{requiredErrors.name}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -839,17 +884,21 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
               {isEditing ? (
                 <input
                   value={companyData.ogrn || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, ogrn: e.target.value })}
-                  className={`${mobileStyles.input} ${!companyData.ogrn ? mobileStyles.errorInput : ""}`}
+                  onChange={(e) => {
+                    setCompanyData({ ...companyData, ogrn: e.target.value });
+                    setRequiredErrors((prev) => ({ ...prev, ogrn: undefined }));
+                  }}
+                  className={`${mobileStyles.input} ${requiredErrors.ogrn ? mobileStyles.errorInput : ""}`}
                 />
               ) : (
                 <input
                   value={companyData.ogrn || ""}
                   readOnly
-                  className={`${mobileStyles.input} ${!companyData.ogrn ? mobileStyles.errorInput : ""}`}
+                  className={`${mobileStyles.input} ${requiredErrors.ogrn ? mobileStyles.errorInput : ""}`}
                   style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a" }}
                 />
               )}
+              {requiredErrors.ogrn && <div className={mobileStyles.errorText}>{requiredErrors.ogrn}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -858,8 +907,11 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
                 isEditing ? (
                   <input
                     value={companyData.kpp || ""}
-                    onChange={(e) => setCompanyData({ ...companyData, kpp: e.target.value.replace(/\D/g, "") })}
-                    className={`${mobileStyles.input} ${!companyData.kpp ? mobileStyles.errorInput : ""}`}
+                    onChange={(e) => {
+                      setCompanyData({ ...companyData, kpp: e.target.value.replace(/\D/g, "") });
+                      setRequiredErrors((prev) => ({ ...prev, kpp: undefined }));
+                    }}
+                    className={`${mobileStyles.input} ${requiredErrors.kpp ? mobileStyles.errorInput : ""}`}
                     maxLength={9}
                     placeholder="9 цифр"
                   />
@@ -867,13 +919,14 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
                   <input
                     value={companyData.kpp || ""}
                     readOnly
-                    className={`${mobileStyles.input} ${!companyData.kpp ? mobileStyles.errorInput : ""}`}
+                    className={`${mobileStyles.input} ${requiredErrors.kpp ? mobileStyles.errorInput : ""}`}
                     style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a" }}
                   />
                 )
               ) : (
                 <span className={mobileStyles.mutedText}>Для ИП КПП не требуется</span>
               )}
+              {requiredErrors.kpp && <div className={mobileStyles.errorText}>{requiredErrors.kpp}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -883,7 +936,7 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
                   <input
                     value={companyData.legalAddress || ""}
                     onChange={handleAddressChange}
-                    className={`${mobileStyles.input} ${!companyData.legalAddress ? mobileStyles.errorInput : ""}`}
+                    className={`${mobileStyles.input} ${requiredErrors.legalAddress ? mobileStyles.errorInput : ""}`}
                     placeholder="Город, улица, дом…"
                   />
                   {addressSuggestions?.length > 0 && (
@@ -905,10 +958,11 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
                 <textarea
                   value={companyData.legalAddress || ""}
                   readOnly
-                  className={`${mobileStyles.input} ${!companyData.legalAddress ? mobileStyles.errorInput : ""}`}
+                  className={`${mobileStyles.input} ${requiredErrors.legalAddress ? mobileStyles.errorInput : ""}`}
                   style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a", minHeight: 52 }}
                 />
               )}
+              {requiredErrors.legalAddress && <div className={mobileStyles.errorText}>{requiredErrors.legalAddress}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -916,18 +970,22 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
               {isEditing ? (
                 <input
                   value={companyData.phone || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
-                  className={`${mobileStyles.input} ${!companyData.phone ? mobileStyles.errorInput : ""}`}
+                  onChange={(e) => {
+                    setCompanyData({ ...companyData, phone: e.target.value });
+                    setRequiredErrors((prev) => ({ ...prev, phone: undefined }));
+                  }}
+                  className={`${mobileStyles.input} ${requiredErrors.phone ? mobileStyles.errorInput : ""}`}
                   placeholder="+7..."
                 />
               ) : (
                 <input
                   value={companyData.phone || ""}
                   readOnly
-                  className={`${mobileStyles.input} ${!companyData.phone ? mobileStyles.errorInput : ""}`}
+                  className={`${mobileStyles.input} ${requiredErrors.phone ? mobileStyles.errorInput : ""}`}
                   style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a" }}
                 />
               )}
+              {requiredErrors.phone && <div className={mobileStyles.errorText}>{requiredErrors.phone}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -935,17 +993,21 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
               {isEditing ? (
                 <input
                   value={companyData.ceo_last_name || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, ceo_last_name: e.target.value })}
-                  className={`${mobileStyles.input} ${!companyData.ceo_last_name ? mobileStyles.errorInput : ""}`}
+                  onChange={(e) => {
+                    setCompanyData({ ...companyData, ceo_last_name: e.target.value });
+                    setRequiredErrors((prev) => ({ ...prev, ceo_last_name: undefined }));
+                  }}
+                  className={`${mobileStyles.input} ${requiredErrors.ceo_last_name ? mobileStyles.errorInput : ""}`}
                 />
               ) : (
                 <input
                   value={companyData.ceo_last_name || ""}
                   readOnly
-                  className={`${mobileStyles.input} ${!companyData.ceo_last_name ? mobileStyles.errorInput : ""}`}
+                  className={`${mobileStyles.input} ${requiredErrors.ceo_last_name ? mobileStyles.errorInput : ""}`}
                   style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a" }}
                 />
               )}
+              {requiredErrors.ceo_last_name && <div className={mobileStyles.errorText}>{requiredErrors.ceo_last_name}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -953,17 +1015,21 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
               {isEditing ? (
                 <input
                   value={companyData.ceo_first_name || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, ceo_first_name: e.target.value })}
-                  className={`${mobileStyles.input} ${!companyData.ceo_first_name ? mobileStyles.errorInput : ""}`}
+                  onChange={(e) => {
+                    setCompanyData({ ...companyData, ceo_first_name: e.target.value });
+                    setRequiredErrors((prev) => ({ ...prev, ceo_first_name: undefined }));
+                  }}
+                  className={`${mobileStyles.input} ${requiredErrors.ceo_first_name ? mobileStyles.errorInput : ""}`}
                 />
               ) : (
                 <input
                   value={companyData.ceo_first_name || ""}
                   readOnly
-                  className={`${mobileStyles.input} ${!companyData.ceo_first_name ? mobileStyles.errorInput : ""}`}
+                  className={`${mobileStyles.input} ${requiredErrors.ceo_first_name ? mobileStyles.errorInput : ""}`}
                   style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a" }}
                 />
               )}
+              {requiredErrors.ceo_first_name && <div className={mobileStyles.errorText}>{requiredErrors.ceo_first_name}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -971,17 +1037,21 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
               {isEditing ? (
                 <input
                   value={companyData.ceo_middle_name || ""}
-                  onChange={(e) => setCompanyData({ ...companyData, ceo_middle_name: e.target.value })}
-                  className={`${mobileStyles.input} ${!companyData.ceo_middle_name ? mobileStyles.errorInput : ""}`}
+                  onChange={(e) => {
+                    setCompanyData({ ...companyData, ceo_middle_name: e.target.value });
+                    setRequiredErrors((prev) => ({ ...prev, ceo_middle_name: undefined }));
+                  }}
+                  className={`${mobileStyles.input} ${requiredErrors.ceo_middle_name ? mobileStyles.errorInput : ""}`}
                 />
               ) : (
                 <input
                   value={companyData.ceo_middle_name || ""}
                   readOnly
-                  className={`${mobileStyles.input} ${!companyData.ceo_middle_name ? mobileStyles.errorInput : ""}`}
+                  className={`${mobileStyles.input} ${requiredErrors.ceo_middle_name ? mobileStyles.errorInput : ""}`}
                   style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a" }}
                 />
               )}
+              {requiredErrors.ceo_middle_name && <div className={mobileStyles.errorText}>{requiredErrors.ceo_middle_name}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
@@ -1018,55 +1088,75 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
               <label>Расчётный счёт</label>
               <input
                 value={paymentData.account}
-                onChange={(e) => setPaymentData({ ...paymentData, account: e.target.value })}
+                onChange={(e) => {
+                  setPaymentData({ ...paymentData, account: e.target.value });
+                  setRequiredErrors((prev) => ({ ...prev, account: undefined }));
+                }}
                 disabled={!isEditing}
-                className={`${mobileStyles.input} ${!paymentData.account ? mobileStyles.errorInput : ""}`}
+                className={`${mobileStyles.input} ${requiredErrors.account ? mobileStyles.errorInput : ""}`}
                 placeholder="20 цифр"
               />
+              {requiredErrors.account && <div className={mobileStyles.errorText}>{requiredErrors.account}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
               <label>БИК</label>
               <input
                 value={paymentData.bik}
-                onChange={(e) => setPaymentData({ ...paymentData, bik: e.target.value })}
+                onChange={(e) => {
+                  setPaymentData({ ...paymentData, bik: e.target.value });
+                  setRequiredErrors((prev) => ({ ...prev, bik: undefined }));
+                }}
                 disabled={!isEditing}
-                className={`${mobileStyles.input} ${!paymentData.bik ? mobileStyles.errorInput : ""}`}
+                className={`${mobileStyles.input} ${requiredErrors.bik ? mobileStyles.errorInput : ""}`}
                 placeholder="9 цифр"
               />
+              {requiredErrors.bik && <div className={mobileStyles.errorText}>{requiredErrors.bik}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
               <label>Кор. счёт</label>
               <input
                 value={paymentData.corrAccount}
-                onChange={(e) => setPaymentData({ ...paymentData, corrAccount: e.target.value })}
+                onChange={(e) => {
+                  setPaymentData({ ...paymentData, corrAccount: e.target.value });
+                  setRequiredErrors((prev) => ({ ...prev, corrAccount: undefined }));
+                }}
                 disabled={!isEditing}
-                className={`${mobileStyles.input} ${!paymentData.corrAccount ? mobileStyles.errorInput : ""}`}
+                className={`${mobileStyles.input} ${requiredErrors.corrAccount ? mobileStyles.errorInput : ""}`}
                 placeholder="20 цифр"
               />
+              {requiredErrors.corrAccount && <div className={mobileStyles.errorText}>{requiredErrors.corrAccount}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
               <label>Название банка</label>
               <input
                 value={paymentData.bankName}
-                onChange={(e) => setPaymentData({ ...paymentData, bankName: e.target.value })}
+                onChange={(e) => {
+                  setPaymentData({ ...paymentData, bankName: e.target.value });
+                  setRequiredErrors((prev) => ({ ...prev, bankName: undefined }));
+                }}
                 disabled={!isEditing}
-                className={`${mobileStyles.input} ${!paymentData.bankName ? mobileStyles.errorInput : ""}`}
+                className={`${mobileStyles.input} ${requiredErrors.bankName ? mobileStyles.errorInput : ""}`}
                 placeholder="Т-Банк…"
               />
+              {requiredErrors.bankName && <div className={mobileStyles.errorText}>{requiredErrors.bankName}</div>}
             </div>
 
             <div className={mobileStyles.inputGroup}>
               <label>Назначение платежа</label>
               <textarea
                 value={paymentData.payment_details}
-                onChange={(e) => setPaymentData({ ...paymentData, payment_details: e.target.value })}
+                onChange={(e) => {
+                  setPaymentData({ ...paymentData, payment_details: e.target.value });
+                  setRequiredErrors((prev) => ({ ...prev, payment_details: undefined }));
+                }}
                 disabled={!isEditing}
-                className={`${mobileStyles.input} ${!paymentData.payment_details ? mobileStyles.errorInput : ""}`}
+                className={`${mobileStyles.input} ${requiredErrors.payment_details ? mobileStyles.errorInput : ""}`}
                 placeholder="Перевод средств по договору…"
               />
+              {requiredErrors.payment_details && <div className={mobileStyles.errorText}>{requiredErrors.payment_details}</div>}
             </div>
           </div>
 
@@ -1081,9 +1171,9 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
             {!isSaved ? (
               <button
                 onClick={handleSaveCompany}
-                disabled={isSaveDisabled() || isSubmitting}
+                disabled={isSubmitting}
                 className={mobileStyles.button}
-                title={isSaveDisabled() ? "Заполните все обязательные поля" : ""}
+                title="Сохранить компанию"
               >
                 {isSubmitting ? "Сохранение…" : "Сохранить и зарегистрировать"}
               </button>
