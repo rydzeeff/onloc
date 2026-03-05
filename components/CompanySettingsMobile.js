@@ -587,44 +587,46 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
     setAddressSuggestions([]);
   };
 
+  const hasValue = (v) => String(v ?? "").trim().length > 0;
+
   const isSaveDisabled = () => {
     if (!companyData) return true;
     const needKpp = /^\d{10}$/.test(String(companyData.inn || "").trim());
 
     return (
-      !companyData.name ||
-      !companyData.inn ||
-      !companyData.ogrn ||
-      !companyData.legalAddress ||
-      !companyData.phone ||
-      !companyData.ceo_first_name ||
-      !companyData.ceo_last_name ||
-      !companyData.ceo_middle_name ||
-      (needKpp && !companyData.kpp) ||
-      !paymentData.account ||
-      !paymentData.bik ||
-      !paymentData.corrAccount ||
-      !paymentData.bankName ||
-      !paymentData.payment_details
+      !hasValue(companyData.name) ||
+      !hasValue(companyData.inn) ||
+      !hasValue(companyData.ogrn) ||
+      !hasValue(companyData.legalAddress) ||
+      !hasValue(companyData.phone) ||
+      !hasValue(companyData.ceo_first_name) ||
+      !hasValue(companyData.ceo_last_name) ||
+      !hasValue(companyData.ceo_middle_name) ||
+      (needKpp && !hasValue(companyData.kpp)) ||
+      !hasValue(paymentData.account) ||
+      !hasValue(paymentData.bik) ||
+      !hasValue(paymentData.corrAccount) ||
+      !hasValue(paymentData.bankName) ||
+      !hasValue(paymentData.payment_details)
     );
   };
 
   const handleSaveCompany = async () => {
     if (!companyData) return;
     const nextRequiredErrors = {
-      ...(companyData.name ? {} : { name: "Заполните данные анкеты" }),
-      ...(companyData.ogrn ? {} : { ogrn: "Заполните данные анкеты" }),
-      ...(companyData.legalAddress ? {} : { legalAddress: "Заполните данные анкеты" }),
-      ...(companyData.phone ? {} : { phone: "Заполните данные анкеты" }),
-      ...(companyData.ceo_last_name ? {} : { ceo_last_name: "Заполните данные анкеты" }),
-      ...(companyData.ceo_first_name ? {} : { ceo_first_name: "Заполните данные анкеты" }),
-      ...(companyData.ceo_middle_name ? {} : { ceo_middle_name: "Заполните данные анкеты" }),
-      ...(!isCompanyEntity || companyData.kpp ? {} : { kpp: "Заполните данные анкеты" }),
-      ...(paymentData.account ? {} : { account: "Заполните данные анкеты" }),
-      ...(paymentData.bik ? {} : { bik: "Заполните данные анкеты" }),
-      ...(paymentData.corrAccount ? {} : { corrAccount: "Заполните данные анкеты" }),
-      ...(paymentData.bankName ? {} : { bankName: "Заполните данные анкеты" }),
-      ...(paymentData.payment_details ? {} : { payment_details: "Заполните данные анкеты" }),
+      ...(hasValue(companyData.name) ? {} : { name: "Заполните данные анкеты" }),
+      ...(hasValue(companyData.ogrn) ? {} : { ogrn: "Заполните данные анкеты" }),
+      ...(hasValue(companyData.legalAddress) ? {} : { legalAddress: "Заполните данные анкеты" }),
+      ...(hasValue(companyData.phone) ? {} : { phone: "Заполните данные анкеты" }),
+      ...(hasValue(companyData.ceo_last_name) ? {} : { ceo_last_name: "Заполните данные анкеты" }),
+      ...(hasValue(companyData.ceo_first_name) ? {} : { ceo_first_name: "Заполните данные анкеты" }),
+      ...(hasValue(companyData.ceo_middle_name) ? {} : { ceo_middle_name: "Заполните данные анкеты" }),
+      ...(!isCompanyEntity || hasValue(companyData.kpp) ? {} : { kpp: "Заполните данные анкеты" }),
+      ...(hasValue(paymentData.account) ? {} : { account: "Заполните данные анкеты" }),
+      ...(hasValue(paymentData.bik) ? {} : { bik: "Заполните данные анкеты" }),
+      ...(hasValue(paymentData.corrAccount) ? {} : { corrAccount: "Заполните данные анкеты" }),
+      ...(hasValue(paymentData.bankName) ? {} : { bankName: "Заполните данные анкеты" }),
+      ...(hasValue(paymentData.payment_details) ? {} : { payment_details: "Заполните данные анкеты" }),
     };
     setRequiredErrors(nextRequiredErrors);
     if (Object.keys(nextRequiredErrors).length > 0 || isSaveDisabled()) {
@@ -826,7 +828,8 @@ const CompanySettingsMobile = ({ user, supabase, profilePhone }) => {
           updateAvatarUrl={setCompanyAvatarUrl}
           supabase={supabase}
           type="company"
-          canEditAvatar={!!companyData}
+          canEditAvatar={!!companyData?.tbank_registered}
+          blockedMessage="Аватар можно прикрепить после регистрации организации в Т-Банке. Сначала заполните данные и нажмите «Сохранить компанию»."
         />
       </div>
 

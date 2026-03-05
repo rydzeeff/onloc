@@ -167,13 +167,11 @@ const CompanySettings = ({ user, supabase, profilePhone }) => {
   const [message, setMessage] = useState(null);
   const messageTimerRef = useRef(null);
   const [submitError, setSubmitError] = useState("");
-  const [avatarHint, setAvatarHint] = useState("");
   const [companyAvatarUrl, setCompanyAvatarUrl] = useState("/avatar-default.svg");
   const [isSaved, setIsSaved] = useState(false);
   const [showInnInput, setShowInnInput] = useState(true);
   const [lookupFailCount, setLookupFailCount] = useState(0);
   const [manualMode, setManualMode] = useState(false);
-  const [companyType, setCompanyType] = useState("ooo");
 
   // для первичного заполнения (до первой регистрации)
   const [paymentData, setPaymentData] = useState({
@@ -394,9 +392,7 @@ if (hasUnsavedDraft) return;
               `/api/tbank/shop?shopCode=${encodeURIComponent(normalized.tbank_shop_code)}`,
               { method: "GET", headers: { Accept: "application/json" } }
             );
-            if (r.ok) {
-              showToast("Точка подтверждена в Т-Банке");
-            } else {
+            if (!r.ok) {
               const err = await r.json().catch(() => ({}));
               console.warn("[sync shop][fail]", r.status, err);
             }
@@ -685,12 +681,10 @@ const handleResetInn = () => {
   setShowInnInput(true);
   setLookupFailCount(0);
   setManualMode(false);
-  setCompanyType("ooo");
 
   // очистить ошибки/сообщения
   setSubmitError("");
 
-setAvatarHint("");
 setCompanyAvatarUrl("/avatar-default.svg");
 
   setFieldErrors({});
@@ -739,21 +733,22 @@ const handleSaveCompany = async () => {
   }
 
   // ✅ (3.2) если не заполнены обязательные поля — показываем ошибку у кнопки (не toast)
+  const hasValue = (v) => String(v ?? "").trim().length > 0;
   const requiredErrors = {
-    ...(c.name ? {} : { name: "Заполните данные анкеты" }),
-    ...(c.inn ? {} : { inn: "Заполните данные анкеты" }),
-    ...(c.ogrn ? {} : { ogrn: "Заполните данные анкеты" }),
-    ...(c.legalAddress ? {} : { legalAddress: "Заполните данные анкеты" }),
-    ...(c.phone ? {} : { phone: "Заполните данные анкеты" }),
-    ...(c.ceo_first_name ? {} : { ceo_first_name: "Заполните данные анкеты" }),
-    ...(c.ceo_last_name ? {} : { ceo_last_name: "Заполните данные анкеты" }),
-    ...(c.ceo_middle_name ? {} : { ceo_middle_name: "Заполните данные анкеты" }),
-    ...(!isCompany || c.kpp ? {} : { kpp: "Заполните данные анкеты" }),
-    ...(p.account ? {} : { account: "Заполните данные анкеты" }),
-    ...(p.bik ? {} : { bik: "Заполните данные анкеты" }),
-    ...(p.corrAccount ? {} : { corrAccount: "Заполните данные анкеты" }),
-    ...(p.bankName ? {} : { bankName: "Заполните данные анкеты" }),
-    ...(p.payment_details ? {} : { payment_details: "Заполните данные анкеты" }),
+    ...(hasValue(c.name) ? {} : { name: "Заполните данные анкеты" }),
+    ...(hasValue(c.inn) ? {} : { inn: "Заполните данные анкеты" }),
+    ...(hasValue(c.ogrn) ? {} : { ogrn: "Заполните данные анкеты" }),
+    ...(hasValue(c.legalAddress) ? {} : { legalAddress: "Заполните данные анкеты" }),
+    ...(hasValue(c.phone) ? {} : { phone: "Заполните данные анкеты" }),
+    ...(hasValue(c.ceo_first_name) ? {} : { ceo_first_name: "Заполните данные анкеты" }),
+    ...(hasValue(c.ceo_last_name) ? {} : { ceo_last_name: "Заполните данные анкеты" }),
+    ...(hasValue(c.ceo_middle_name) ? {} : { ceo_middle_name: "Заполните данные анкеты" }),
+    ...(!isCompany || hasValue(c.kpp) ? {} : { kpp: "Заполните данные анкеты" }),
+    ...(hasValue(p.account) ? {} : { account: "Заполните данные анкеты" }),
+    ...(hasValue(p.bik) ? {} : { bik: "Заполните данные анкеты" }),
+    ...(hasValue(p.corrAccount) ? {} : { corrAccount: "Заполните данные анкеты" }),
+    ...(hasValue(p.bankName) ? {} : { bankName: "Заполните данные анкеты" }),
+    ...(hasValue(p.payment_details) ? {} : { payment_details: "Заполните данные анкеты" }),
   };
   if (Object.keys(requiredErrors).length > 0) {
     setRequiredFieldErrors(requiredErrors);
@@ -954,8 +949,8 @@ restoredDraftRef.current = false;
     const currentInn = (companyData?.inn || inn || "").trim();
     if (/^\d{10}$/.test(currentInn)) return true;
     if (/^\d{12}$/.test(currentInn)) return false;
-    return companyType === "ooo";
-  }, [companyData?.inn, inn, companyType]);
+    return true;
+  }, [companyData?.inn, inn]);
 
   const startManualInput = () => {
     setCompanyData({
@@ -980,7 +975,7 @@ restoredDraftRef.current = false;
 
   return (
     <div className={styles.companyTab}>
-{companyData ? (
+{companyData?.tbank_registered ? (
   <AvatarEditor
     user={user}
     avatarUrl={companyAvatarUrl}
@@ -993,8 +988,7 @@ restoredDraftRef.current = false;
   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
     <div
       onClick={() => {
-        setAvatarHint("Аватар можно прикрепить после регистрации организации в Т-Банке. Сначала заполните данные и нажмите «Сохранить компанию».");
-        setTimeout(() => setAvatarHint(""), 6000);
+        showToast("Аватар можно прикрепить после регистрации организации в Т-Банке. Сначала заполните данные и нажмите «Сохранить компанию».");
       }}
       style={{
         width: 64,
@@ -1019,11 +1013,6 @@ restoredDraftRef.current = false;
 
     <div style={{ fontSize: 14, color: "#64748b" }}>
       Аватар организации
-      {!!avatarHint && (
-        <div style={{ marginTop: 6, color: "#ef4444", fontWeight: 500 }}>
-          {avatarHint}
-        </div>
-      )}
     </div>
   </div>
 )}
@@ -1038,8 +1027,6 @@ restoredDraftRef.current = false;
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "");
               setInn(value);
-              if (value.length === 10) setCompanyType("ooo");
-              if (value.length === 12) setCompanyType("ip");
             }}
             maxLength={12}
             placeholder="10 цифр для ООО, 12 для ИП"
@@ -1062,19 +1049,7 @@ restoredDraftRef.current = false;
           <div className={styles.companySection}>
             <h3 className={styles.sectionTitle}>Данные организации</h3>
 
-            {manualMode && !isSaved && (
-              <div className={styles.inputGroup}>
-                <label>Тип организации</label>
-                <select
-                  className={styles.input}
-                  value={companyType}
-                  onChange={(e) => setCompanyType(e.target.value)}
-                >
-                  <option value="ooo">ООО</option>
-                  <option value="ip">ИП</option>
-                </select>
-              </div>
-            )}
+
 
             {/* Название */}
             <div className={styles.inputGroup}>
