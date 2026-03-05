@@ -493,8 +493,9 @@ min-height: 53px;
 }
 
 .avatarHover:hover {
-  transform: scale(3.33);
-  z-index: 10;
+  transform: scale(1.25);
+  transform-origin: center center;
+  z-index: 2;
 }
 
 .avatarPlaceholder {
@@ -587,8 +588,9 @@ min-height: 53px;
 }
 
 .avatar:hover {
-  transform: scale(3.33);
-  z-index: 10;
+  transform: scale(1.25);
+  transform-origin: center center;
+  z-index: 2;
 }
 
 .participantsList {

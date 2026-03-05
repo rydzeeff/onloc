@@ -8,6 +8,7 @@ const AvatarEditorMobile = ({
   supabase,
   type = 'individual', // 'individual' | 'company'
   canEditAvatar = true,
+  blockedMessage = '',
 }) => {
   const [step, setStep] = useState('view'); // 'view' | 'crop' | 'uploading'
   const [selectedImage, setSelectedImage] = useState(null); // blob url
@@ -49,7 +50,7 @@ const AvatarEditorMobile = ({
 
   const toast = (text, ms = 3000) => {
     setMessage(text);
-    if (text) setTimeout(() => setMessage(null), ms);
+    if (text) setTimeout(() => setMessage(null), Math.max(ms, 10000));
   };
 
   const galleryAccept = '.jpg,.jpeg,.png,.webp,.bmp,.gif';
@@ -572,7 +573,7 @@ const AvatarEditorMobile = ({
               e.stopPropagation();
               toast(
                 type === 'company'
-                  ? 'Сначала сохраните организацию, затем загрузите аватар.'
+                  ? (blockedMessage || 'Сначала сохраните организацию, затем загрузите аватар.')
                   : 'Недоступно'
               );
             }
