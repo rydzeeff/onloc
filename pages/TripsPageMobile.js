@@ -1271,7 +1271,12 @@ const closeInfoModal = () => {
     </div>
   )}
 
-  <YMaps>
+  <YMaps
+    query={{
+      apikey: process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY,
+      lang: 'ru_RU',
+    }}
+  >
 
                 <Map
   instanceRef={mapRef}
