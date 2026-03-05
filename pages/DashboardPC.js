@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import pcStyles from '../styles/dashboard.pc.module.css';
 import MessagesPage from './messages';
@@ -19,6 +19,24 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
   const [avatarUrl, setAvatarUrl] = useState('/avatar-default.svg');
   const [triggerAnimation, setTriggerAnimation] = useState(false);
   const [exitingSection, setExitingSection] = useState(null);
+
+  const transitionTimeoutRef = useRef(null);
+
+  const scheduleSectionTransition = useCallback((nextSection) => {
+    if (!nextSection || nextSection === activeSection) return;
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+
+    setExitingSection(activeSection);
+    transitionTimeoutRef.current = setTimeout(() => {
+      setActiveSection(nextSection);
+      setTriggerAnimation(true);
+      setExitingSection(null);
+      transitionTimeoutRef.current = null;
+    }, 300);
+  }, [activeSection]);
 
   const fetchTrips = useCallback(async () => {
     if (!user) return;
@@ -98,42 +116,27 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
     }
     const urlSection = router.query?.section;
     if (urlSection === 'participants' && activeSection !== 'participants') {
-      setExitingSection(activeSection);
-      setTimeout(() => {
-        setActiveSection('participants');
-        setTriggerAnimation(true);
-        setExitingSection(null);
-      }, 300);
+      scheduleSectionTransition('participants');
     }
-  }, [router.query?.tripId, router.query?.section, activeSection, selectedTripId]);
+  }, [router.query?.tripId, router.query?.section, activeSection, selectedTripId, scheduleSectionTransition]);
 
   useEffect(() => {
     const { section } = router.query;
     if (section && section !== activeSection) {
-      setExitingSection(activeSection);
-      setTimeout(() => {
-        setActiveSection(section);
-        setTriggerAnimation(true);
-        setExitingSection(null);
-      }, 300);
+      scheduleSectionTransition(section);
     }
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const { section } = router.query;
         if (section && section !== activeSection) {
-          setExitingSection(activeSection);
-          setTimeout(() => {
-            setActiveSection(section);
-            setTriggerAnimation(true);
-            setExitingSection(null);
-          }, 300);
+          scheduleSectionTransition(section);
         }
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [router.query.section, activeSection]);
+  }, [router.query.section, activeSection, scheduleSectionTransition]);
 
   useEffect(() => {
     if (triggerAnimation) {
@@ -142,6 +145,15 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
     }
   }, [triggerAnimation]);
 
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleLogout = useCallback(async () => {
     await supabase.auth.signOut();
     router.push('/auth');
@@ -149,31 +161,19 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
 
   const handleTripClick = useCallback((tripId) => {
     setSelectedTripId(tripId);
-    setExitingSection(activeSection);
-    setTimeout(() => {
-      setActiveSection('participants');
-      setTriggerAnimation(true);
-      setExitingSection(null);
-    }, 300);
+    scheduleSectionTransition('participants');
+
     router.push(
       { pathname: '/dashboard', query: { section: 'participants', tripId } },
       undefined,
       { shallow: true }
-    );
-  }, [activeSection, router]);
+    ).catch((error) => console.error('router.push failed:', error));
+  }, [router, scheduleSectionTransition]);
 
   const handleSectionChange = useCallback((section) => {
     if (section === activeSection) return;
 
-    setExitingSection(activeSection);
-    setTimeout(() => {
-      setActiveSection(section);
-      if (section !== 'participants') {
-        // setSelectedTripId(null);
-      }
-      setTriggerAnimation(true);
-      setExitingSection(null);
-    }, 300);
+    scheduleSectionTransition(section);
 
     const q = section === 'participants'
       ? { section, tripId: selectedTripId || (typeof router.query?.tripId === 'string' ? router.query.tripId : undefined) }
@@ -181,7 +181,7 @@ export default function DashboardPC({ initialSection, user, supabase, loading, r
 
     router.push({ pathname: '/dashboard', query: q }, undefined, { shallow: true })
       .catch((error) => console.error('router.push failed:', error));
-  }, [activeSection, router, selectedTripId]);
+  }, [activeSection, router, selectedTripId, scheduleSectionTransition]);
 
   const totalUnread = notifications.getTotalUnread();
   const unreadAlerts = useTripAlertsCount(user?.id);
