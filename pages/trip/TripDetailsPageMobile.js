@@ -149,6 +149,11 @@ export default function TripDetailsPageMobile({ tripId }) {
 
   const unreadAlerts = useTripAlertsCount(user?.id);
 
+  const modalParticipants = useMemo(
+    () => (participants || []).filter((p) => (p?.status || '').toLowerCase() !== 'rejected'),
+    [participants]
+  );
+
   const leisureTypeMap = {
     tourism: 'Туризм',
     fishing: 'Рыбалка',
@@ -1104,11 +1109,11 @@ const handleBackToTrips = () => {
             </div>
 
             <div className={styles.participantsModalBody}>
-              {participants.length === 0 ? (
+              {modalParticipants.length === 0 ? (
                 <div className={styles.noParticipants}>Нет участников</div>
               ) : (
                 <div className={styles.participantsList}>
-                  {participants.map((p) => (
+                  {modalParticipants.map((p) => (
                     <div key={p.id} className={styles.participantCard}>
                       <img
                         src={p.avatar_url || DEFAULT_AVATAR}

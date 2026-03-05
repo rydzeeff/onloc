@@ -117,6 +117,11 @@ export default function TripDetailsPagePC() {
 
   const unreadAlerts = useTripAlertsCount(user?.id);
 
+  const modalParticipants = useMemo(
+    () => (participants || []).filter((p) => (p?.status || '').toLowerCase() !== 'rejected'),
+    [participants]
+  );
+
   // --- Локальные "оверрайды": добираем поля, которых нет в RPC, и корректируем организатора ---
   const [tripExtras, setTripExtras] = useState({
     refund_policy: null,
@@ -694,7 +699,7 @@ export default function TripDetailsPagePC() {
         <div className={styles.modalBackdrop}>
           <div className={styles.modalContent}>
             <h2>Участники</h2>
-            {participants.length === 0 ? (
+            {modalParticipants.length === 0 ? (
               <table className={styles.participantsTable}>
                 <thead>
                   <tr>
@@ -725,7 +730,7 @@ export default function TripDetailsPagePC() {
                   </tr>
                 </thead>
                 <tbody>
-                  {participants.map((p) => (
+                  {modalParticipants.map((p) => (
                     <tr key={p.id}>
                       <td><img src={p.avatar_url || DEFAULT_AVATAR} alt={`${getFullName(p)}'s avatar`} className={styles.avatar} /></td>
                       <td>{getFullName(p)}</td>
