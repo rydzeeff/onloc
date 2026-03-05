@@ -23,6 +23,7 @@ export default function AdminChatsPage({
   const canModerate = !!(permissions.is_admin || permissions.can_tab);
 
   const [list, setList] = useState([]);
+  const [profilesById, setProfilesById] = useState({});
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState("");
 
@@ -172,6 +173,7 @@ export default function AdminChatsPage({
     );
 
     setList(result);
+    setProfilesById(profilesById);
     setLoading(false);
   }
 
@@ -281,7 +283,7 @@ export default function AdminChatsPage({
     toastOnce("Доступ запрещен: недостаточно прав");
   }
   function nameOf(uid) {
-    const p = list[0]?.profilesById?.[uid];
+    const p = profilesById?.[uid];
     if (!p) return "Пользователь";
     return `${p.last_name || ""} ${p.first_name || ""}`.trim() || "Пользователь";
   }
@@ -499,6 +501,7 @@ export default function AdminChatsPage({
         </span>
       </div>
 
+      <div className={styles.tableWrap}>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -549,12 +552,12 @@ export default function AdminChatsPage({
                   <td style={{ maxWidth: 340, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {lastMessage ? `${lastMessage.user_id === chat.moderator_id ? "Админ: " : ""}${lastMessage.content}` : "—"}
                   </td>
-                  <td style={{ whiteSpace: "nowrap" }}>
+                  <td>
+                    <div className={styles.actionsRow}>
                     <button
                       className={styles.joinButton}
                       onClick={() => openChatViewer(row)}
                       title="Открыть окно переписки"
-                      style={{ marginRight: 8 }}
                     >
                       Открыть
                     </button>
@@ -589,6 +592,7 @@ export default function AdminChatsPage({
                         </button>
                       </>
                     )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -602,6 +606,7 @@ export default function AdminChatsPage({
           )}
         </tbody>
       </table>
+      </div>
 
       {/* Модалка делегирования */}
       {delegatingChat && (
