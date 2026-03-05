@@ -79,8 +79,7 @@ function buildDecisionMessage({ tripTitle, refund, payout, feesPayout, descripti
   if (description && description.trim()) {
     lines.push(`• Описание: ${description.trim()}`);
   }
-  lines.push('Все согласны с данным решением?');
-  return `[ADMIN_DECISION_PROPOSAL]\n${lines.join('\n')}`;
+  return `[ADMIN_DECISION]\n${lines.join('\n')}`;
 }
 
 const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }) => {
@@ -539,10 +538,9 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
   }
 
   async function confirmClosePrompt() {
-    const { dispute, description, total, refundRub, refundPct, inputMode } = closingModal;
+    const { dispute, description, total, refundRub, refundPct } = closingModal;
     if (!dispute) return;
 
-    // Ищем свежий статус диспута
     const { data: drow } = await supabase
       .from('disputes')
       .select('trip_id, initiator_id, respondent_id, status, id')
@@ -553,7 +551,6 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
       return toastOnce('Спор не в процессе обсуждения');
     }
 
-    // Получаем чат
     const chatId = await findDisputeChatId({
       tripId: drow.trip_id,
       initiatorId: drow.initiator_id,
@@ -567,7 +564,6 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     const sumTotal = Number(total);
     if (!Number.isFinite(sumTotal) || sumTotal <= 0) return toastOnce('Укажите корректную общую сумму оплаты');
 
-    // Валидируем по факту исходной оплаты участника (последний confirmed)
     const { data: pmt } = await supabase
       .from('payments')
       .select('amount')
@@ -583,7 +579,6 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     if (!(originalPaid > 0)) return toastOnce('Исходный платёж участника не найден');
     if (sumTotal > originalPaid + 1e-6) return toastOnce('Общая сумма больше исходной оплаты участника');
 
-    // Рассчитываем возврат
     let refund = 0;
     if (closingModal.inputMode === 'rub') {
       refund = Number(refundRub || 0);
@@ -596,12 +591,8 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     if (refund > sumTotal) return toastOnce('Сумма возврата больше общей суммы');
     const payout = +(sumTotal - refund).toFixed(2);
 
-    // Разбивка комиссий (для текста)
     const feeSnapshot = getTripFeeSnapshot(dispute?.trips);
-    const feesRefund = computeFeesBreakdown(refund, feeSnapshot);
     const feesPayout = computeFeesBreakdown(payout, feeSnapshot);
-
-    // Подготовим текст-опрос
     const decisionText = buildDecisionMessage({
       tripTitle: dispute.trips?.title,
       refund,
@@ -610,33 +601,70 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
       description,
     });
 
+    const guess = await guessPaymentAndDeal(dispute);
+
     setClosingModal((s) => ({ ...s, submitting: true }));
+    try {
+      const { error: upderr } = await supabase
+        .from('disputes')
+        .update({
+          close_proposal_text: decisionText,
+          close_proposal_at: new Date().toISOString(),
+          refund_amount_cents: Math.round(refund * 100),
+          payout_amount_cents: Math.round(payout * 100),
+          initiator_confirmed: true,
+          respondent_confirmed: true,
+          confirmed_at: new Date().toISOString(),
+          locked: true,
+        })
+        .eq('id', dispute.id);
 
-    // Сохраняем в disputes суммы и текст предложения, сбрасываем подтверждения
-    const { error: upderr } = await supabase
-      .from('disputes')
-      .update({
-        close_proposal_text: decisionText,
-        close_proposal_at: new Date().toISOString(),
-        refund_amount_cents: Math.round(refund * 100),
-        payout_amount_cents: Math.round(payout * 100),
-        initiator_confirmed: false,
-        respondent_confirmed: false,
-        confirmed_at: null,
-        locked: false,
-      })
-      .eq('id', dispute.id);
+      if (upderr) throw new Error('Не удалось сохранить решение администратора');
 
-    if (upderr) {
+      await sendChatSystem(chatId, decisionText);
+
+      if (refund > 0) {
+        await doRefund({
+          tripId: drow.trip_id,
+          participantId: drow.initiator_id,
+          paymentId: guess.paymentId,
+          amount: refund,
+          source: 'admin_disputes_settle',
+          reason: 'admin_dispute_settle',
+        });
+        await sendChatSystem(chatId, `✅ Возврат участнику выполнен: ${fmtRub(refund)} ₽.`);
+      }
+
+      if (payout > 0) {
+        await doPayout({
+          tripId: drow.trip_id,
+          organizerId: guess.organizerId,
+          dealId: guess.dealId,
+          participantId: drow.initiator_id,
+          amount: payout,
+          sourcePaymentId: guess.paymentDbId,
+          feeSnapshot: guess.feeSnapshot,
+        });
+        await sendChatSystem(chatId, `✅ Выплата организатору выполнена: ${fmtRub(payout)} ₽.`);
+      }
+
+      await supabase
+        .from('disputes')
+        .update({ status: 'resolved' })
+        .eq('id', dispute.id);
+      await supabase
+        .from('chats')
+        .update({ support_close_confirmed: true })
+        .eq('id', chatId);
+
+      setClosingModal({ open: false, dispute: null, description: '', total: '', refundRub: '', refundPct: '', inputMode: 'rub', submitting: false });
+      toastOnce('Спор завершен. Возврат и выплата выполнены.');
+      fetchDisputes();
+    } catch (e) {
+      console.error(e);
+      toastOnce(e?.message || 'Ошибка завершения спора');
       setClosingModal((s) => ({ ...s, submitting: false }));
-      return toastOnce('Не удалось сохранить предложение администратора');
     }
-
-    // Отправляем в чат опрос-сообщение
-    await sendChatSystem(chatId, decisionText);
-
-    setClosingModal({ open: false, dispute: null, description: '', total: '', refundRub: '', refundPct: '', inputMode: 'rub', submitting: false });
-    toastOnce('Отправлен запрос на подтверждение решения. После подтверждения станет доступна кнопка выплат/возврата.');
   }
 
   // ОТКРЫТЬ ЧАТ
@@ -927,6 +955,7 @@ if (kind === 'refund') {
       <h2>Управление спорами</h2>
       {message && <div className={styles.toast}>{message}</div>}
 
+      <div className={styles.tableWrap}>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -980,14 +1009,14 @@ if (kind === 'refund') {
                   ) : '—'}
                 </td>
 
-                <td style={{ whiteSpace: 'nowrap' }}>
+                <td>
+                  <div className={styles.actionsRow}>
                   {dispute.chatId && (
                     <button
                       className={styles.joinButton}
                       onClick={() => openDisputeViewer(dispute)}
                       title="Открыть чат"
-                      style={{ marginRight: 6 }}
-                    >
+                      >
                       Открыть
                     </button>
                   )}
@@ -1010,8 +1039,7 @@ if (kind === 'refund') {
                             onClick={() => isMyModerator ? handleResolveDispute(dispute.id) : null}
                             disabled={!isMyModerator}
                             title={isMyModerator ? 'Завершить спор (предложение + опрос)' : 'Только модератор может закрыть'}
-                            style={{ marginRight: 6 }}
-                          >
+                            >
                             Завершить спор
                           </button>
 
@@ -1039,12 +1067,14 @@ if (kind === 'refund') {
                       Произвести выплаты и возврат
                     </button>
                   )}
+                  </div>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      </div>
 
       {/* Модалка переписки диспута */}
       {viewerChat && (
