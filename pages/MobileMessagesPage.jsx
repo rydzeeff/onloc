@@ -762,7 +762,7 @@ const schedulePostOpenActions = useCallback(
   const inputBlockedText =
     currentChat?.chat_type === "archived"
       ? "Чат в архиве. Отправка сообщений недоступна."
-      : "Стороны подтвердили завершение спора. Ожидается действие администратора. Отправка сообщений недоступна.";
+      : "Ожидается действие администратора. Отправка сообщений недоступна.";
 
 // ✅ "реальный" тип текущего чата, даже если chat_type = archived
 const effectiveCurrentType = (() => {
