@@ -185,6 +185,17 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     });
   }
 
+  async function hasSystemMessage(chatId, content) {
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('id')
+      .eq('chat_id', chatId)
+      .eq('content', content)
+      .limit(1)
+      .maybeSingle();
+    return !!data?.id;
+  }
+
   async function findDisputeChatId({ tripId, initiatorId, respondentId }) {
     const { data: chatsRows } = await supabase
       .from('chats')
@@ -623,7 +634,10 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
 
       await sendChatSystem(chatId, decisionText);
 
-      if (refund > 0) {
+      const refundDoneText = `✅ Возврат участнику выполнен: ${fmtRub(refund)} ₽.`;
+      const payoutDoneText = `✅ Выплата организатору выполнена: ${fmtRub(payout)} ₽.`;
+
+      if (refund > 0 && !(await hasSystemMessage(chatId, refundDoneText))) {
         await doRefund({
           tripId: drow.trip_id,
           participantId: drow.initiator_id,
@@ -632,10 +646,10 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
           source: 'admin_disputes_settle',
           reason: 'admin_dispute_settle',
         });
-        await sendChatSystem(chatId, `✅ Возврат участнику выполнен: ${fmtRub(refund)} ₽.`);
+        await sendChatSystem(chatId, refundDoneText);
       }
 
-      if (payout > 0) {
+      if (payout > 0 && !(await hasSystemMessage(chatId, payoutDoneText))) {
         await doPayout({
           tripId: drow.trip_id,
           organizerId: guess.organizerId,
@@ -645,7 +659,7 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
           sourcePaymentId: guess.paymentDbId,
           feeSnapshot: guess.feeSnapshot,
         });
-        await sendChatSystem(chatId, `✅ Выплата организатору выполнена: ${fmtRub(payout)} ₽.`);
+        await sendChatSystem(chatId, payoutDoneText);
       }
 
       await supabase
@@ -654,7 +668,11 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
         .eq('id', dispute.id);
       await supabase
         .from('chats')
-        .update({ support_close_confirmed: true })
+        .update({
+          support_close_confirmed: true,
+          support_close_requested_at: new Date().toISOString(),
+          chat_type: 'archived',
+        })
         .eq('id', chatId);
 
       setClosingModal({ open: false, dispute: null, description: '', total: '', refundRub: '', refundPct: '', inputMode: 'rub', submitting: false });
@@ -771,31 +789,6 @@ const AdminDisputesPage = ({ permissions = { is_admin: false, can_tab: false } }
     return out;
   }
 
-  async function openSettleModal(row) {
-    if (!row.support_close_confirmed && row.status !== 'resolved') {
-      return toastOnce('Сначала дождитесь подтверждения участниками');
-    }
-    if (row.moderator_id !== user?.id) {
-      return toastOnce('Действие доступно только модератору спора');
-    }
-
-    const guess = await guessPaymentAndDeal(row);
-    const preRefund = (row.refund_amount_cents ?? null) !== null ? (row.refund_amount_cents / 100) : 0;
-
-    setSettleModal({
-      open: true,
-      dispute: row,
-      total: guess.total ? String(guess.total) : '',
-      refund: String(preRefund || 0),
-      loading: false,
-      organizerId: guess.organizerId,
-      dealId: guess.dealId,
-      paymentId: guess.paymentId,
-      originalPaid: guess.originalPaid || guess.total || 0,
-      paymentDbId: guess.paymentDbId || null,
-      feeSnapshot: guess.feeSnapshot || null,
-    });
-  }
   function closeSettleModal() {
     setSettleModal({ open: false, dispute: null, total: '', refund: '', loading: false, organizerId: null, dealId: null, paymentId: null, originalPaid: null, paymentDbId: null, feeSnapshot: null });
   }
@@ -1038,7 +1031,7 @@ if (kind === 'refund') {
                             className={styles.resolveButton}
                             onClick={() => isMyModerator ? handleResolveDispute(dispute.id) : null}
                             disabled={!isMyModerator}
-                            title={isMyModerator ? 'Завершить спор (предложение + опрос)' : 'Только модератор может закрыть'}
+                            title={isMyModerator ? 'Завершить спор (с выплатой/возвратом и закрытием)' : 'Только модератор может закрыть'}
                             >
                             Завершить спор
                           </button>
@@ -1054,18 +1047,6 @@ if (kind === 'refund') {
                         </>
                       )}
                     </>
-                  )}
-
-                  {/* Подтвержден: единая кнопка расчёта (доступна только модератору) */}
-                  {isConfirmed && dispute.chatId && (
-                    <button
-                      className={styles.resolveButton}
-                      onClick={() => openSettleModal(dispute)}
-                      disabled={!isMyModerator}
-                      title={isMyModerator ? 'Произвести выплаты и/или возврат' : 'Доступно только модератору спора'}
-                    >
-                      Произвести выплаты и возврат
-                    </button>
                   )}
                   </div>
                 </td>
