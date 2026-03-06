@@ -164,6 +164,39 @@ Deno.serve(async (req) => {
 
         console.log("[auto-approve] eligible participants:", eligible.length);
 
+        const eligibleUserIds = eligible
+          .map((p: any) => p.user_id)
+          .filter((id: string | null) => !!id);
+
+        const usersWithConfirmedPayment = new Set<string>();
+        if (eligibleUserIds.length > 0) {
+          const { data: payments, error: paymentsErr } = await supabase
+            .from("payments")
+            .select("participant_id")
+            .eq("trip_id", trip.id)
+            .eq("status", "confirmed")
+            .eq("payment_type", "participant_payment")
+            .in("participant_id", eligibleUserIds);
+
+          if (paymentsErr) {
+            console.error("[auto-approve] payments lookup error", {
+              tripId: trip.id,
+              error: paymentsErr,
+            });
+            errors.push({
+              tripId: trip.id,
+              error: "payments lookup error",
+            });
+            continue;
+          }
+
+          for (const payment of payments || []) {
+            if (payment.participant_id) {
+              usersWithConfirmedPayment.add(payment.participant_id);
+            }
+          }
+        }
+
         for (const p of eligible) {
           try {
             console.log("[auto-approve] processing participant", {
@@ -171,6 +204,20 @@ Deno.serve(async (req) => {
               participantRowId: p.id,
               userId: p.user_id,
             });
+
+            if (!usersWithConfirmedPayment.has(p.user_id)) {
+              console.warn("[auto-approve] skip participant: confirmed payment not found", {
+                tripId: trip.id,
+                participantRowId: p.id,
+                userId: p.user_id,
+              });
+              errors.push({
+                tripId: trip.id,
+                participantRowId: p.id,
+                error: "SOURCE_PAYMENT_NOT_FOUND",
+              });
+              continue;
+            }
 
             // 4) Внутренний payout через Next endpoint /api/internal/payout
             // Он:
