@@ -401,7 +401,9 @@ if (S === 'CONFIRMED' && Success) {
 
   // === Оповещения: участнику и организатору о подтверждённой оплате ===
   try {
-    const { data: tripInfo, error: tripInfoErr } = await supabase
+    const supabaseAdmin = getSupabaseAdmin();
+
+    const { data: tripInfo, error: tripInfoErr } = await supabaseAdmin
       .from('trips')
       .select('creator_id, title')
       .eq('id', tripId)
@@ -413,11 +415,43 @@ if (S === 'CONFIRMED' && Success) {
       const tripTitle = tripInfo?.title || '';
       const organizerId = tripInfo?.creator_id || null;
 
-      const { data: participantProfile } = await supabase
-        .from('profiles')
-        .select('full_name, first_name, last_name')
-        .eq('user_id', participantId)
-        .maybeSingle();
+      let participantUserId = participantId;
+      let participantProfile = null;
+
+      if (participantUserId) {
+        const { data: profileByUserId } = await supabaseAdmin
+          .from('profiles')
+          .select('full_name, first_name, last_name')
+          .eq('user_id', participantUserId)
+          .maybeSingle();
+        participantProfile = profileByUserId || null;
+      }
+
+      // Фолбэк: в старых/нестандартных сценариях payments.participant_id может хранить trip_participants.id.
+      if (!participantProfile && participantId && tripId) {
+        const { data: participantRow } = await supabaseAdmin
+          .from('trip_participants')
+          .select('id, user_id')
+          .eq('trip_id', tripId)
+          .eq('id', participantId)
+          .maybeSingle();
+
+        if (participantRow?.user_id) {
+          participantUserId = participantRow.user_id;
+          const { data: profileByResolvedUserId } = await supabaseAdmin
+            .from('profiles')
+            .select('full_name, first_name, last_name')
+            .eq('user_id', participantUserId)
+            .maybeSingle();
+          participantProfile = profileByResolvedUserId || null;
+
+          console.log('[payment-notification] resolved participant user_id via trip_participants.id', {
+            tripId,
+            participantId,
+            participantUserId,
+          });
+        }
+      }
 
       const participantName =
         [participantProfile?.first_name, participantProfile?.last_name].filter(Boolean).join(' ').trim() ||
@@ -426,9 +460,9 @@ if (S === 'CONFIRMED' && Success) {
 
       const payloads = [
         {
-          user_id: participantId,
+          user_id: participantUserId || participantId,
           trip_id: tripId,
-          actor_user_id: participantId,
+          actor_user_id: participantUserId || participantId,
           type: 'trip_payment_paid',
           title: 'Оплата подтверждена',
           body: `Вы оплатили поездку «${tripTitle}».`,
@@ -440,7 +474,7 @@ if (S === 'CONFIRMED' && Success) {
         payloads.push({
           user_id: organizerId,
           trip_id: tripId,
-          actor_user_id: participantId,
+          actor_user_id: participantUserId || participantId,
           type: 'trip_payment_paid_by_participant',
           title: 'Участник оплатил поездку',
           body: `Участник «${participantName}» оплатил поездку «${tripTitle}».`,
@@ -448,7 +482,6 @@ if (S === 'CONFIRMED' && Success) {
         });
       }
 
-      const supabaseAdmin = getSupabaseAdmin();
       const { error: alertErr } = await supabaseAdmin.from('trip_alerts').insert(payloads);
       if (alertErr) {
         console.error('[payment-notification] insert trip_alerts error:', alertErr.message);
