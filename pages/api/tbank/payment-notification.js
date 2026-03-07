@@ -401,7 +401,9 @@ if (S === 'CONFIRMED' && Success) {
 
   // === Оповещения: участнику и организатору о подтверждённой оплате ===
   try {
-    const { data: tripInfo, error: tripInfoErr } = await supabase
+    const supabaseAdmin = getSupabaseAdmin();
+
+    const { data: tripInfo, error: tripInfoErr } = await supabaseAdmin
       .from('trips')
       .select('creator_id, title')
       .eq('id', tripId)
@@ -413,7 +415,7 @@ if (S === 'CONFIRMED' && Success) {
       const tripTitle = tripInfo?.title || '';
       const organizerId = tripInfo?.creator_id || null;
 
-      const { data: participantProfile } = await supabase
+      const { data: participantProfile } = await supabaseAdmin
         .from('profiles')
         .select('full_name, first_name, last_name')
         .eq('user_id', participantId)
@@ -448,7 +450,6 @@ if (S === 'CONFIRMED' && Success) {
         });
       }
 
-      const supabaseAdmin = getSupabaseAdmin();
       const { error: alertErr } = await supabaseAdmin.from('trip_alerts').insert(payloads);
       if (alertErr) {
         console.error('[payment-notification] insert trip_alerts error:', alertErr.message);
