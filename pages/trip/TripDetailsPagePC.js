@@ -298,8 +298,8 @@ export default function TripDetailsPagePC() {
         tag: 'Стандартный',
         variant: 'standard',
         lines: [
-          'Стандартный возврат: за 1 час и ранее до начала — вернём 100% суммы.',
-          'Менее чем за 1 час до начала — возврат не предусмотрен.',
+          'Стандартный возврат: за 1 час и ранее до начала поездки — вернём 100% суммы.',
+          'Менее чем за 1 час до начала поездки — возврат не предусмотрен.',
           `Часовой пояс расчётов: ${tz}.`,
         ],
       };
@@ -307,9 +307,9 @@ export default function TripDetailsPagePC() {
 
     const lines = [];
     if (typeof fullH === 'number')
-      lines.push(`Полный возврат: до ${fullH} ч до начала — 100%.`);
+      lines.push(`Полный возврат: до ${fullH} ч до начала поездки — 100%.`);
     if (typeof partPct === 'number' && typeof partH === 'number')
-      lines.push(`Частичный возврат: ${partPct}% не позднее чем за ${partH} ч до начала.`);
+      lines.push(`Частичный возврат: ${partPct}% не позднее чем за ${partH} ч до начала поездки.`);
     lines.push(`Часовой пояс расчётов: ${tz}.`);
 
     return {
