@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { platformSettings } from '../../../lib/platformSettings';
 import { calculateNetAmountAfterFees } from '../../../lib/tbankFees';
 import { getTbankConfig } from './_config';
+import { getSupabaseAdmin } from './supabaseClient';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -667,16 +668,28 @@ try {
     const participantUserId = part?.user_id;
 
     if (organizerId && participantUserId) {
-      const { error: alertErr } = await supabase
+      const { data: participantProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, full_name')
+        .eq('user_id', participantUserId)
+        .maybeSingle();
+
+      const participantName =
+        [participantProfile?.first_name, participantProfile?.last_name].filter(Boolean).join(' ').trim() ||
+        participantProfile?.full_name ||
+        'Участник';
+
+      const supabaseAdmin = getSupabaseAdmin();
+      const { error: alertErr } = await supabaseAdmin
         .from('trip_alerts')
         .insert({
           user_id: organizerId,
           trip_id: tripId,
           actor_user_id: participantUserId,
           type: 'trip_payout_completed_after_participant_approval',
-          title: 'Выплата организатору выполнена',
-          body: `Участник одобрил поездку «${trip?.title || ''}». Выплата выполнена.`,
-          metadata: { tripTitle: trip?.title || null },
+          title: 'Участник одобрил поездку',
+          body: `«${participantName}» одобрил поездку «${trip?.title || ''}». Выплата организатору выполнена.`,
+          metadata: { tripTitle: trip?.title || null, participantName },
         });
 
       if (alertErr) {

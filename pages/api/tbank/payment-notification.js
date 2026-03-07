@@ -420,9 +420,9 @@ if (S === 'CONFIRMED' && Success) {
         .maybeSingle();
 
       const participantName =
+        [participantProfile?.first_name, participantProfile?.last_name].filter(Boolean).join(' ').trim() ||
         participantProfile?.full_name ||
-        [participantProfile?.last_name, participantProfile?.first_name].filter(Boolean).join(' ') ||
-        'Пользователь';
+        'Участник';
 
       const payloads = [
         {
@@ -443,7 +443,7 @@ if (S === 'CONFIRMED' && Success) {
           actor_user_id: participantId,
           type: 'trip_payment_paid_by_participant',
           title: 'Участник оплатил поездку',
-          body: `Пользователь «${participantName}» оплатил поездку «${tripTitle}».`,
+          body: `Участник «${participantName}» оплатил поездку «${tripTitle}».`,
           metadata: { tripTitle, participantName },
         });
       }
