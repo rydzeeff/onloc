@@ -250,6 +250,8 @@ useEffect(() => {
                 {/* Организатор: исключить подтверждённого/оплаченного до завершения поездки */}
                 {isCreator &&
                   (p.status?.toLowerCase() === 'confirmed' || p.status?.toLowerCase() === 'paid') &&
+                  // После старта скрываем «Исключить», если сейчас не окно check-in
+                  (!((trip?.status || '').toLowerCase() === 'started') || isCheckinOpen) &&
                   !['finished', 'canceled', 'archived', 'canceling', 'cancel_failed'].includes(
                     (trip?.status || '').toLowerCase()
                   ) && (
