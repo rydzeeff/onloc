@@ -417,19 +417,51 @@ if (S === 'CONFIRMED' && Success) {
 
       const participantCandidates = [participantId, participant_id].filter(Boolean);
       const triedParticipantCandidates = [];
+      const profileLookupDiagnostics = [];
 
       let participantUserId = null;
       let participantProfile = null;
+
+      const readProfileByUserId = async (userId) => {
+        const { data, error } = await supabaseAdmin
+          .from('profiles')
+          .select('full_name, first_name, last_name')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!error) return data || null;
+
+        // maybeSingle() падает, если найдено >1 строки (например, исторические дубли).
+        // В этом случае пытаемся взять первую строку вручную, чтобы не терять имя в уведомлении.
+        const { data: rows, error: fallbackError } = await supabaseAdmin
+          .from('profiles')
+          .select('full_name, first_name, last_name')
+          .eq('user_id', userId)
+          .limit(1);
+
+        if (fallbackError) {
+          console.error('[payment-notification] profile lookup failed', {
+            userId,
+            error: error.message,
+            fallbackError: fallbackError.message,
+          });
+          return null;
+        }
+
+        console.warn('[payment-notification] profile lookup recovered via limit(1) fallback', {
+          userId,
+          initialError: error.message,
+          rowsCount: Array.isArray(rows) ? rows.length : 0,
+        });
+        return Array.isArray(rows) && rows.length ? rows[0] : null;
+      };
 
       for (const candidate of participantCandidates) {
         if (!candidate || participantProfile) break;
         triedParticipantCandidates.push(candidate);
 
-        const { data: profileByCandidate } = await supabaseAdmin
-          .from('profiles')
-          .select('full_name, first_name, last_name')
-          .eq('user_id', candidate)
-          .maybeSingle();
+        const profileByCandidate = await readProfileByUserId(candidate);
+        profileLookupDiagnostics.push({ candidate, found: !!profileByCandidate });
 
         if (profileByCandidate) {
           participantUserId = candidate;
@@ -439,6 +471,46 @@ if (S === 'CONFIRMED' && Success) {
             candidate,
           });
         }
+      }
+
+      // Фолбэк: в старых/нестандартных сценариях payments.participant_id может хранить trip_participants.id.
+      if (!participantProfile && tripId) {
+        for (const candidate of participantCandidates) {
+          if (!candidate || participantProfile) break;
+          const { data: participantRow } = await supabaseAdmin
+            .from('trip_participants')
+            .select('id, user_id')
+            .eq('trip_id', tripId)
+            .eq('id', candidate)
+            .maybeSingle();
+
+          if (participantRow?.user_id) {
+            participantUserId = participantRow.user_id;
+            const profileByResolvedUserId = await readProfileByUserId(participantUserId);
+            participantProfile = profileByResolvedUserId || null;
+
+            console.log('[payment-notification] resolved participant user_id via trip_participants.id', {
+              tripId,
+              candidate,
+              participantUserId,
+            });
+          }
+        }
+      }
+
+      if (!participantUserId) {
+        participantUserId = participantId || participant_id || null;
+      }
+
+      if (!participantProfile) {
+        console.warn('[payment-notification] participant profile not found, fallback to generic name', {
+          tripId,
+          participantId,
+          paymentParticipantId: payment?.participant_id || null,
+          requestParticipantId: participant_id || null,
+          triedParticipantCandidates,
+          profileLookupDiagnostics,
+        });
       }
 
       // Фолбэк: в старых/нестандартных сценариях payments.participant_id может хранить trip_participants.id.
