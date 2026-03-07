@@ -398,7 +398,8 @@ const showCheckinHint = tripStatus === 'active_checkin';
       open: true,
       action: 'approve-and-payout',
       participantId: id,
-      confirmMessage: 'Одобрить поездку? Да? Нет?',
+      confirmMessage:
+        'Одобрение поездки подтверждает, что поездка выполнена, и средства будут перечислены организатору. Если не одобрить сейчас, выплата произойдёт автоматически через 12 часов после завершения поездки.',
     });
 
   // Колбэк выхода — дергаем открытие confirm внутри хука
