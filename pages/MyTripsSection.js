@@ -306,13 +306,15 @@ const MyTripsSection = ({ trips: _trips, user, onTripClick }) => {
                       <p>Начало: {new Date(trip.date).toLocaleDateString('ru')}</p>
                       <p>Конец: {new Date(trip.arrival_date).toLocaleDateString('ru')}</p>
                       <p>Цена: {trip.price} ₽</p>
-                      <button
-                        type="button"
-                        className={pcStyles.repeatTripButton}
-                        onClick={(event) => handleRepeatTrip(event, trip)}
-                      >
-                        Повторить
-                      </button>
+                      {trip.creator_id === user.id && (
+                        <button
+                          type="button"
+                          className={pcStyles.repeatTripButton}
+                          onClick={(event) => handleRepeatTrip(event, trip)}
+                        >
+                          Повторить
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
