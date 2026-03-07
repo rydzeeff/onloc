@@ -476,7 +476,8 @@ const TripParticipantsPageMobile = ({ tripId }) => {
                 open: true,
                 action: "start-trip",
                 participantId: null,
-                confirmMessage: "Вы точно хотите начать поездку?",
+                confirmMessage:
+                  "Если начать поездку заранее, всем участникам нужно будет подтвердить присутствие в приложении. Иначе поездка автоматически начнётся в запланированное время.",
               }),
           })
         );
