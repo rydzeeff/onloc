@@ -210,7 +210,7 @@ export default async function handler(req, res) {
     // ---------- Поиск существующего платежа ----------
     const { data: payment, error: paymentError } = await supabase
       .from('payments')
-      .select('id, trip_id, participant_id, status, payment_id, order_id, is_authorized, is_confirmed, is_refunded, deal_id')
+      .select('id, trip_id, participant_id, user_id, status, payment_id, order_id, is_authorized, is_confirmed, is_refunded, deal_id')
       .eq('order_id', OrderId)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -415,8 +415,75 @@ if (S === 'CONFIRMED' && Success) {
       const tripTitle = tripInfo?.title || '';
       const organizerId = tripInfo?.creator_id || null;
 
-      let participantUserId = participantId;
+      const participantCandidates = [participantId, payment?.user_id, participant_id].filter(Boolean);
+      const triedParticipantCandidates = [];
+
+      let participantUserId = null;
       let participantProfile = null;
+
+      for (const candidate of participantCandidates) {
+        if (!candidate || participantProfile) break;
+        triedParticipantCandidates.push(candidate);
+
+        const { data: profileByCandidate } = await supabaseAdmin
+          .from('profiles')
+          .select('full_name, first_name, last_name')
+          .eq('user_id', candidate)
+          .maybeSingle();
+
+        if (profileByCandidate) {
+          participantUserId = candidate;
+          participantProfile = profileByCandidate;
+          console.log('[payment-notification] participant profile resolved directly by user_id candidate', {
+            tripId,
+            candidate,
+          });
+        }
+      }
+
+      // Фолбэк: в старых/нестандартных сценариях payments.participant_id может хранить trip_participants.id.
+      if (!participantProfile && tripId) {
+        for (const candidate of participantCandidates) {
+          if (!candidate || participantProfile) break;
+          const { data: participantRow } = await supabaseAdmin
+            .from('trip_participants')
+            .select('id, user_id')
+            .eq('trip_id', tripId)
+            .eq('id', candidate)
+            .maybeSingle();
+
+          if (participantRow?.user_id) {
+            participantUserId = participantRow.user_id;
+            const { data: profileByResolvedUserId } = await supabaseAdmin
+              .from('profiles')
+              .select('full_name, first_name, last_name')
+              .eq('user_id', participantUserId)
+              .maybeSingle();
+            participantProfile = profileByResolvedUserId || null;
+
+            console.log('[payment-notification] resolved participant user_id via trip_participants.id', {
+              tripId,
+              candidate,
+              participantUserId,
+            });
+          }
+        }
+      }
+
+      if (!participantUserId) {
+        participantUserId = participantId || payment?.user_id || participant_id || null;
+      }
+
+      if (!participantProfile) {
+        console.warn('[payment-notification] participant profile not found, fallback to generic name', {
+          tripId,
+          participantId,
+          paymentParticipantId: payment?.participant_id || null,
+          paymentUserId: payment?.user_id || null,
+          requestParticipantId: participant_id || null,
+          triedParticipantCandidates,
+        });
+      }
 
       if (participantUserId) {
         const { data: profileByUserId } = await supabaseAdmin
