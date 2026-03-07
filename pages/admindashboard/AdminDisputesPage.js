@@ -48,6 +48,8 @@ function computeFeesBreakdown(sumRub, snapshot = {}) {
   return {
     ps: rules.platformPercent,
     tb: rules.tbankCardPercent,
+    tbPayout: rules.tbankPayoutPercent,
+    tbTotalPercent: Number((rules.tbankCardPercent + rules.tbankPayoutPercent).toFixed(3)),
     feePlatform: calc.platformFee,
     feeTbank: calc.tbankFee,
     feeTbankCard: calc.tbankCardFee,
@@ -831,13 +833,16 @@ async function doPayout({ tripId, organizerId, dealId, participantId, amount, so
       .maybeSingle();
     const recipientId = prof?.phone || null;
 
+    const payoutFees = computeFeesBreakdown(amount, feeSnapshot);
     const token = await getAccessToken();
     const res = await fetch('/api/tbank/payout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         tripId,
-        amount: computeFeesBreakdown(amount, feeSnapshot).net, // ✅ шлём NET
+        amount: payoutFees.net, // ✅ шлём NET
+        feePlatformPct: payoutFees.ps,
+        feeTbankPct: payoutFees.tbTotalPercent,
         mode: 'admin-settle-net',                 // ✅ сервер НЕ пересчитывает комиссии
         dealId,
         recipientId,

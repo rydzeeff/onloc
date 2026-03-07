@@ -445,7 +445,9 @@ export default async function handler(req, res) {
       reason,              // 🔹 для логов/аудита (необяз.)
       refundExternalId,    // 🔹 связываем выплату с конкретным возвратом (необяз.)
       amountRub,            // 🔹 альтернативное имя суммы (если пришла из cancel)
-      sourcePaymentId
+      sourcePaymentId,
+      feePlatformPct: feePlatformPctInput,
+      feeTbankPct: feeTbankPctInput
     } = req.body || {};
 
     // Нормализуем override-флаг: null = не задан → использовать computed из БД
@@ -457,9 +459,11 @@ export default async function handler(req, res) {
       mode, tripId, participantId,
       amount: requestAmountRub, dealId,
       overrideFinal,
-      reason, 
+      reason,
       refundExternalId,
-      sourcePaymentId
+      sourcePaymentId,
+      feePlatformPctInput,
+      feeTbankPctInput,
     });
 
     // Поездка
@@ -733,6 +737,13 @@ if (!requestAmountRub || !(dealId || trip.deal_id)) {
 const manualAmountRub = Number(requestAmountRub);
 if (!(manualAmountRub > 0)) return res.status(400).json({ error: 'Invalid amount' });
 
+const feePlatformPctResolved = Number.isFinite(Number(feePlatformPctInput))
+  ? Number(feePlatformPctInput)
+  : (Number.isFinite(Number(trip?.platform_fee)) ? Number(trip.platform_fee) : Number(platformSettings?.platformFeePercent || 0));
+const feeTbankPctResolved = Number.isFinite(Number(feeTbankPctInput))
+  ? Number(feeTbankPctInput)
+  : (Number.isFinite(Number(trip?.tbank_fee)) ? Number(trip.tbank_fee) : Number(platformSettings?.tbankFeePercent || 0));
+
 // ✅ Новая логика: если пришёл mode === 'admin-settle-net', то amount — это уже NET
 let netRub;
 if (mode === 'admin-settle-net') {
@@ -759,12 +770,8 @@ let resolvedSourcePaymentId = sourcePaymentId ?? null;
 
 try {
   // снимок процентов комиссий для RPC
-  const feePlatformPct = Number.isFinite(Number(trip?.platform_fee))
-    ? Number(trip.platform_fee)
-    : Number(platformSettings?.platformFeePercent || 0);
-  const feeTbankPct = Number.isFinite(Number(trip?.tbank_fee))
-    ? Number(trip.tbank_fee)
-    : Number(platformSettings?.tbankFeePercent || 0);
+  const feePlatformPct = feePlatformPctResolved;
+  const feeTbankPct = feeTbankPctResolved;
 
   // ── найти sourcePaymentId, если не передали напрямую
   if (!resolvedSourcePaymentId) {
@@ -957,10 +964,8 @@ if (bank.bankStatus !== 'COMPLETED') {
       
 
 // 🔹 Снимок комиссий и сумм
-const feePlatformPct = Number.isFinite(Number(trip?.platform_fee)) ? Number(trip.platform_fee)
-                   : Number(platformSettings?.platformFeePercent || 0);
-const feeTbankPct    = Number.isFinite(Number(trip?.tbank_fee)) ? Number(trip.tbank_fee)
-                   : Number(platformSettings?.tbankFeePercent || 0);
+const feePlatformPct = feePlatformPctResolved;
+const feeTbankPct    = feeTbankPctResolved;
 const totalPct       = feePlatformPct + feeTbankPct;
 const amountNetRub   = Number((prep.amount_kop / 100).toFixed(2));
 const grossEquivRub  = totalPct >= 100 ? null : Number((amountNetRub / (1 - totalPct / 100)).toFixed(2));
